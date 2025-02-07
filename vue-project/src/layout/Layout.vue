@@ -7,41 +7,6 @@
             class="sticky z-50 print:hidden"
             :class="isDevelopmentMode ? 'top-0' : 'top-8'"
         />
-
-        <div
-            v-if="!hideAlerts"
-            class="fixed bottom-4 right-4 z-50"
-        >
-            <!-- messages start -->
-            <MessageBox
-                v-if="!!hasNewOrder"
-                title="New Order Received 🎉"
-                type="success"
-                @onClose="hasNewOrder = false"
-            />
-            <MessageBox
-                v-if="userData?.notice && userData?.notice?.message"
-                :title="userData?.notice?.message"
-                :type="userData?.notice?.type"
-                cleanBox
-
-                @onClose="() => {
-                    userData.notice.message = ''
-                }"
-            />
-            <MessageBox
-                v-if="internetStatusMessage.title"
-                :type="internetStatusMessage.type"
-                :title="internetStatusMessage.title"
-
-                @onClose="() => {
-                    internetStatusMessage.title = ''
-                }"
-            />
-            <!-- messages end -->
-        </div>
-
-
         <main class="print:mt-0 mt-6">
             <slot></slot>
         </main>
@@ -58,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Navigation, Loader, MessageBox } from '@components'
+    import { Navigation, Loader } from '@components'
     import { onBeforeMount, provide, inject, onMounted } from 'vue'
     import { useCourier } from '@/pages/config/courier/useCourier'
     import { useNotification } from './useNotification'
@@ -77,22 +42,14 @@
     const _useLayout = useLayout()
     const {
         configData,
-        loadConfig,
-        internetStatusMessage
+        loadConfig
     } = _useLayout
-
-    const {
-        userData
-    } = inject('useServiceProvider')
 
     onBeforeMount(async () => {
         await loadConfig()
     })
     
     const _useNotification = useNotification()
-    const {
-        hasNewOrder
-    } = _useNotification
 
     onMounted(async () => {
         if(isValidLicenseKey.value) {

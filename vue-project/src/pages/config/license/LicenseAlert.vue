@@ -1,7 +1,7 @@
 <template>
     <MessageBox
-        v-if="licenseAlertMessage.message || licenseAlertMessage.title"
-        :title="licenseAlertMessage.message || licenseAlertMessage.title"
+        v-if="licenseAlertMessage?.message"
+        :title="licenseAlertMessage.message"
         :type="licenseAlertMessage.type"
     />
 </template>

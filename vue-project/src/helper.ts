@@ -1,4 +1,36 @@
 import { format, parseISO } from 'date-fns'
+import { toast, type ToastPosition } from 'vue3-toastify';
+
+/**
+ * Show a notification toast with optional HTML support.
+ */
+export const showNotification = (
+  alertMsg: { type: 'success' | 'info' | 'warning' | 'danger'; message: string },
+  closeTime: number | false = 3000,
+  supportHtml: boolean = true,
+  position: ToastPosition = "bottom-right"
+): void => {
+  const toastType = alertMsg.type === 'danger' ? 'error' : alertMsg.type;
+
+  toast[toastType](supportHtml ? htmlOneLiner(alertMsg.message) : alertMsg.message, {
+    autoClose: closeTime,
+    position: position,
+    dangerouslyHTMLString: supportHtml, // Enable HTML rendering if true
+  });
+}
+
+/**
+ * Converts multi-line HTML into a single-line, well-formatted HTML string.
+ */
+export const htmlOneLiner = (html: string): string => {
+  return html
+    .replace(/\n/g, " ")          // Replace new lines with spaces
+    .replace(/\s+/g, " ")         // Collapse multiple spaces into a single space
+    .replace(/>\s+</g, "><")      // Remove spaces between HTML tags
+    .trim();                      // Trim leading & trailing spaces
+}
+  
+  
 
 export const getContrastColor = (hexColor: string) => {
     // Remove the hash symbol if present
@@ -167,7 +199,7 @@ export const  detectInternetState = (callback) => {
         if (!navigator.onLine) {
             callback({
                 type: "warning",
-                title: 'You are currently offline. Check your internet connection.'
+                message: 'You are currently offline. Check your internet connection.'
             });
             return;
         }
@@ -179,12 +211,12 @@ export const  detectInternetState = (callback) => {
             if (effectiveType === "3g") {
                 callback({
                     type: "warning",
-                    title: 'Slow internet connection.'
+                    message: 'Slow internet connection.'
                 })
             }else if(effectiveType != "4g") {
                 callback({
                     type: "danger",
-                    title: 'Poor internet connection.'
+                    message: 'Poor internet connection.'
                 })
             }
         }

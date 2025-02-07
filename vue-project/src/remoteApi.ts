@@ -8,6 +8,8 @@ import {
   licenseAlertMessage,
   redirectToLicensePage
 } from '@/service/useServiceProvider'
+import { showNotification } from './helper'
+
 
 export const remoteApiBaseURL = "https://api.wpsalehub.com/api";
 
@@ -255,7 +257,7 @@ const handleLicenseValidations = (err) =>
   switch (msg) {
     case 'Expired': 
       licenseAlertMessage.value = {
-        title: `
+        message: `
           <strong style="font-size: 18px;">Your License Key Has Expired!</strong>
           <br />
           <p>
@@ -268,7 +270,7 @@ const handleLicenseValidations = (err) =>
 
     case 'Invalid Token':
       licenseAlertMessage.value = {
-        title: `
+        message: `
           <strong style="font-size: 18px;">Invalid License!</strong>
           <br />
           <p>
@@ -282,7 +284,7 @@ const handleLicenseValidations = (err) =>
     case 'Unauthenticated':
     case 'Token not found': 
       licenseAlertMessage.value = {
-        title: `
+        message: `
           <strong style="font-size: 18px;">License key not found!</strong>
           <br />
           <p>
@@ -296,7 +298,7 @@ const handleLicenseValidations = (err) =>
     default:
       // Optional: Handle unexpected cases
       licenseAlertMessage.value = {
-        title: `
+        message: `
           <strong style="font-size: 18px;">Unknown License Issue</strong>
           <br />
           <p>

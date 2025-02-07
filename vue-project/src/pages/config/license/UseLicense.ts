@@ -43,7 +43,7 @@ export const useLicense = (mountable: boolean = true) => {
                 await loadLicenseKey()
                 licenseAlertMessage.value = {
                     type: "success",
-                    title: 'License key saved successfully.'
+                    message: 'License key saved successfully.'
                 }
             }
         } finally {

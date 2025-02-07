@@ -1,4 +1,5 @@
 import { checkHasNewOrder } from "@/api";
+import { showNotification, detectInternetState } from "@/helper";
 import { inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router"
 
@@ -20,6 +21,10 @@ export const useNotification = () => {
       if (data?.has_new_orders) {
         notificationSound.play();
         hasNewOrder.value = true;
+        showNotification({
+          type: 'success',
+          message: 'New Order Received 🎉'
+        }, 3000, false, 'top-right')
 
         if(route.name == 'orders'){
           await loadOrderStatusList();
@@ -45,7 +50,12 @@ export const useNotification = () => {
   };
   
   // Start tracking orders
-  onMounted(checkNewOrderStatus);
+  onMounted(() => {
+    detectInternetState((data: {type: "success" | "info" | "warning" | "danger", message: string}) => {
+      showNotification(data)
+    })
+    checkNewOrderStatus()
+  });
 
   return {
     hasNewOrder,
