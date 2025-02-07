@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.toplevel_page_woo-easy-life :is(#wpcontent, #wpfooter) {
+  margin-left: 140px !important;
+}
+
+.toplevel_page_woo-easy-life.folded :is(#wpcontent, #wpfooter) {
+  margin-left: 16px !important;
+}
+.toplevel_page_woo-easy-life {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: inherit;
+  }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* wordpress default style overwrite start */
+.wp-admin #woo-easy-life {
+  .wp-person a:focus .gravatar,
+  a:focus,
+  a:focus .media-icon img,
+  a:focus .plugin-icon {
+    color: inherit;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  input[type="datetime"],
+  input[type="email"],
+  input[type="month"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="time"],
+  input[type="url"],
+  input[type="week"] {
+    padding: 0 !important;
+    line-height: normal !important;
+    min-height: auto !important;
+  }
+  input[type="color"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="datetime"],
+  input[type="email"],
+  input[type="month"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="time"],
+  input[type="url"],
+  input[type="week"],
+  select {
+    box-shadow: none !important;
+    border-radius: unset !important;
+    border: none !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    padding: 0;
+    max-width: 100% !important;
+  }
+  .outline-none {
+    outline: 0px solid transparent;
+    outline-offset: 0px;
+  }
+
+  input[type="checkbox"]:focus,
+  input[type="color"]:focus,
+  input[type="date"]:focus,
+  input[type="datetime-local"]:focus,
+  input[type="datetime"]:focus,
+  input[type="email"]:focus,
+  input[type="month"]:focus,
+  input[type="number"]:focus,
+  input[type="password"]:focus,
+  input[type="radio"]:focus,
+  input[type="search"]:focus,
+  input[type="tel"]:focus,
+  input[type="text"]:focus,
+  input[type="time"]:focus,
+  input[type="url"]:focus,
+  input[type="week"]:focus,
+  select:focus,
+  textarea:focus {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  textarea {
+    border-color: inherit !important;
+  }
+}
+
+/* wordpress default style overwrite end */
+
+@media print {
+  #adminmenuwrap,
+  #wpadminbar,
+  #adminmenuback,
+  .notice {
+    display: none !important;
+  }
+  html.wp-toolbar {
+    padding-top: 0 !important;
+  }
+  .toplevel_page_woo-easy-life.folded :is(#wpcontent, #wpfooter) {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+}
