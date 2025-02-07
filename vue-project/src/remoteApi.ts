@@ -8,7 +8,6 @@ import {
   licenseAlertMessage,
   redirectToLicensePage
 } from '@/service/useServiceProvider'
-import { showNotification } from './helper'
 
 
 export const remoteApiBaseURL = "https://api.wpsalehub.com/api";

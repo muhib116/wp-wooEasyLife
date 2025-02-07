@@ -61,6 +61,14 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         global $wpdb;
     
         $cutoff_time = strtotime('-25 minutes'); // 25 minutes ago
+
+        // for testing when development environment start
+        $server_ip = $_SERVER['SERVER_ADDR'];
+        if ($server_ip === '127.0.0.1' || $server_ip === '::1') {
+            $cutoff_time = strtotime('-1 minutes'); // 1 minutes ago
+        }
+        // for testing when development environment end
+
         $cutoff_date = date('Y-m-d H:i:s', $cutoff_time);
     
         $query = $wpdb->prepare(

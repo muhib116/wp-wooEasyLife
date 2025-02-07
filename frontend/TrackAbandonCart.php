@@ -12,6 +12,9 @@ class TrackAbandonCart {
         // AJAX handler for non-logged-in users
         add_action( 'wp_ajax_nopriv_update_abandoned_data', [$this, 'update_wc_session_for_abandoned_order'] );
 
+        add_action( 'wp_ajax_wc_ajax_update_order_review', 'update_wc_session_for_abandoned_order', 10, 0 );
+        add_action( 'wp_ajax_nopriv_wc_ajax_update_order_review', 'update_wc_session_for_abandoned_order', 10, 0 );
+        
 
         // work when change checkout page data
         add_action('woocommerce_cart_updated', [$this, 'store_abandoned_cart_data']);
@@ -19,8 +22,8 @@ class TrackAbandonCart {
         //fire when reload the checkout page
         add_action('woocommerce_checkout_update_order_review', [$this, 'store_abandoned_cart_data']);
 
-        add_action('woocommerce_thankyou', [$this, 'mark_abandoned_cart_as_recovered'], 10, 3);
-        add_action('woocommerce_order_status_changed', [$this, 'mark_abandoned_cart_as_recovered'], 10, 3);
+        add_action('woocommerce_thankyou', [$this, 'deleteAbandonedOrderIfOrderProcessedSuccessfully'], 10, 1);
+        // add_action('woocommerce_order_status_changed', [$this, 'mark_abandoned_cart_as_recovered'], 10, 3);
 
         // abandoned marked from abandonedOrderAPI.php
     }
@@ -47,13 +50,13 @@ class TrackAbandonCart {
             wp_send_json_error( 'WooCommerce session handler not available.' );
             return;
         }
-    
+        
         // Retrieve data sent via AJAX
         $billing_first_name = isset( $_POST['billing_first_name'] ) ? sanitize_text_field( $_POST['billing_first_name'] ) : '';
         $billing_last_name = isset( $_POST['billing_last_name'] ) ? sanitize_text_field( $_POST['billing_last_name'] ) : '';
         $billing_phone = isset( $_POST['billing_phone'] ) ? sanitize_text_field( $_POST['billing_phone'] ) : '';
         $billing_email = isset( $_POST['billing_email'] ) ? sanitize_text_field( $_POST['billing_email'] ) : '';
-    
+        
         // Update the WooCommerce session
         WC()->session->set( 'billing_first_name', $billing_first_name );
         WC()->session->set( 'billing_last_name', $billing_last_name );
@@ -82,7 +85,7 @@ class TrackAbandonCart {
         if (empty($cart)) {
             return; // Exit if the cart is empty
         }
-    
+        
         // Get customer details
         $customer_name = WC()->session->get('billing_first_name') . ' ' . WC()->session->get('billing_last_name');
         $customer_email = WC()->session->get('billing_email');
@@ -91,12 +94,19 @@ class TrackAbandonCart {
         if (empty($customer_phone) && empty($customer_email)) {
             return false;
         }
+
+        // Check if the customer has already placed a new order with 'wc-processing' status
+        $existingNewOrder = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email, 'wc-processing');
+        
+        if ($existingNewOrder) {
+            return;
+        }
     
         $billing_address = WC()->customer->get_billing_address_1() . ', ' . WC()->customer->get_billing_city() . ', ' . WC()->customer->get_billing_state() . ', ' . WC()->customer->get_billing_postcode();
         $shipping_address = WC()->customer->get_shipping_address_1() . ', ' . WC()->customer->get_shipping_city() . ', ' . WC()->customer->get_shipping_state() . ', ' . WC()->customer->get_shipping_postcode();
     
         // Determine if the customer is a repeat customer (check WooCommerce orders)
-        $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone);
+        $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email);
     
         // Serialize cart contents to store in the database
         $cart_contents = [];
@@ -118,7 +128,8 @@ class TrackAbandonCart {
         }
     
         $serialized_cart_contents = maybe_serialize($cart_contents);
-    
+
+        
         // Check if the cart is already stored
         $session_id = $session->get_customer_id();
         $existing_cart = $wpdb->get_var(
@@ -189,20 +200,27 @@ class TrackAbandonCart {
         }
     }    
 
-    private function is_repeat_customer_by_billing_phone($billing_phone) {
-        if (empty($billing_phone)) {
+    private function is_repeat_customer_by_billing_phone($billing_phone=null, $billing_email=null, $status='wc-completed') {
+        if (empty($billing_phone) && empty($billing_email)) {
             return false; // No billing phone provided, cannot determine repeat status
         }
-
+        
         // Query WooCommerce for all completed orders with the same billing phone
-        $args = array_merge([
-            'billing_phone' => normalize_phone_number($billing_phone),
-            'status'        => 'wc-completed',
+        $args = [
+            'status'        => $status,
             'type'          => 'shop_order',
             'limit'         => -1,
-            'return'        => 'ids', // Only retrieve order IDs
-            
-        ], getMetaDataOfOrderForArgs());
+            'return'        => 'ids', // Only retrieve order IDs   
+        ];
+
+
+
+        if (!empty($billing_phone)) {
+            $args['billing_phone'] = normalize_phone_number($billing_phone);
+        }
+        else if (!empty($billing_email)) {
+            $args['billing_email'] = $billing_email;
+        }
 
         $completed_orders = wc_get_orders($args);
 
@@ -210,72 +228,38 @@ class TrackAbandonCart {
         return count($completed_orders) > 0;
     }
 
-    public function mark_abandoned_cart_as_recovered($order_id, $old_status, $new_status) {
+    public function deleteAbandonedOrderIfOrderProcessedSuccessfully($order_id) {
         global $wpdb;
     
-        // Get the WooCommerce order object
+        // Get the WooCommerce order by ID
         $order = wc_get_order($order_id);
         if (!$order) {
-            return; // Exit if the order object is not found
+            return; // Exit if the order does not exist
         }
+    
+        // Retrieve billing phone and email, ensuring the phone number is normalized
+        $customer_email = $order->get_billing_email();
+        $customer_phone = normalize_phone_number($order->get_billing_phone());
     
         // Define the abandoned cart table name
         $table_name = $wpdb->prefix . __PREFIX . 'abandon_cart';
     
-        // Retrieve customer data from the order
-        $customer_email = $order->get_billing_email();
-        $customer_phone = normalize_phone_number($order->get_billing_phone());
-        
-        
-        // Check if WooCommerce is active and session is initialized
-        $session_id = (class_exists('WooCommerce') && WC()->session) ? WC()->session->get_customer_id() : '';
-
-        if (!empty($session_id)) {
-            // Check for a record with session_id and status = 'active'
-            $active_cart_id = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT id FROM $table_name WHERE session_id = %s AND status = 'active'",
-                    $session_id
-                )
-            );
-        } else {
-            // Handle case where session is not available
-            $active_cart_id = null; // Or some fallback action
-        }
-
-    
-        if ($active_cart_id) {
-            // Delete the record with session_id and status = 'active'
-            $wpdb->delete(
-                $table_name,
-                ['id' => $active_cart_id],
-                ['%d']
-            );
-        }
-    
-        // Check if an abandoned cart exists for this customer
+        // Check if an abandoned order exists for this customer where status is 'active'
         $abandoned_cart_id = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM $table_name WHERE (session_id = %s OR customer_email = %s OR customer_phone = %s) AND status = 'abandoned'",
-                $session_id,
+                "SELECT id FROM $table_name WHERE (customer_email = %s OR customer_phone = %s) AND status = 'active'",
                 $customer_email,
                 $customer_phone
             )
         );
     
         if ($abandoned_cart_id) {
-            // Update the abandoned cart record to mark it as recovered
-            $wpdb->update(
+            // Delete the abandoned order record
+            $wpdb->delete(
                 $table_name,
-                [
-                    'status'       => 'recovered',
-                    'recovered_at' => current_time('mysql'),
-                    'updated_at'   => current_time('mysql'),
-                ],
                 ['id' => $abandoned_cart_id],
-                ['%s', '%s', '%s'],
                 ['%d']
             );
         }
-    }
+    }    
 }

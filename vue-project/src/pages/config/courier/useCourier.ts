@@ -1,3 +1,4 @@
+import { showNotification } from "@/helper"
 import { getCourierCompanies, getCourierConfig, saveCourierConfig } from "@/remoteApi"
 import { onMounted, ref } from "vue"
 
@@ -21,7 +22,10 @@ export const useCourier = () => {
 
     const changeTab = (tabSlug: string) => {
         if(hasUnsavedData.value && tabSlug != activeTab.value){
-            alert('You have unsaved changes. Please save before switching tabs!');
+            showNotification({
+                type: 'warning',
+                message: 'You have unsaved changes. Please save before switching tabs!'
+            })
             return
         }
 
@@ -49,7 +53,10 @@ export const useCourier = () => {
 
     const handleSaveCourierConfig = async (payload, button) => {
         if(!payload.api_key || !payload.secret_key){
-            alert("API Key and Secret Key must not be empty!");
+            showNotification({
+                type: 'warning',
+                message: '"API Key and Secret Key must not be empty!"'
+            })
             return
         }
 
