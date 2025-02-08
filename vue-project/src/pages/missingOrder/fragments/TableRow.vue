@@ -52,7 +52,9 @@
     </Table.Td>
     <Table.Td class="capitalize">
       <span
-        :class="item.status == 'abandoned' ? 'text-red-500' : 'text-green-500'"
+        :style="{
+          color: selectedOption.color
+        }"
       >
         {{ item.status }}
       </span>
@@ -85,48 +87,20 @@
     </Table.Td>
     <Table.Td class="truncate">
       <div class="grid gap-3">
+        <Select.Primary
+          :options="options"
+          v-model="item.status"
+        />
+
         <Button.Primary
-          v-if="item.status == 'abandoned'"
           class="!bg-green-500"
-          @onClick="(btn) => markAsRecovered(item, btn)"
+          @onClick="(btn) => updateStatus(item, btn)"
         >
           <Icon
             name="PhUserCheck"
             weight="bold"
           />
-          Confirm order
-        </Button.Primary>
-        <Button.Primary
-          v-else
-          class="!bg-orange-500"
-          @onClick="(btn) => markAsAbandoned(item, btn)"
-        >
-          <Icon
-            name="PhUserCircleDashed"
-            weight="bold"
-          />
-          Mark as abandoned
-        </Button.Primary>
-        <Button.Primary
-          class="!bg-gray-700"
-          @onClick="(btn) => markAsAbandoned(item, btn)"
-        >
-          <Icon
-            name="PhPhoneX"
-            weight="bold"
-          />
-          Call not received
-        </Button.Primary>
-        <Button.Primary
-          class="!bg-red-500"
-          @onClick="(btn) => markAsAbandoned(item, btn)"
-        >
-          
-          <Icon
-            name="PhTrash"
-            weight="bold"
-          />
-          Delete
+          Apply
         </Button.Primary>
       </div>
     </Table.Td>
@@ -145,7 +119,7 @@
 
 <script setup lang="ts">
 import { printDate } from "@/helper";
-import { Table, Button, Modal, Icon } from "@components";
+import { Table, Button, Modal, Icon, Select } from "@components";
 import { inject, ref } from "vue";
 import CartDetails from "./CartDetails.vue";
 
@@ -154,5 +128,5 @@ defineProps<{
 }>();
 
 const toggleModal = ref(false);
-const { markAsRecovered, markAsAbandoned } = inject("useMissingOrder");
+const { updateStatus, options, selectedOption } = inject("useMissingOrder");
 </script>

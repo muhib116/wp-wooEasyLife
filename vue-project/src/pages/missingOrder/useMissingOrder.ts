@@ -1,74 +1,41 @@
 import { getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
+import { showNotification } from "@/helper"
 import { computed, onMounted, ref } from "vue"
 
 export const useMissingOrder = () => {
-    const selectedFilter = ref('dashboard')
     const isLoading = ref()
     const abandonOrders = ref([])
-    const alertMessage = ref({
-        title: '',
-        type: ''
-    })
-    const filter = [
+    const options = ref([
         {
-            slug: "dashboard",
-            title: "Dashboard"
+          title: 'Abandoned',
+          id: 'abandoned',
+          color: '#8cc520'
         },
         {
-            slug: "all",
-            title: "All"
+          title: 'Call not received',
+          id: 'call-not-received',
+          color: '#f97315'
         },
         {
-            slug: "registered-user",
-            title: "Registered User"
+          title: 'Confirmed',
+          id: 'confirmed',
+          color: '#00b002'
         },
         {
-            slug: "guest-user",
-            title: "Guest User"
-        },
-        {
-            slug: "recovered-order",
-            title: "Recovered order"
+          title: 'Delete',
+          id: 'delete',
+          color: '#e82661'
         }
-    ]
+    ])
+
+    const selectedOption = ref(options.value[0])
 
     const filteredAbandonOrders = computed(() => {
         let filteredOrders = [];
-    
-        switch (selectedFilter.value) {
-            case 'all':
-                filteredOrders = abandonOrders.value;
-                break;
-    
-            case 'registered-user':
-                filteredOrders = abandonOrders.value.filter(
-                    (item) => item.status === 'abandoned' && item.is_repeat_customer >= 1
-                );
-                break;
-    
-            case 'guest-user':
-                filteredOrders = abandonOrders.value.filter(
-                    (item) => item.status === 'abandoned' && item.is_repeat_customer == 0
-                );
-                break;
-    
-            case 'recovered-order':
-                filteredOrders = abandonOrders.value.filter(
-                    (item) => item.status === 'recovered'
-                );
-                break;
-    
-            case 'carts-without-customer-details':
-                filteredOrders = abandonOrders.value.filter(
-                    (item) => !item.customer_phone && !item.customer_email
-                );
-                break;
-    
-            default:
-                filteredOrders = abandonOrders.value; // Fallback to all orders
-                break;
-        }    
-        return filteredOrders;
+        filteredOrders = abandonOrders.value.filter(
+            (item) => item?.status?.toLowerCase() == selectedOption.value.id
+        )
+        return filteredOrders
     })
     
 
@@ -94,9 +61,31 @@ export const useMissingOrder = () => {
         return data
     })
 
+    const updateStatus = async (item, btn) => {
+        try {
+            isLoading.value = true
+            btn.isLoading = true
+            const { message, status } = await updateAbandonedOrderStatus(item.id, item)
+            showNotification({
+                type: 'success',
+                message: message
+            })
+
+            await loadAbandonedOrder()
+        } catch({response}) {
+            showNotification({
+                type: 'danger',
+                message: response?.data?.message
+            })
+        } finally {
+            isLoading.value = false
+            btn.isLoading = false
+        }
+    }
+
     const handleFilter = (item) => {
-        selectedFilter.value = item.slug
-        loadAbandonedOrder()
+        selectedOption.value = item
+        // loadAbandonedOrder()
     }
 
     const loadAbandonedOrder = async (date?: {start_date: string, end_date: string}) => {
@@ -110,61 +99,19 @@ export const useMissingOrder = () => {
         }
     }
 
-    const markAsRecovered = async (item, btn: { isLoading: boolean }) => {
-        if(!confirm('Are you sure to make it recovered!')) return
-        item.status = 'recovered'
-
-        handleUpdate(item, btn)
-    }
-    const markAsAbandoned = async (item, btn: { isLoading: boolean }) => {
-        if(!confirm('Are you sure to make it abandoned!')) return
-        item.status = 'abandoned'
-
-        handleUpdate(item, btn)
-    }
-
-    const handleUpdate = async (item, btn) => {
-        try {
-            isLoading.value = true
-            btn.isLoading = true
-            const { message, status } = await updateAbandonedOrderStatus(item.id, item)
-            alertMessage.value.type = status == 'success' ? 'success' : 'warning'
-            alertMessage.value.title = message
-
-            await loadAbandonedOrder()
-        } catch({response}) {
-            alertMessage.value = {
-                title: response?.data?.message,
-                type: 'danger'
-            }
-        } finally {
-            isLoading.value = false
-            btn.isLoading = false
-
-            setTimeout(() => {
-                alertMessage.value = {
-                    title: '',
-                    type: ''
-                }
-            }, 5000)
-        }
-    }
-
     onMounted(() => {
         loadAbandonedOrder()
     })
 
     return {
-        filter,
+        options,
         isLoading,
-        alertMessage,
         abandonOrders,
-        selectedFilter,
+        selectedOption,
         getDashboardData,
         filteredAbandonOrders,
+        updateStatus,
         handleFilter,
-        markAsRecovered,
-        markAsAbandoned,
         loadAbandonedOrder,
     }
 }

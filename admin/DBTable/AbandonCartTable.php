@@ -35,7 +35,7 @@ class AbandonCartTable {
             billing_address TEXT DEFAULT NULL,
             shipping_address TEXT DEFAULT NULL,
             is_repeat_customer BOOLEAN NOT NULL DEFAULT 0,
-            status ENUM('abandoned', 'recovered', 'active') NOT NULL DEFAULT 'abandoned',
+            status ENUM('abandoned', 'recovered', 'active', 'confirmed', 'call-not-received', 'canceled') NOT NULL DEFAULT 'active',
             recovered_at DATETIME DEFAULT NULL,
             abandoned_at DATETIME NOT NULL NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

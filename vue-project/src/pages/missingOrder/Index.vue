@@ -6,23 +6,26 @@
                 :active="isLoading"
             />
             <Card.Native>
-                <MessageBox
-                    :title="alertMessage.title"
-                    :type="alertMessage.type"
-                />
-
-                <div class="flex gap-4 mb-5 -ml-6 -mr-6 -mt-6 rounded-t-md border-b px-6 py-3 bg-sky-600 text-white/60">
+                <div class="flex gap-4 mb-5 -ml-6 -mr-6 -mt-6 rounded-t-md border-b px-6 py-3 bg-white text-black">
                     <Button.Native
-                        v-for="item in filter"
+                        @click="selectedOption = {id: 'dashboard', title: 'Dashboard', color: 'black'}"
+                        class="hover:text-sky-500 font-medium"
+                        :class="selectedOption.id == 'dashboard' ? 'text-sky-500 font-semibold' : ''"
+                    >
+                        Dashboard
+                    </Button.Native>
+
+                    <Button.Native
+                        v-for="item in options"
                         @onClick="btn => handleFilter(item, btn)"
-                        class="font-light hover:text-white"
-                        :class="selectedFilter == item.slug ? 'text-white' : ''"
+                        class="hover:text-sky-500 font-medium"
+                        :class="selectedOption.id == item.id ? 'text-sky-500 font-semibold' : ''"
                     >
                         {{ item.title }}
                     </Button.Native>
                 </div>
 
-                <Dashboard v-if="selectedFilter == 'dashboard'" />
+                <Dashboard v-if="selectedOption.id == 'dashboard'" />
                 <OrderList v-else />
 
             </Card.Native>
@@ -32,7 +35,7 @@
 
 <script setup lang="ts">
     import { Layout, Container } from '@layout'
-    import { Button, MessageBox, Card, Loader } from '@/components'
+    import { Button, Card, Loader } from '@/components'
     import { useMissingOrder } from './useMissingOrder'
     import OrderList from './fragments/OrderList.vue'
     import Dashboard from './fragments/Dashboard.vue'
@@ -40,10 +43,9 @@
 
     const _useMissingOrder = useMissingOrder()
     const {
-        filter,
+        options,
+        selectedOption,
         isLoading,
-        alertMessage,
-        selectedFilter,
         handleFilter,
     } = _useMissingOrder
 

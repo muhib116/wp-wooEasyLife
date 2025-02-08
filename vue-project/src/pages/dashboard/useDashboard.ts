@@ -79,7 +79,7 @@ export const useDashboard = () =>
         try {
             isLoading.value = true
             const { data } = await getOrderStatuses()
-            orderStatuses.value = data.map(item => {
+            orderStatuses.value = data?.map(item => {
                 return {
                     title: item.title,
                     slug: item.slug

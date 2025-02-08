@@ -30,7 +30,16 @@
     onMounted(async () => {
         if(isEmpty(userData.value)) {
             await loadUserData()
-            showNotification(getNoticeOfBalanceOver(userData.value.remaining_order || 0), false)
+
+            const notificationMsg: {
+                type: "success" | "info" | "warning" | "danger"
+                message: string
+            } = getNoticeOfBalanceOver(userData.value.remaining_order || 0)
+            
+            if(notificationMsg){
+                console.log({notificationMsg})
+                showNotification(notificationMsg, false)
+            }
             
             if(isArray(userData.value.notice) && userData.value?.notice?.length){
                 userData.value.notice.forEach((item: {

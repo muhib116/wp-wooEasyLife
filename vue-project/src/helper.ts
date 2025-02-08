@@ -10,6 +10,7 @@ export const showNotification = (
   supportHtml: boolean = true,
   position: ToastPosition = "bottom-right"
 ): void => {
+    if(alertMsg && !alertMsg.type || !alertMsg.message) return
   const toastType = alertMsg.type === 'danger' ? 'error' : alertMsg.type;
 
   toast[toastType](supportHtml ? htmlOneLiner(alertMsg.message) : alertMsg.message, {
