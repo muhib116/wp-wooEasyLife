@@ -35,13 +35,14 @@
             </Button.Primary>
         </div>
 
-        <div class="flex justify-between items-end mb-4">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-3 mb-4">
             <Heading
                 :title="title"
                 :subtitle="subtitle"
+                class="text-center md:text-left"
             />
 
-            <div class="flex gap-2 relative">
+            <div class="flex justify-center md:justify-start gap-2 relative">
                 <slot name="before-filter"></slot>
                 <Loader
                     :active="showStatusFilter && isLoading"

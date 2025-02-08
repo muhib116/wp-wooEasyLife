@@ -1,9 +1,9 @@
 <template>
-    <div class="flex items-center">
+    <div class="flex items-center gap-2">
         <Button.Native
             v-if="isValidLicenseKey"
             :loading="userDataLoading"
-            class="py-[4px] px-2 rounded font-medium text-[10px] text-white mr-4"
+            class="py-[4px] px-2 rounded font-medium text-[10px] text-white"
             :class="{
                 'animate-bounce' : balance <= 5
             }"
@@ -12,7 +12,7 @@
             }"
             :title="`Remaining Order Balance ${userData?.remaining_order || 0}`"
         >
-            Balance: {{ userData?.remaining_order || 0 }}
+            Token: {{ userData?.remaining_order || 0 }}
         </Button.Native>
         
         <Button.Native

@@ -1,8 +1,8 @@
 <template>
   <Container class="bg-white border-gray-200 border-b z-[30] sticky">
     <nav class="w-full flex justify-between">
-      <div class="flex -mb-[2px]">
-        <a href="#" class="flex items-center">
+      <div class="flex -mb-[2px] relative">
+        <a href="#" class="hidden xl:flex items-center">
           <img
             class="w-auto max-w-[120px]"
             :src="`https://api.wpsalehub.com/app-logo`"
@@ -10,19 +10,25 @@
           />
         </a>
 
-        <ul class="flex sm:ml-6 sm:flex sm:space-x-5 [&>li]:mb-0 [&>li]:flex">
-          <template v-for="(item, index) in menus" :key="index">
-            <li v-if="item.visible">
-              <RouterLink
-                :to="item.to"
-                exact-active-class="border-orange-500/100 text-gray-700"
-                class="text-base border-b-2 border-orange-500/0 hover:border-orange-500/100 text-gray-500 hover:text-gray-700 inline-flex items-center"
-              >
-                {{ item.title }}
-              </RouterLink>
-            </li>
-          </template>
-        </ul>
+
+        <Button.Native 
+          class="aspect-squire border border-gray-400 rounded size-7 outline-none grid place-content-center self-center"
+          v-click-outside="() => {
+            toggleLeftMenu = false
+          }"
+          @onClick="toggleLeftMenu = !toggleLeftMenu"
+        >
+          <Icon
+            name="PhTextIndent"
+            weight="bold"
+            size="20"
+          />
+        </Button.Native>
+
+        <DesktopNavigation
+          :menus="menus"
+          :toggleLeftMenu="toggleLeftMenu"
+        />
       </div>
 
       <RightMenu />
@@ -31,12 +37,14 @@
 </template>
 
 <script setup lang="ts">
-import { Container } from "@layout";
-import { inject } from "vue";
-import RightMenu from "./fragments/RightMenu.vue";
+import { Container } from "@layout"
+import { Button, Icon } from '@components'
+import { inject, ref } from "vue"
+import RightMenu from "./fragments/RightMenu.vue"
+import DesktopNavigation from './fragments/menu/DesktopNavigation.vue'
 
 const { configData } = inject("configData");
-
+const toggleLeftMenu = ref(false)
 const menus = [
   {
     title: "Dashboard",

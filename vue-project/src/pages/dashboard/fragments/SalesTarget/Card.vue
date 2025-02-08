@@ -9,7 +9,7 @@
     <hr class="my-2" />
     <div 
       class="items-center grid pt-4 gap-4"
-      :class="hideTargetAchieve ? '' : 'grid-cols-2'"
+      :class="hideTargetAchieve ? '' : 'md:grid-cols-2'"
     >
       <div
         class="min-h-[200px] max-h-[300px]"

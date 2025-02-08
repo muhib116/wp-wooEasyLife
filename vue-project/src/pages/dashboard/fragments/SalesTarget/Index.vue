@@ -21,6 +21,7 @@
     </div>
     <br />
     <Card
+      class="hidden md:block"
       title="Date wise"
       :chartData="chartData.dateWise"
       hideTargetAchieve

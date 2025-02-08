@@ -1,14 +1,14 @@
 <template>
     <div>
         <h3 
-            class="text-xl font-semibold text-gray-900"
+            class="md:text-xl leading-[20px] md:leading-[26px] font-semibold text-gray-900"
             :class="titleClass"
         >
             {{ title }}
         </h3>
         <div
             v-if="subtitle" 
-            class="text-lg text-gray-500"
+            class="hidden md:block text-lg text-gray-500"
             :class="subtitleClass"
             v-html="subtitle"
         ></div>
