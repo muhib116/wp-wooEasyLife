@@ -1,6 +1,6 @@
 import { checkHasNewOrder } from "@/api";
 import { showNotification, detectInternetState } from "@/helper";
-import { inject, onMounted, ref } from "vue";
+import { inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router"
 
 export const useNotification = () => {
@@ -30,32 +30,25 @@ export const useNotification = () => {
           await loadOrderStatusList();
           await getOrders(false);
         }
-  
-        timeoutId = setTimeout(() => {
-          hasNewOrder.value = false;
-          scheduleNextCheck(8000);
-        }, 10000);
-      } else {
-        scheduleNextCheck(10000);
       }
     } catch (error) {
-      console.error("Error checking new order status:", error);
-      scheduleNextCheck(10000);
+      console.error("Error checking new order status:", error)
     }
-  };
-  
-  const scheduleNextCheck = (delay) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(checkNewOrderStatus, delay);
-  };
+  }
   
   // Start tracking orders
+  let intervalId: any = null;
   onMounted(() => {
     detectInternetState((data: {type: "success" | "info" | "warning" | "danger", message: string}) => {
       showNotification(data)
     })
-    checkNewOrderStatus()
-  });
+
+    intervalId = setInterval(checkNewOrderStatus, 10000)
+  })
+
+  onBeforeUnmount(() => {
+    clearInterval(intervalId)
+  })
 
   return {
     hasNewOrder,
