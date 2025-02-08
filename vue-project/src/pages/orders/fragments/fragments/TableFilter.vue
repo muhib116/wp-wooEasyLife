@@ -32,18 +32,8 @@
 
     const {
         totalRecords,
-        getOrders,
+        handleFilter,
         orderFilter,
         orderStatusWithCounts
     } = inject('useOrders')
-
-    const handleFilter = async (status: string, btn) => {
-        try {
-            btn.isLoading = true
-            orderFilter.value.status = status
-            await getOrders()
-        } finally {
-            btn.isLoading = false
-        }
-    }
 </script>

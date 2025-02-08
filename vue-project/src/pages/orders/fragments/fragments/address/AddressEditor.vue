@@ -1,7 +1,7 @@
 <template>
     <div class="relative">
         <div class="flex bg-white z-20  justify-between items-center sticky -top-3">
-            <h3 class="font-semibold text-lg mb-2">
+            <h3 class="font-bold md:font-semibold md:text-lg mb-2">
                 {{ title }}
             </h3>
 

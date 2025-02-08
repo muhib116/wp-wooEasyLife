@@ -16,6 +16,7 @@
                 weight="bold"
             />
         </Button.Primary>
+        <slot name="afterButton"></slot>
     </div>
 </template>
 

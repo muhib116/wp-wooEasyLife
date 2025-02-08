@@ -6,7 +6,7 @@
         itemKey="slug"
         v-model="form.order_status"
     />
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-2 gap-4">
         <Input.Primary
             label="Customer Name *"
             placeholder="Write customer name."

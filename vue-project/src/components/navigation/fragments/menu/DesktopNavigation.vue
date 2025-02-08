@@ -2,7 +2,7 @@
     <ul
       class="responsive_menu lg:flex lg:ml-6 lg:space-x-5 [&>li]:mb-0 [&>li]:flex"
       :class="{
-        '!hidden': !toggleLeftMenu
+        'hidden': !toggleLeftMenu
       }"
     >
         <template v-for="(item, index) in menus" :key="index">
@@ -36,7 +36,6 @@
     position: absolute;
     top: 100%;
     background-color: white;
-    display: block;
     box-shadow: 0px 4px 4px #0002;
     border-radius: 0px 0px 4px 4px;
     white-space: nowrap;

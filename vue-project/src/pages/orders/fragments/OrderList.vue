@@ -7,18 +7,8 @@
 
         <OrderDetails v-if="activeOrder" />
         <div v-else>
-            <Heading
-                title="Recent Orders"
-                class="mb-4 px-6"
-            />
-            <TableFilter />
-            <TableHeaderAction />
-
-            <Pagination class="">
-                <template #beforeSearch>
-                    <StatusChangeDropdown />
-                </template>
-            </Pagination>
+            <TableHeaderForDesktop class="hidden md:block" />
+            <TableHeaderForMobile class="block md:hidden" />
 
             <div class="min-h-[300px] overflow-auto w-full">
                 <Table.Table v-if="orders?.length">
@@ -48,15 +38,15 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Loader, Heading, MessageBox, Select, Button } from '@components'
+    import { Table, Loader, MessageBox } from '@components'
     import { inject } from 'vue'
     import TableHeaderAction from './TableHeaderAction.vue'
     import TableHeader from './fragments/TableHeader.vue'
     import TableRow from './fragments/TableRow.vue'
-    import TableFilter from './fragments/TableFilter.vue'
     import OrderDetails from './OrderDetails.vue'
     import Pagination from './fragments/Pagination.vue'
-    import StatusChangeDropdown from './fragments/StatusChangeDropdown.vue'
+    import TableHeaderForDesktop from './tableHeader/Desktop.vue'
+    import TableHeaderForMobile from './tableHeader/Mobile.vue'
 
     const {
         activeOrder,

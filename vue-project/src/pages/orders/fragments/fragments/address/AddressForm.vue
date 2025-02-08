@@ -1,6 +1,6 @@
 <template>
     <div class="grid gap-4 mt-4">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-2 gap-4">
             <Input.Primary
                 label="First name"
                 v-model="address.first_name"
@@ -28,7 +28,7 @@
                 v-model="address.address_2"
             />
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-2 gap-4">
             <Input.Primary
                 label="City"
                 v-model="address.city"
@@ -38,7 +38,7 @@
                 v-model="address.state"
             />
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid md:grid-cols-2 gap-4">
             <Input.Primary
                 label="Post code"
                 v-model="address.postcode"
@@ -48,7 +48,7 @@
                 v-model="address.country"
             />
         </div>
-        <div v-if="address.type=='billing'" class="grid grid-cols-2 gap-4">
+        <div v-if="address.type=='billing'" class="grid md:grid-cols-2 gap-4">
             <Input.Primary
                 label="Email"
                 v-model="address.email"

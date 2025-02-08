@@ -1,27 +1,7 @@
 <template>
-    <div class="flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between px-4 mt-2 mb-4 md:mb-2">
-        <div class="sm:flex gap-4">
-            <slot name="beforeSearch"></slot>
-            <!-- Search Input -->
-            <div 
-                v-if="!hideSearch" 
-                class="flex gap-1"
-            >
-                <Input.Native
-                    placeholder="Search customer"
-                    class="text-base border px-2 py-1 rounded-sm"
-                    v-model="orderFilter.search"
-                />
-                <Button.Primary
-                    class="!py-1 px-2"
-                    @click="debouncedGetOrders"
-                >
-                    <Icon
-                        name="PhMagnifyingGlass"
-                        weight="bold"
-                    />
-                </Button.Primary>
-            </div>
+    <div class="flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between whitespace-nowrap">
+        <div v-if="$slots.leftSide" class="sm:flex gap-2 md:gap-4">
+            <slot name="leftSide"></slot>
         </div>
 
         <!-- Pagination Controls -->
@@ -38,14 +18,14 @@
             </div>
 
             <!-- Total Items -->
-            <span>{{ totalRecords }} items</span>
+            <span class="hidden md:inline-block">{{ totalRecords }} items</span>
 
             <!-- Pagination Buttons -->
             <div class="flex items-center space-x-1 ml-4">
                 <Button.Native
                     :disabled="isFirstPage"
                     @onClick="btn => goToPage(1, btn)"
-                    class="px-2 py-1 border rounded-sm"
+                    class="px-2 py-1 border rounded-sm hidden md:inline-block"
                     :class="isFirstPage ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-blue-600 bg-blue-100 border-blue-300 hover:bg-blue-200'"
                 >«</Button.Native>
                 <Button.Native
@@ -69,7 +49,7 @@
                 <Button.Native
                     :disabled="isLastPage"
                     @onClick="btn => goToPage(totalPages, btn)"
-                    class="px-2 py-1 border rounded-sm"
+                    class="px-2 py-1 border rounded-sm hidden md:inline-block"
                     :class="isLastPage ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-blue-600 bg-blue-100 border-blue-300 hover:bg-blue-200'"
                 >»</Button.Native>
             </div>

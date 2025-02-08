@@ -1,9 +1,10 @@
 <template>
-    <div class="grid grid-cols-2 gap-10">
+    <div class="grid md:grid-cols-2 md:gap-10">
         <AddressEditor
             title="Billing Info"
             :address="order.billing_address"
         />
+        <hr class="block md:hidden my-6" />
         <AddressEditor
             title="Shipping Info"
             :address="order.shipping_address"

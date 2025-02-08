@@ -131,7 +131,7 @@
                 wrapperClass="!mr-3"
             />
 
-            <div class="max-h-[100px] overflow-auto mt-4 [&>div+div]:border-t">
+            <div class="max-h-[190px] overflow-auto mt-4 [&>div+div]:border-t">
                 <div
                     v-for="item in filteredProducts"
                     :key="item.id"

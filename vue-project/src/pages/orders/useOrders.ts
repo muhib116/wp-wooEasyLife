@@ -170,6 +170,16 @@ export const useOrders = () => {
     isLoading.value = false;
   };
 
+  const handleFilter = async (status: string, btn) => {
+    try {
+        btn.isLoading = true
+        orderFilter.value.status = status
+        await getOrders()
+    } finally {
+        btn.isLoading = false
+    }
+  }
+
   const handlePhoneNumberBlock = async (btn) => {
     if (![...selectedOrders.value].length) {
       alert("Please select at least on item.");
@@ -542,8 +552,8 @@ export const useOrders = () => {
     orderStatusWithCounts,
     totalPages,
     currentPage,
-    debouncedGetOrders,
     getOrders,
+    handleFilter,
     handleIPBlock,
     setActiveOrder,
     setSelectedOrder,
@@ -551,6 +561,7 @@ export const useOrders = () => {
     handleFraudCheck,
     handleEmailBlock,
     handleStatusChange,
+    debouncedGetOrders,
     handleCourierEntry,
     loadOrderStatusList,
     handlePhoneNumberBlock,

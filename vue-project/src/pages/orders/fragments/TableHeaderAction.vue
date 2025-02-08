@@ -1,12 +1,12 @@
 <template>
     <div v-bind="$attrs" class="flex justify-between text-[10px] px-4 my-4">
         <div 
-            class="flex justify-center md:justify-start flex-wrap gap-1 sm:gap-3 items-center relative"
+            class="flex justify-center md:justify-start flex-wrap gap-3 items-center relative"
             v-click-outside="() => toggleCourierDropdown = false"
         >
             <span 
                 v-if="[...selectedOrders].length"
-                class="size-6 shadow -mr-2 flex items-center justify-center text-[10px] aspect-square rounded-full bg-orange-500 text-white "
+                class="size-6 shadow -mr-2 flex items-center justify-center md:text-[10px] aspect-square rounded-full bg-orange-500 text-white "
             >
                 {{ [...selectedOrders].length }}
             </span>
@@ -24,9 +24,14 @@
                             backgroundColor: item.bg,
                             color: item.color   
                         }"
-                        @onClick="btn => item?.isCourier 
+                        @onClick="async (btn) => {
+                            item?.isCourier 
                                         ? toggleCourierDropdown = !toggleCourierDropdown 
-                                        : item.method(btn)"
+                                        : 
+                                        await item.method(btn)
+                                        $emit('close')
+                            }
+                        "
                     >
                         <Icon
                             :name="item.icon"
@@ -45,7 +50,10 @@
                             <Button.Native 
                                 v-if="courierConfigs[_item.slug]?.is_active"
                                 class="text-left text-xl px-2 py-2 text-gray-700 hover:scale-110 origin-left duration-300"
-                                @onClick="btn => item.method(_item.slug, btn)"
+                                @onClick="async (btn) => {
+                                    await item.method(_item.slug, btn)
+                                    $emit('close')
+                                }"
                             >
                                 <img
                                     v-if="courierConfigs[_item.slug]?.logo"
@@ -63,7 +71,10 @@
                 v-if="configData.courier_automation"
                 class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm px-1 py-1"
                 title="Refresh CourierData"
-                @onClick="refreshBulkCourierData"
+                @onClick="async (btn) => {
+                    await refreshBulkCourierData(btn)
+                    $emit('close')
+                }"
             >
                 <Icon
                     name="PhArrowsClockwise"
@@ -77,7 +88,10 @@
                 v-if="orders[0]?.total_new_orders_not_handled_by_wel_plugin && userData?.remaining_order > 0"
                 class="opacity-100 w-fit text-white bg-green-500 shadow rounded-sm px-1 py-1"
                 title="Include your previous new orders that are missing from this order list."
-                @onClick="btn => include_past_new_orders_thats_not_handled_by_wel_plugin(orders[0].total_new_orders_not_handled_by_wel_plugin, btn)"
+                @onClick="async (btn) => {
+                    await include_past_new_orders_thats_not_handled_by_wel_plugin(orders[0].total_new_orders_not_handled_by_wel_plugin, btn)
+                    $emit('close')
+                }"
             >
                 <Icon
                     name="PhArrowSquareIn"
@@ -93,7 +107,10 @@
                 v-if="orders[0]?.total_new_order_handled_by_wel_but_balance_cut_failed && userData?.remaining_order > 0"
                 class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm px-1 py-1"
                 title="Include your new orders that failed to deduct balance."
-                @onClick="btn => include_balance_cut_failed_new_orders(orders[0].total_new_order_handled_by_wel_but_balance_cut_failed, btn)"
+                @onClick="async (btn) => {
+                await include_balance_cut_failed_new_orders(orders[0].total_new_order_handled_by_wel_but_balance_cut_failed, btn)
+                $emit('close')
+        }"
             >
                 <Icon
                     name="PhArrowSquareIn"
@@ -104,8 +121,6 @@
                 Include missing new orders
                 ({{ orders[0].total_new_order_handled_by_wel_but_balance_cut_failed }})
             </Button.Native>
-
-
         </div>
 
         <div>
