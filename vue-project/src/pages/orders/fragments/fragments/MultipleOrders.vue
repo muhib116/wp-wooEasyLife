@@ -15,10 +15,10 @@
                     <Icon
                         name="PhCaretLeft"
                     />
-                    Back
+                    <span class="hidden md:inline-block">Back</span>
                 </Button.Primary>
             </div>
-            <div class="grid gap-1 grid-cols-[auto_1fr] mb-4">
+            <div class="grid gap-1 md:grid-cols-[auto_1fr] mb-4">
                 <h4>
                     <span style="font-weight: bold;"> Name: </span> 
                     {{ orders[0].billing_address.first_name }} 
@@ -45,7 +45,7 @@
                 :selectedOrderInfo="selectedOrderInfo"
             />
 
-            <Table.Table v-else>
+            <Table.Table v-else class="whitespace-nowrap">
                 <Table.THead>
                     <Table.Th>#SL</Table.Th>
                     <Table.Th>Order</Table.Th>

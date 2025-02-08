@@ -2,6 +2,7 @@
     <div>
         <slot></slot>
         <Card.Native 
+            class="!p-0 whitespace-nowrap"
             :class="hideShadow ? '' : '!shadow-none'"
         >
             <h3 

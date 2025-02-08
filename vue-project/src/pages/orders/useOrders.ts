@@ -170,6 +170,38 @@ export const useOrders = () => {
     isLoading.value = false;
   };
 
+  const getDeliveryProbability = (order) => {
+    // Get success rate and ensure it's a valid number
+    let successRate = order?.customer_report?.success_rate;
+
+    if (isNaN(parseFloat(successRate))) {
+        successRate = '0'; // Default to 0% if it's an invalid value
+    }
+
+    // Remove '%' if present and parse it as a float
+    const courierSuccessRate = parseFloat(successRate.replace('%', '')) || 0;
+
+    // Ensure fraud score is a number
+    const systemFraudScore = parseFloat(order?.customer_custom_data?.fraud_score) || 0;
+
+    // Normalize success rate to a 0-1 scale
+    let probability = courierSuccessRate / 100;
+
+    // Adjust probability based on fraud score
+    if (systemFraudScore > 80) {
+        probability *= 0.5; // High fraud risk, reduce probability significantly
+    } else if (systemFraudScore > 50) {
+        probability *= 0.7; // Medium fraud risk, moderate reduction
+    } else if (systemFraudScore > 20) {
+        probability *= 0.9; // Low fraud risk, slight reduction
+    }
+
+    // Ensure probability stays within 0-100%
+    probability = Math.max(0, Math.min(probability * 100, 100));
+
+    return Math.round(probability) || 'Unpredicted'; // Return probability as a rounded percentage
+}
+
   const handleFilter = async (status: string, btn) => {
     try {
         btn.isLoading = true
@@ -563,6 +595,7 @@ export const useOrders = () => {
     loadOrderStatusList,
     handlePhoneNumberBlock,
     refreshBulkCourierData,
+    getDeliveryProbability,
     include_past_new_orders_thats_not_handled_by_wel_plugin,
     include_balance_cut_failed_new_orders
   };

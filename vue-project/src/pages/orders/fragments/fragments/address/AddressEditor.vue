@@ -16,15 +16,20 @@
                         name="PhCaretLeft"
                         size="25"
                     />
-                    Back
+                    <span class="hidden md:inline-block">Back</span>
                 </Button.Native>
                 <Button.Primary
                     v-if="isEditable"
                     @onClick="handleUpdate"
-                    icon="PhCheck"
                     title="Click to save"
+                    class="!bg-green-500"
                 >
-                    Save
+                    <Icon
+                        name="PhChecks"
+                        weight="bold"
+                        size="20"
+                    />
+                    <span class="hidden md:inline-block">Save</span>
                 </Button.Primary>
                 <Button.Native
                     v-else

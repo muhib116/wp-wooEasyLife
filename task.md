@@ -78,6 +78,13 @@ Dashboard:
 👉🏻 missing order theke create order er button dite hobe
 👉🏻 abandont order a sound dite hobe
 👉🏻 sound on and off localstorage theke control korte hobe
+👉🏻 FB Ad cost plugins a ante hobe
+👉🏻 Message and comment theke order api diye ane ai diye filter kore plugins a ante hobe
+👉🏻 Centralize data base a black list er data rekhe plugins er fake order komate hobe
+👉🏻 abandont, comment and message er lead gulu fb er ad cost er 50% price sale korte hobe.
+👉🏻 
+👉🏻 
+👉🏻 
 
 
 

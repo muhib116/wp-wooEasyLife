@@ -1,5 +1,5 @@
 <template>
-    <Table.Table>
+    <Table.Table class="whitespace-nowrap">
         <Table.THead>
             <Table.Th>Image</Table.Th>
             <Table.Th>Product name</Table.Th>

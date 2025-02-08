@@ -220,11 +220,11 @@
                 title="Delivery success probability"
                 class="font-semibold w-fit flex gap-3 mb-3 items-center bg-sky-500 px-3 py-1 rounded-sm"
                 :style="{
-                    background: +getDeliveryProbability >=0 ? `hsl(${ (+getDeliveryProbability / 100) * 120 }deg 75% 35%)` : `red`,
+                    background: +deliveryProbability >=0 ? `hsl(${ (+deliveryProbability / 100) * 120 }deg 75% 35%)` : `red`,
                     color: '#fff'
                 }"
             >
-                {{ +getDeliveryProbability >= 0 ? `DSP: ${getDeliveryProbability}%` : getDeliveryProbability }}
+                {{ +deliveryProbability >= 0 ? `DSP: ${deliveryProbability}%` : deliveryProbability }}
                 <Icon
                     class="text-red-100 cursor-pointer"
                     title="This is just a prediction based on available data. \nWe do not guarantee the accuracy of the outcome, as various external factors may influence the actual results."
@@ -441,7 +441,8 @@
         setActiveOrder,
         setSelectedOrder,
         selectedOrders,
-        courierStatusInfo
+        courierStatusInfo,
+        getDeliveryProbability
     } = inject('useOrders')
     const { courierConfigs } = inject('useCourierConfig')
 
@@ -450,36 +451,7 @@
     const toggleMultiOrderModel = ref(false)
     const toggleNotesModel = ref(false)
 
-    const getDeliveryProbability = computed(() => {
-        let order = props.order
-        // Get success rate and ensure it's a valid number
-        let successRate = order?.customer_report?.success_rate;
-
-        if (isNaN(parseFloat(successRate))) {
-            successRate = '0'; // Default to 0% if it's an invalid value
-        }
-
-        // Remove '%' if present and parse it as a float
-        const courierSuccessRate = parseFloat(successRate.replace('%', '')) || 0;
-
-        // Ensure fraud score is a number
-        const systemFraudScore = parseFloat(order?.customer_custom_data?.fraud_score) || 0;
-
-        // Normalize success rate to a 0-1 scale
-        let probability = courierSuccessRate / 100;
-
-        // Adjust probability based on fraud score
-        if (systemFraudScore > 80) {
-            probability *= 0.5; // High fraud risk, reduce probability significantly
-        } else if (systemFraudScore > 50) {
-            probability *= 0.7; // Medium fraud risk, moderate reduction
-        } else if (systemFraudScore > 20) {
-            probability *= 0.9; // Low fraud risk, slight reduction
-        }
-
-        // Ensure probability stays within 0-100%
-        probability = Math.max(0, Math.min(probability * 100, 100));
-
-        return Math.round(probability) || 'Unpredicted'; // Return probability as a rounded percentage
+    const deliveryProbability = computed(() => {
+        return getDeliveryProbability(props.order)
     })
 </script>

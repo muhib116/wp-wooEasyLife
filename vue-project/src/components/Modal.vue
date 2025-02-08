@@ -1,10 +1,10 @@
 <template>
     <div 
-        class="bg-black/30 p-6 fixed inset-0 z-50 flex items-center justify-center"
+        class="bg-black/30 md:p-6 fixed inset-0 z-50 flex items-center justify-center"
         v-if="modelValue"
         @click.self="$emit('close')"
     >
-        <Card.Native v-bind="$attrs" class="min-w-[300px] bg-white relative">
+        <Card.Native v-bind="$attrs" class="min-w-[350px] bg-white relative">
             
             <slot v-if="!hideHeader" name="header">
                 <div class="flex justify-between border-b pb-2">
@@ -59,7 +59,6 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue'
     import { Card, Heading, Icon, Button } from '@components'
 
 

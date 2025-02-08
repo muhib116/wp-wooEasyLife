@@ -402,7 +402,7 @@ class CustomerHandler {
         // 4️⃣ **🛑 Blacklist Check → If customer email, phone, or IP is blacklisted**
         $totalBlacklistedRecord = $this->is_blacklisted($billing_phone, $billing_email, $customer_ip);
         if ($totalBlacklistedRecord) {
-            $score += $totalBlacklistedRecord * (50/3); // High risk if blacklisted
+            $score += 30 * $totalBlacklistedRecord; // High risk if blacklisted
         }
     
         // 5️⃣ **❌ Multiple failed/canceled orders → Possible fraud**
