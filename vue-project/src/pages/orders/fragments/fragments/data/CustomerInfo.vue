@@ -1,0 +1,101 @@
+<template>
+    <div
+        class="flex flex-wrap items-start gap-2 relative"
+    >
+        <span 
+            class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
+            title="Order Id"
+        >
+            #{{ order.id }}
+        </span>
+        <span 
+            v-if="order.order_source "
+            class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
+            title="Order source"
+        >
+            {{ order.order_source }}
+        </span>
+        <a 
+            class="absolute top-0 right-0 text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"
+            :href="`${baseUrl}/wp-admin/post.php?post=${order.id}&action=edit`"
+            target="_blank"
+        >
+            <Icon 
+                name="PhArrowSquareOut"
+                size="20"
+                weight="bold"
+            />
+        </a>
+    </div>
+    <div
+        class="flex gap-1 font-medium"
+    >
+        {{ order.billing_address.first_name }}
+        {{ order.billing_address.last_name }}
+        <span
+            v-if="order.repeat_customer"
+            class="text-green-500 tex-sm"
+            title="Repeat customer"
+        >
+            (Repeat)
+        </span>
+    </div>
+    <div class="flex gap-1 items-center">
+        📅 {{ order.date_created }}
+    </div>
+    <div class="flex gap-1 items-center">
+        📞 {{ order.billing_address.phone }}
+    </div>
+    <div
+        class="flex gap-1 items-center"
+        :title="`${order.billing_address.address_1}, ${order.billing_address.address_2}`"
+    >
+        <p class="max-w-[240px]">
+            🏠 
+            {{ order.billing_address.address_1 }},
+            {{ order.billing_address.address_2 }}
+        </p>
+    </div>
+
+    <div class="flex flex-wrap gap-x-2">
+        <span
+            v-if="order?.ip_block_listed"
+            class="!py-0 !text-[10px] flex items-center text-[#f93926]"
+        >
+            <Icon
+                name="PhCellTower"
+                size="12"
+            />
+            Ip blocked
+        </span>
+        <span
+            v-if="order?.phone_block_listed"
+            class="!py-0 !text-[10px] flex items-center text-[#e82661]"
+        >
+            <Icon
+                name="PhSimCard"
+                size="12"
+            />
+            Phone blocked
+        </span>
+        <span
+            v-if="order?.email_block_listed"
+            class="!py-0 !text-[10px] flex items-center text-[#444444]"
+        >
+            <Icon
+                name="PhSimCard"
+                size="12"
+            />
+            Email blocked
+        </span>
+    </div>
+</template>
+
+<script setup lang="ts">
+    import { Icon } from '@components'
+    import { baseUrl } from '@/api'
+
+    defineProps({
+        order: Object
+    })
+</script>

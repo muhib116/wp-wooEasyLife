@@ -101,7 +101,6 @@
             <BlackListData
                 :order="order"
             />
-
             <div class="flex gap-2 items-center mt-2">
                 <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">
                     {{ order.status=='processing' ? 'New Order' : order?.status?.replace(/-/g, ' ') }}
@@ -182,12 +181,18 @@
         />
     </Modal>
     <!-- customer notes end -->
-
+    <Transition name="slide">
+        <OrderDetailsForMobile
+            v-if="showOrderDetailsPopup"
+            @close="showOrderDetailsPopup = false"
+            :order="order"
+        />
+    </Transition>
 </template>
 
 <script setup lang="ts">
-    import { Table, Icon, Loader, Modal } from '@components'
-    import { computed, inject, ref } from 'vue'
+    import { Table, Icon, Modal } from '@components'
+    import { inject, ref } from 'vue'
     import Address from '../address/Index.vue'
     import { baseUrl } from '@/api'
     import FraudHistory from '../FraudHistory.vue'
@@ -195,6 +200,7 @@
     import Notes from '../notes/Index.vue'
     import BlackListData from './BlackListData.vue'
     import { useTableRowForMobile } from './useTableRowForMobile'
+    import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
 
     defineProps<{
         order: {
@@ -235,13 +241,33 @@
     const toggleMultiOrderModel = ref(false)
     const toggleNotesModel = ref(false)
 
-    
-
     const {
         tapTimer,
-        showPopup,
+        showOrderDetailsPopup,
         startLongPress,
         cancelLongPress,
         closePopup,
     } = useTableRowForMobile()
 </script>
+
+<style>
+.slide-enter-active, .slide-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-enter-from {
+  transform: translateY(100%);
+}
+
+.slide-enter-to {
+  transform: translateY(0);
+}
+
+.slide-leave-from {
+  transform: translateY(0);
+}
+
+.slide-leave-to {
+  transform: translateY(100%);
+}
+</style>

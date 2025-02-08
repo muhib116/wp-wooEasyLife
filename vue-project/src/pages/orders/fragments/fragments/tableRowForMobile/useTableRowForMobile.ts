@@ -2,25 +2,28 @@ import { ref } from 'vue';
 
 export const useTableRowForMobile = () => {
     let tapTimer = null
-    const showPopup = ref(false)
+    const showOrderDetailsPopup = ref(true)
 
-    const startLongPress = () => {
-    tapTimer = setTimeout(() => {
-        showPopup.value = true
-    }, 2000)
+    const startLongPress = (e) => 
+    {
+        e.preventDefault()
+        tapTimer = setTimeout(() => {
+            showOrderDetailsPopup.value = true
+            console.log('hidden')
+        }, 400)
     }
 
     const cancelLongPress = () => {
-    clearTimeout(tapTimer)
+        clearTimeout(tapTimer)
     }
 
     const closePopup = () => {
-    showPopup.value = false
+        showOrderDetailsPopup.value = false
     }
 
     return {
         tapTimer,
-        showPopup,
+        showOrderDetailsPopup,
         startLongPress,
         cancelLongPress,
         closePopup,
