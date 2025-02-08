@@ -1,4 +1,4 @@
-import { getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
+import { createOrder, getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
 import { showNotification } from "@/helper"
 import { computed, onMounted, ref } from "vue"
 
@@ -69,6 +69,7 @@ export const useMissingOrder = () => {
                 ...item,
                 status: selectedStatus
             }
+            await createOrderFromAbandonedData(item)
             const { message, status } = await updateAbandonedOrderStatus(item.id, payload)
             showNotification({
                 type: 'success',
@@ -89,7 +90,10 @@ export const useMissingOrder = () => {
 
     const handleFilter = (item) => {
         selectedOption.value = item
-        // loadAbandonedOrder()
+    }
+
+    const createOrderFromAbandonedData = () => {
+        
     }
 
     const loadAbandonedOrder = async (date?: {start_date: string, end_date: string}) => {
