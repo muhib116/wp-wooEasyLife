@@ -447,11 +447,6 @@ class BlockListAPI extends WP_REST_Controller {
             [
                 'type'       => 'object',
                 'properties' => [
-                    'customer_id' => [
-                        'required'    => true,
-                        'type'        => 'string',
-                        'description' => 'Type of entry to block.',
-                    ],
                     'type' => [
                         'required'    => true,
                         'type'        => 'string',

@@ -90,8 +90,7 @@ class OrderListAPI
 
         register_rest_route(
             __API_NAMESPACE, 
-            '/update-
-            -data',
+            '/update-courier-data',
             [
                 'methods'  => 'POST',
                 'callback' => [$this, 'update_courier_data'], // Ensure this function exists and is callable

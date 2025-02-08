@@ -191,7 +191,6 @@ export const useOrders = () => {
       type: "phone_number";
       ip_phone_or_email: string;
     }[] = [...selectedOrders.value].map((item) => ({
-      customer_id: item?.customer_custom_data?.id,
       type: "phone_number",
       ip_phone_or_email: item?.billing_address?.phone,
     }));
@@ -216,7 +215,6 @@ export const useOrders = () => {
       type: "email";
       ip_phone_or_email: string;
     }[] = [...selectedOrders.value].map((item) => ({
-      customer_id: item?.customer_custom_data?.id,
       type: "email",
       ip_phone_or_email: item?.billing_address?.email,
     }));
@@ -241,7 +239,6 @@ export const useOrders = () => {
       type: "ip";
       ip_phone_or_email: string;
     }[] = [...selectedOrders.value].map((item) => ({
-      customer_id: item?.customer_custom_data?.id,
       type: "ip",
       ip_phone_or_email: item?.customer_ip,
     }));

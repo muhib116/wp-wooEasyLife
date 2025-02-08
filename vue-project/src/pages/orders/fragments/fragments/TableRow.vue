@@ -148,7 +148,7 @@
                     class="text-red-500"
                 >
                     🚨 CFS: 
-                    {{order?.customer_custom_data?.fraud_score || 0}}%
+                    {{order?.customer_custom_data?.fraud_score?.toFixed(0) || 0}}%
                 </span>
             </div>
             <div v-else class="text-red-400 text-center">
