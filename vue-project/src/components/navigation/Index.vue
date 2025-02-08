@@ -12,7 +12,7 @@
 
 
         <Button.Native 
-          class="aspect-squire border border-gray-400 rounded size-7 outline-none grid place-content-center self-center"
+          class="aspect-squire border border-gray-400 rounded size-7 outline-none grid lg:hidden place-content-center self-center"
           v-click-outside="() => {
             toggleLeftMenu = false
           }"

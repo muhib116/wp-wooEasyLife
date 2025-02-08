@@ -1,7 +1,9 @@
 <template>
     <ul
-      v-if="toggleLeftMenu" 
       class="responsive_menu lg:flex lg:ml-6 lg:space-x-5 [&>li]:mb-0 [&>li]:flex"
+      :class="{
+        '!hidden': !toggleLeftMenu
+      }"
     >
         <template v-for="(item, index) in menus" :key="index">
           <li v-if="item.visible">

@@ -1,6 +1,6 @@
 <template>
-    <div class="flex justify-between px-4 mt-2 mb-2">
-        <div class="flex gap-4">
+    <div class="flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between px-4 mt-2 mb-4 md:mb-2">
+        <div class="sm:flex gap-4">
             <slot name="beforeSearch"></slot>
             <!-- Search Input -->
             <div 
@@ -25,9 +25,9 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="flex items-center space-x-2 text-sm justify-end">
+        <div class="flex flex-wrap md:flex-nowrap gap-2 items-center sm:gap-3 text-sm justify-end">
             <!-- Per Page Input -->
-            <div class="flex items-center gap-2">
+            <div class="hidden md:flex items-center gap-2">
                 <span>Per page</span>
                 <Input.Native
                     type="number"
@@ -79,30 +79,22 @@
 
 <script setup lang="ts">
 import { Input, Button, Icon } from '@components'
-import { computed, inject, ref } from 'vue'
+import { computed, inject } from 'vue'
 
 defineProps<{
     hideSearch?: boolean
 }>()
 
 // Inject dependencies
-const { totalRecords, orderFilter, getOrders } = inject('useOrders')
+const { 
+    totalRecords, 
+    orderFilter,
+    getOrders,
+    totalPages,
+    debouncedGetOrders,
+    currentPage,
+} = inject('useOrders')
 
-// Debounce handler for getting orders
-let timeoutId: any;
-const debouncedGetOrders = () => {
-    orderFilter.value.page = orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(getOrders, 500)
-}
-
-// Pagination logic
-const currentPage = computed(() =>
-    orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
-)
-const totalPages = computed(() =>
-    orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
-)
 const isFirstPage = computed(() => orderFilter.value.page <= 1)
 const isLastPage = computed(() => orderFilter.value.page >= totalPages.value)
 

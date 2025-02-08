@@ -122,8 +122,16 @@
     border-color: inherit !important;
   }
 }
-
 /* wordpress default style overwrite end */
+
+
+@media all and (max-width: 1024px) {
+  .toplevel_page_woo-easy-life.folded :is(#wpcontent, #wpfooter) {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+}
+
 
 @media print {
   #adminmenuwrap,

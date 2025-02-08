@@ -6,12 +6,9 @@
         <Container
             v-else
         >
-            <div class="flex gap-6 w-full items-start">
-                <Card.Native class="flex-1 !px-0">
-                    <OrderList />
-                </Card.Native>
-                <!-- <ActionMenu /> -->
-            </div>
+            <Card.Native class="flex-1 !px-0">
+                <OrderList />
+            </Card.Native>
         </Container>
     </Layout>
 </template>
@@ -21,7 +18,6 @@
     import { useOrders } from './useOrders'
     import { provide } from 'vue'
     import OrderList from './fragments/OrderList.vue'
-    import ActionMenu from './fragments/ActionMenu.vue'
     import PrintInvoice from './fragments/fragments/PrintInvoice.vue'
 
     const _useOrders = useOrders()

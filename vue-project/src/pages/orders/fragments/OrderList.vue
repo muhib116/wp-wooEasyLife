@@ -4,12 +4,6 @@
             class="absolute top-[30vh] left-1/2 -translate-x-1/2 z-30"
             :active="isLoading"
         />
-        <MessageBox
-            v-if="alertMessage?.title"
-            :title="alertMessage.title"
-            :type="alertMessage.type"
-            class="mx-4"
-        />
 
         <OrderDetails v-if="activeOrder" />
         <div v-else>
@@ -20,27 +14,13 @@
             <TableFilter />
             <TableHeaderAction />
 
-            <Pagination>
+            <Pagination class="">
                 <template #beforeSearch>
-                    <div class="flex gap-1">
-                        <Select.Primary
-                            inputClass="py-1 px-3 pr-3 rounded-sm block w-full bg-transparent border border-secondary-five"
-                            defaultOption="Select Status"
-                            :options="wooCommerceStatuses"
-                            itemKey="slug"
-                            v-model="selectedStatus"
-                        />
-                        <Button.Primary 
-                            class="!py-1"
-                            @onClick="handleStatusChange"    
-                        >
-                            Apply
-                        </Button.Primary>
-                    </div>
+                    <StatusChangeDropdown />
                 </template>
             </Pagination>
 
-            <div class="min-h-[300px]">
+            <div class="min-h-[300px] overflow-auto w-full">
                 <Table.Table v-if="orders?.length">
                     <TableHeader />
                     <Table.TBody>
@@ -76,14 +56,11 @@
     import TableFilter from './fragments/TableFilter.vue'
     import OrderDetails from './OrderDetails.vue'
     import Pagination from './fragments/Pagination.vue'
+    import StatusChangeDropdown from './fragments/StatusChangeDropdown.vue'
 
     const {
         activeOrder,
         orders,
-        isLoading,
-        alertMessage,
-        selectedStatus,
-        wooCommerceStatuses,
-        handleStatusChange
+        isLoading
     } = inject('useOrders')
 </script>

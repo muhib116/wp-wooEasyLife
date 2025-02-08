@@ -483,7 +483,7 @@ function get_order_source($order) {
 
     // Check if the order is valid
     if (!$order) {
-        return 'No source found'; // Return a default message if the order is invalid
+        return ''; // Return a default message if the order is invalid
     }
 
     // Safely retrieve the source data from the custom meta key
@@ -493,7 +493,7 @@ function get_order_source($order) {
     if (!empty($source)) {
         return $source; // Return the source if it exists
     } else {
-        return 'No source found'; // Fallback message if the source is not set
+        return ''; // Fallback message if the source is not set
     }
 }
 

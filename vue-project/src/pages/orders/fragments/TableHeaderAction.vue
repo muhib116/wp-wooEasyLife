@@ -1,10 +1,11 @@
 <template>
     <div v-bind="$attrs" class="flex justify-between text-[10px] px-4 my-4">
         <div 
-            class="flex flex-wrap gap-3 items-center relative"
+            class="flex justify-center md:justify-start flex-wrap gap-1 sm:gap-3 items-center relative"
             v-click-outside="() => toggleCourierDropdown = false"
         >
             <span 
+                v-if="[...selectedOrders].length"
                 class="size-6 shadow -mr-2 flex items-center justify-center text-[10px] aspect-square rounded-full bg-orange-500 text-white "
             >
                 {{ [...selectedOrders].length }}

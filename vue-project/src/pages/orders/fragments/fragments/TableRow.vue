@@ -16,7 +16,7 @@
         </Table.Td>
         <Table.Td >
             <div
-                class="flex gap-2"
+                class="flex flex-wrap items-start gap-2 relative"
             >
                 <span 
                     class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
@@ -25,14 +25,14 @@
                     #{{ order.id }}
                 </span>
                 <span 
+                    v-if="order.order_source "
                     class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
                     title="Order source"
                 >
                     {{ order.order_source }}
-                    <!-- {{ order.created_via.replace('-', ' ') }} -->
                 </span>
                 <a 
-                    class="text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"
+                    class="absolute top-0 right-0 text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"
                     :href="`${baseUrl}/wp-admin/post.php?post=${order.id}&action=edit`"
                     target="_blank"
                 >

@@ -1,4 +1,4 @@
-import { inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import {
   changeStatus,
   getOrderList,
@@ -11,7 +11,7 @@ import {
   includeMissingNewOrdersOfFailedBalanceCut
 } from "@/api";
 import { manageCourier } from "./useHandleCourierEntry";
-import { normalizePhoneNumber } from "@/helper";
+import { normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
 import { isEmpty } from "lodash";
 
@@ -27,10 +27,6 @@ export const useOrders = () => {
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
-  const alertMessage = ref<{
-    title: string;
-    type: "" | "success" | "danger" | "warning" | "info";
-  }>();
   const { userData, loadUserData } = inject('useServiceProvider')
   const courierStatusInfo = {
     pending: "Consignment is not delivered or cancelled yet.",
@@ -289,28 +285,21 @@ export const useOrders = () => {
       btn.isLoading = true;
       await manageCourier(selectedOrders, courierPartner, async () => {
         await getOrders();
-        alertMessage.value = {
+        showNotification({
           type: "success",
-          title:
-            "Your order information has been submitted to the courier platform.",
-        };
+          message: "Your order information has been submitted to the courier platform.",
+        })
       });
     } catch ({ response }) {
       const { status, message } = response?.data;
       if (!status) {
-        alertMessage.value = {
+        showNotification({
           type: "warning",
-          title: message,
-        };
+          message: message,
+        })
       }
     } finally {
       btn.isLoading = false;
-      setTimeout(() => {
-        alertMessage.value = {
-          type: "info",
-          title: "",
-        };
-      }, 6000);
     }
   };
 
@@ -330,10 +319,10 @@ export const useOrders = () => {
       };
 
       if(!consignment_ids?.length) {
-        alertMessage.value = {
+        showNotification({
           type: "warning",
-          title: "There is no data available to refresh."
-        }
+          message: "There is no data available to refresh."
+        })
         return
       }
 
@@ -359,19 +348,12 @@ export const useOrders = () => {
         }
       })
 
-      alertMessage.value = {
+      showNotification({
         type: "success",
-        title: "Courier data refresh done."
-      }
+        message: "Courier data refresh done."
+      })
     } finally {
       btn.isLoading = false;
-
-      setTimeout(() => {
-        alertMessage.value = {
-          title: "",
-          type: "",
-        };
-      }, 5000);
     }
   };
 
@@ -411,16 +393,34 @@ export const useOrders = () => {
     };
 
     return statuses[courier_status];
-  };
+  }
+
+  let timeoutId: any;
+  const totalPages = computed(() =>
+      orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
+  )
+  const debouncedGetOrders = (btn) => {
+    orderFilter.value.page = orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(async () => {
+      btn.isLoading = true
+      await getOrders()
+      btn.isLoading = false
+    }, 500)
+  }
+  // Pagination logic
+  const currentPage = computed(() =>
+    orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
+  )
 
   const include_past_new_orders_thats_not_handled_by_wel_plugin = async (totalNewOrders: number, btn: { isLoading: boolean }) => 
   {
     let alertMsg = `Are you sure you want to include your past new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
     if(!confirm(alertMsg)) return
     if(totalNewOrders > userData.value.remaining_order) {
-      alertMessage.value = {
+      showNotification({
         type: 'info',
-        title: `
+        message: `
           <h3 class="text-lg">You don’t have enough balance to complete this action.</h3>
 
           <p>Your current balance is <strong>${userData.value.remaining_order}</strong>, your minimum balance should <strong>${totalNewOrders}</strong>.</p>
@@ -432,19 +432,17 @@ export const useOrders = () => {
           </p>
 
         `
-      }
-
+      })
       return;
     }
 
     try {
       btn.isLoading = true;
       const data = await includePastNewOrdersToWELPlugin();
-      
-      alertMessage.value = {
+      showNotification({
         type: 'success',
-        title: data.message,
-      }
+        message: data.message,
+      })
       
       await loadUserData();
       loadOrderStatusList();
@@ -453,20 +451,13 @@ export const useOrders = () => {
     } catch (err) {
       console.error("Error including past new orders:", err);
       
-      alertMessage.value = {
+      showNotification({
         type: 'danger',
-        title: "Failed to update orders. Please try again.",
-      }
+        message: "Failed to update orders. Please try again.",
+      }) 
     } 
     finally {
       btn.isLoading = false;
-  
-      setTimeout(() => {
-        alertMessage.value = {
-          title: "",
-          type: "",
-        };
-      }, 5000);
     }
   }
 
@@ -475,9 +466,9 @@ export const useOrders = () => {
     let alertMsg = `Are you sure you want to include your missing new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
     if(!confirm(alertMsg)) return
     if(totalNewOrders > userData.value.remaining_order) {
-      alertMessage.value = {
+      showNotification({
         type: 'info',
-        title: `
+        message: `
           <h3 class="text-lg">You don’t have enough balance to complete this action.</h3>
 
           <p>Your current balance is <strong>${userData.value.remaining_order}</strong>, your minimum balance should <strong>${totalNewOrders}</strong>.</p>
@@ -489,8 +480,7 @@ export const useOrders = () => {
           </p>
 
         `
-      }
-
+      })
       return;
     }
 
@@ -498,10 +488,10 @@ export const useOrders = () => {
       btn.isLoading = true;
       const data = await includeMissingNewOrdersOfFailedBalanceCut();
       
-      alertMessage.value = {
+      showNotification({
         type: 'success',
-        title: data.message,
-      }
+        message: data.message,
+      })
       
       await loadUserData();
       loadOrderStatusList();
@@ -510,20 +500,13 @@ export const useOrders = () => {
     } catch (err) {
       console.error("Error including missing new orders:", err);
       
-      alertMessage.value = {
+      showNotification({
         type: 'danger',
-        title: "Failed to update orders. Please try again.",
-      }
+        message: "Failed to update orders. Please try again.",
+      })
     } 
     finally {
       btn.isLoading = false;
-  
-      setTimeout(() => {
-        alertMessage.value = {
-          title: "",
-          type: "",
-        };
-      }, 5000);
     }
   }
 
@@ -551,13 +534,15 @@ export const useOrders = () => {
     orderFilter,
     showInvoices,
     totalRecords,
-    alertMessage,
     toggleNewOrder,
     selectedStatus,
     selectedOrders,
     courierStatusInfo,
     wooCommerceStatuses,
     orderStatusWithCounts,
+    totalPages,
+    currentPage,
+    debouncedGetOrders,
     getOrders,
     handleIPBlock,
     setActiveOrder,
