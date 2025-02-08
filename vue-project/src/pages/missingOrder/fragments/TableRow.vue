@@ -89,12 +89,12 @@
       <div class="grid gap-3">
         <Select.Primary
           :options="options"
-          v-model="item.status"
+          v-model="selectedStatus"
         />
 
         <Button.Primary
           class="!bg-green-500"
-          @onClick="(btn) => updateStatus(item, btn)"
+          @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
         >
           <Icon
             name="PhUserCheck"
@@ -120,13 +120,15 @@
 <script setup lang="ts">
 import { printDate } from "@/helper";
 import { Table, Button, Modal, Icon, Select } from "@components";
-import { inject, ref } from "vue";
+import { inject, onMounted, ref } from "vue";
 import CartDetails from "./CartDetails.vue";
 
-defineProps<{
+const props = defineProps<{
   item: object;
 }>();
 
 const toggleModal = ref(false);
+const selectedStatus = ref(props.item.status)
 const { updateStatus, options, selectedOption } = inject("useMissingOrder");
+
 </script>

@@ -23,7 +23,7 @@ export const useMissingOrder = () => {
         },
         {
           title: 'Delete',
-          id: 'delete',
+          id: 'canceled',
           color: '#e82661'
         }
     ])
@@ -48,11 +48,11 @@ export const useMissingOrder = () => {
         }
 
         abandonOrders.value.forEach(item => {
-            if(item.status == 'recovered'){
+            if(item.status == 'confirmed'){
                 data.totalRecoveredOrder += 1
                 data.recoveredAmount +=  +item.total_value
-            }
-            if(item.status == 'abandoned'){
+                return
+            }else {
                 data.totalAbandonedOrder += 1
                 data.loosedAmount +=  +item.total_value
             }
@@ -61,11 +61,15 @@ export const useMissingOrder = () => {
         return data
     })
 
-    const updateStatus = async (item, btn) => {
+    const updateStatus = async (item, selectedStatus: string, btn) => {
         try {
             isLoading.value = true
             btn.isLoading = true
-            const { message, status } = await updateAbandonedOrderStatus(item.id, item)
+            const payload = {
+                ...item,
+                status: selectedStatus
+            }
+            const { message, status } = await updateAbandonedOrderStatus(item.id, payload)
             showNotification({
                 type: 'success',
                 message: message
