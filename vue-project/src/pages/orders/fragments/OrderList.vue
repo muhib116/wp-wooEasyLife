@@ -42,13 +42,6 @@
                                 </label>
                             </Table.Th>
                             <Table.Th>Customer Info</Table.Th>
-                            <!-- <Table.Th>Consumer Behavior</Table.Th>
-                            <Table.Th>Delivery History</Table.Th>
-                            <Table.Th>Delivery Partner</Table.Th>
-                            <Table.Th>Shipping</Table.Th>
-                            <Table.Th>Payment</Table.Th>
-                            <Table.Th>Status</Table.Th>
-                            <Table.Th class="text-center">Action</Table.Th> -->
                         </Table.THead>
                         <Table.TBody>
                             <TableRowForMobile
@@ -68,8 +61,14 @@
                 class="mx-4"
             />
 
-            <TableHeaderAction />
-            <Pagination />
+            <div class="px-4 hidden md:flex justify-between gap-4 mt-4">
+                <SearchBox />
+                <Pagination />
+            </div>
+            
+            <TableHeaderAction 
+                class="hidden md:flex"
+            />
         </div>
     </div>
 </template>
@@ -85,10 +84,13 @@
     import Pagination from './fragments/Pagination.vue'
     import TableHeaderForDesktop from './tableHeader/Desktop.vue'
     import TableHeaderForMobile from './tableHeader/Mobile.vue'
+    import SearchBox from '@/pages/orders/fragments/fragments/SearchBox.vue'
 
     const {
         activeOrder,
         orders,
-        isLoading
+        isLoading,
+        selectAll,
+        toggleSelectAll
     } = inject('useOrders')
 </script>

@@ -5,7 +5,7 @@
     >
         <Navigation 
             class="sticky z-50 print:hidden"
-            :class="isDevelopmentMode ? 'top-0' : 'top-8'"
+            :class="isDevelopmentMode ? 'top-0' : 'md:top-8'"
         />
         <main class="print:mt-0 mt-6">
             <slot></slot>

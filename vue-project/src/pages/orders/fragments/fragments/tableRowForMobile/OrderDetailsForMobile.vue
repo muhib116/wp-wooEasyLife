@@ -1,5 +1,5 @@
 <template>
-    <div class="p-3 bg-white h-[100vh] overflow-auto fixed z-50 w-full left-0 bottom-0">
+    <div class="p-6 bg-white h-[100vh] overflow-auto fixed z-50 w-full left-0 bottom-0">
         <div class="flex justify-between items-center font-bold border-b pb-2 mb-2">
             <h2 class="text-lg">Order details</h2>
             <button
@@ -12,55 +12,83 @@
             </button>
         </div>
 
-        <div>
+        <div class="grid">
             <div>
-                <h3>Customer Information</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Customer Information
+                </h3>
                 <CustomerInfo
                     :order="order"
+                    class="!text-[14px] grid gap-2"
                 />
             </div>
+            <hr  class="my-4"/>
             <div>
-                <h3>Customer Behavior</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Customer Behavior
+                </h3>
                 <CustomerBehavior
                     :order="order"
+                    textFullFormate
+                    class="gap-1"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Delivery History</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Delivery History
+                </h3>
                 <DeliveryHistory
                     :order="order"
+                    textFullFormate
+                    class="grid gap-1"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Delivery Partner</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Delivery Partner
+                </h3>
                 
                 <DeliveryPartner
                     :order="order"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Shipping info</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Shipping info
+                </h3>
                 
                 <Shipping
                     :order="order"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Payment</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Payment
+                </h3>
                 
                 <Payment
                     :order="order"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Status</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Status
+                </h3>
                 
                 <Status
                     :order="order"
                 />
             </div>
+            <hr class="my-4" />
             <div>
-                <h3>Action</h3>
+                <h3 class="text-lg font-semibold mb-2">
+                    Action
+                </h3>
                 
                 <Action
                     :order="order"

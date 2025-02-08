@@ -2,33 +2,46 @@
     <div 
         v-if="order?.customer_report"
         class="group whitespace-nowrap"
+        v-bind="$attrs"
     >
         <div 
             class="flex gap-2"
             title="Total order"
         >
-            📦 Total: 
+            <span v-if="textFullFormate">
+                📦 Total order: 
+            </span>
+            <span v-else>📦 Total: </span>
             <strong>{{ order.customer_report?.total_order || 0 }}</strong>
         </div>
         <div 
             class="flex gap-2 text-green-600"
             title="Confirmed order"
         >
-            🎉 Confirmed: 
+            <span v-if="textFullFormate">
+                🎉 Confirmed order: 
+            </span>
+            <span v-else>🎉 Confirmed: </span>
             <strong>{{ order.customer_report?.confirmed || 0 }}</strong>
         </div>
         <div 
             class="flex gap-2 text-red-600"
             title="Canceled order"
         >
-            ❌ Canceled: 
+            <span v-if="textFullFormate">
+                ❌ Canceled order: 
+            </span>
+            <span v-else>❌ Canceled: </span>
             <strong>{{ (order.customer_report?.total_order - order.customer_report?.confirmed) || 0 }}</strong>
         </div>
         <div 
             class="flex gap-2 flex-wrap text-sky-600"
             title="Success Rate"
         >
-            ✅ Rate:
+            <span v-if="textFullFormate">
+                ✅ Success Rate:
+            </span>
+            <span v-else>✅ Rate:</span>
             <span
                 v-if="order.customer_report?.success_rate == 'No order history found!'"
                 class="truncate block"
@@ -40,7 +53,7 @@
             </strong>
         </div>
         <button
-            class="md:opacity-0 group-hover:opacity-100 text-white bg-orange-500 shadow mt-1 rounded-sm px-2"
+            class="mt-2 md:mt-0 md:opacity-0 group-hover:opacity-100 text-white bg-orange-500 shadow mt-1 rounded-sm px-2"
             @click="toggleFraudHistoryModel=true"
         >
             View Details
@@ -74,7 +87,12 @@
     import { ref } from 'vue'
 
     defineProps({
-        order: Object
+        order: Object,
+        textFullFormate: Boolean
+    })
+
+    defineOptions({
+        inheritAttrs: false
     })
 
     const toggleFraudHistoryModel = ref(false)

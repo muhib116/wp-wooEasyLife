@@ -6,6 +6,8 @@
         @touchstart="startLongPress" 
         @touchend="cancelLongPress" 
         @touchcancel="cancelLongPress"
+        @touchmove="onTouchMove"
+        @contextmenu.prevent
     >
         <Table.Td
             @click="setSelectedOrder(order)"  
@@ -242,11 +244,10 @@
     const toggleNotesModel = ref(false)
 
     const {
-        tapTimer,
         showOrderDetailsPopup,
         startLongPress,
         cancelLongPress,
-        closePopup,
+        onTouchMove
     } = useTableRowForMobile()
 </script>
 

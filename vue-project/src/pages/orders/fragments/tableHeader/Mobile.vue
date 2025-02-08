@@ -6,13 +6,13 @@
             toggleFilter = false
         }"
     >
-        <div class="flex justify-between items-center px-4 relative mb-8">
+        <div class="flex justify-between items-center px-4 relative mb-4">
             <Button.Native
                 @click="toggleFilter = true"
             >
                 <Icon
                     name="PhFunnelSimple"
-                    size="25"
+                    size="20"
                     weight="bold"
                 />
             </Button.Native>
@@ -21,7 +21,7 @@
             >
                 <Icon
                     name="PhMagnifyingGlass"
-                    size="25"
+                    size="20"
                     weight="bold"
                 />
             </Button.Native>
@@ -40,8 +40,6 @@
             v-if="toggleFilter"
             @close="toggleFilter = false"
         />
-        
-
 
         <div class="px-4 flex items-center gap-2 mb-3">
             <StatusChangeDropdown />

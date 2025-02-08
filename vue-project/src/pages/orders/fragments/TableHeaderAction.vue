@@ -1,7 +1,7 @@
 <template>
     <div v-bind="$attrs" class="flex justify-between text-[10px] px-4 my-4">
         <div 
-            class="flex justify-center md:justify-start flex-wrap gap-3 items-center relative"
+            class="flex justify-center md:justify-start flex-wrap gap-2 items-center relative"
             v-click-outside="() => toggleCourierDropdown = false"
         >
             <span 
