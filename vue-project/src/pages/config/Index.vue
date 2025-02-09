@@ -2,7 +2,7 @@
     <Layout>
         <Container>
             <Card.Native class="p-0 shadow-none bg-transparent lg:bg-white lg:shadow-md lg:p-6">
-                <div class="px-4 py-2 lg:py-0 lg:px-0 border-b pb-3 flex gap-3 items-center">
+                <div class="py-2 mb-4 md:mb-0 lg:py-0 lg:px-0 border-b pb-3 flex gap-3 items-center">
                     <Button.Native 
                         class="aspect-squire border border-gray-400 rounded size-7 outline-none grid lg:hidden place-content-center self-center"
                         @onClick="toggleLeftSidebar = !toggleLeftSidebar"

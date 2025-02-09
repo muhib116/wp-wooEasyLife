@@ -53,7 +53,7 @@
             </strong>
         </div>
         <button
-            class="mt-2 md:mt-0 md:opacity-0 group-hover:opacity-100 text-white bg-orange-500 shadow mt-1 rounded-sm px-2"
+            class="md:mt-0 md:opacity-0 group-hover:opacity-100 text-white bg-orange-500 shadow mt-1 rounded-sm px-2 py-1"
             @click="toggleFraudHistoryModel=true"
         >
             View Details

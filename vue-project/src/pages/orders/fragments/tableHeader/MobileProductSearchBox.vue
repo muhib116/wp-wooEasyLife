@@ -7,7 +7,7 @@
         >
             <Icon
                 name="PhX"
-                size="25"
+                size="20"
                 weight="bold"
             />
         </Button.Native>

@@ -8,7 +8,7 @@
             :type="alertMessage.type"
         />
         <div class="mb-2">
-            <h3 class="text-xl font-semibold text-gray-900">Message list</h3>
+            <h3 class="font-semibold text-gray-900">Message list</h3>
         </div>
         <Table.Table>
             <Table.THead class="whitespace-nowrap">

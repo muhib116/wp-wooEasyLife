@@ -1,5 +1,5 @@
 <template>
-    <Card.Native class="relative min-h-[200px] !py-10">
+    <Card.Native class="relative min-h-[200px] !py-10 px-0 md:px-6 shadow-none md:shadow-md">
         <LicenseAlert />
 
         <Heading
@@ -37,7 +37,7 @@
         </div>
         
         <hr class="mt-10 mb-6" />
-        <div class="space-y-1 flex flex-col md:flex-row justify-center gap-6 -mb-2 md:text-lg">
+        <div class="flex flex-col md:flex-row justify-center gap-3 md:gap-6 -mb-2 md:text-lg">
             <a
                 class="flex items-center gap-3"
                 href="tel:+8801789909958"

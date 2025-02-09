@@ -1,5 +1,5 @@
 <template>
-    <Card.Native class="min-h-[200px]">
+    <Card.Native class="min-h-[200px] px-0 md:px-6 shadow-none md:shadow-md">
         <MessageBox
             class="!fixed top-10 right-4 z-50"
             :title="alertMessage.message"

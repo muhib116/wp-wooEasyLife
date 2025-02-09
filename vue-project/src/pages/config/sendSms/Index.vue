@@ -11,7 +11,7 @@
             @onTabChange="tabChange"
         />
         <Card.Native
-            class="min-h-[200px] h-full w-full p-4 rounded-t-none py-10"
+            class="min-h-[200px] h-full w-full px-0 md:p-4 rounded-t-none md:py-10 shadow-none md:shadow-md"
         >
             <component
                 :is="components[activeTab]"

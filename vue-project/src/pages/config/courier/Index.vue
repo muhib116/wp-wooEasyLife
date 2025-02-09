@@ -12,7 +12,7 @@
         />
         <Card.Native
             v-if="courierCompanyNames.length"
-            class="bg-white h-full w-full p-4 rounded-t-none"
+            class="bg-white h-full w-full p-4 rounded-t-none px-0 md:px-6 shadow-none md:shadow-md"
         >
             <Form />
         </Card.Native>

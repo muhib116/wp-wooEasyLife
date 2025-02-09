@@ -1,5 +1,5 @@
 <template>
-    <Card.Native>
+    <Card.Native class="px-0 md:px-6 shadow-none md:shadow-md">
         <div class="min-h-[400px] grid place-content-center text-center">
             <h1 class="font-bold text-lg mb-2">
                 Marketing Tools: Coming soon! 🎉

@@ -1,5 +1,5 @@
 <template>
-    <Card.Native class="relative min-h-[200px]">
+    <Card.Native class="relative min-h-[200px] px-0 md:px-6 shadow-none md:shadow-md">
         <Loader
             :active="isLoading"
             class="absolute inset-x-1/2 top-[15px] -translate-x-1/2 z-20"
@@ -9,7 +9,7 @@
             :type="alertMessage.type"
         />
         <div class="mb-2">
-            <h3 class="text-xl font-semibold text-gray-900">
+            <h3 class="font-semibold text-gray-900">
                 Blacklisted Customers
             </h3>
         </div>

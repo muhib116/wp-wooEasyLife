@@ -14,6 +14,7 @@
             <Icon
                 name="PhMagnifyingGlass"
                 weight="bold"
+                size="20"
             />
         </Button.Primary>
         <slot name="afterButton"></slot>

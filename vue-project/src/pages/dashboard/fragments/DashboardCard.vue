@@ -1,10 +1,13 @@
 <template>
     <Card.Native>
-        <div v-if="showCustomDateInput" class="w-full text-sm flex flex-col md:flex-row items-end mb-2 gap-3">
-            <div class="flex-1 grid grid-cols-2 gap-3">
+        <div 
+            v-if="showCustomDateInput" 
+            class="w-full text-sm flex flex-col md:flex-row justify-end items-end mb-2 gap-3"
+        >
+            <div class="flex-1 grid grid-cols-2 gap-3 max-w-[500px] w-full">
                 <div class="grid">
                     Start date
-                    <label class="font-light border px-3 py-1 rounded-sm">
+                    <label class="font-light border px-3 rounded-sm">
                         <input
                             class="outline-none bg-transparent w-full !border-none focus:outline-none"
                             type="date"
@@ -15,7 +18,7 @@
     
                 <div class="grid">
                     End date
-                    <label class="font-light border px-3 py-1 rounded-sm">
+                    <label class="font-light border px-3 rounded-sm">
                         <input
                             class="outline-none bg-transparent w-full !border-none focus:outline-none"
                             type="date"
@@ -26,7 +29,7 @@
             </div>
 
             <Button.Primary
-                class="ml-auto w-[118px] text-center justify-center !py-[6px]"
+                class="w-[118px] text-center justify-center !py-[6px]"
                 @click="() => {
                     $emit('dateChange', customDates, selectedStatusOption)
                 }"
@@ -53,7 +56,7 @@
                     class="font-light border px-2 py-1 rounded-sm"
                 >
                     <select 
-                        class="outline-none bg-transparent min-[150px] w-full !border-none focus:outline-none"
+                        class="outline-none bg-transparent min-w-[130px] w-full !border-none focus:outline-none"
                         v-model="selectedStatusOption"
                         @change="handleLoadData()"
                     >
@@ -73,7 +76,7 @@
                     class="font-light border px-2 py-1 rounded-sm"
                 >
                     <select 
-                        class="outline-none bg-transparent w-full !border-none focus:outline-none"
+                        class="outline-none bg-transparent min-w-[130px] w-full !border-none focus:outline-none"
                         v-model="selectedFilterOption"
                         @change="handleLoadData()"
                     >

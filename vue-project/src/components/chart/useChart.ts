@@ -17,6 +17,9 @@ export const useChart = () =>
                 toolbar: {
                     show: false, // Hides the toolbar
                 },
+                zoom: {
+                    enabled: false // Disable zooming
+                }
             },
             colors: ['#0ca5e9', '#f97315', '#ABA62B', '#8D8D8D', '#2BAD7E', '#3062BB', '#C51B1B', '#2B80AD'],
             stroke: {

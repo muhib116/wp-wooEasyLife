@@ -1,7 +1,7 @@
 <template>
-    <div class="p-6 bg-white h-[100vh] overflow-auto fixed z-50 w-full left-0 bottom-0">
-        <div class="flex justify-between items-center font-bold border-b pb-2 mb-2">
-            <h2 class="text-lg">Order details</h2>
+    <div class="p-6 bg-white h-[100vh] overflow-auto fixed z-[99999] w-full left-0 bottom-0">
+        <div class="flex justify-between items-center font-bold border-b pb-3 mb-4">
+            <h2 class="text-xl">Order details</h2>
             <button
                 @click="$emit('close')"
             >

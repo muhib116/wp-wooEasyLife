@@ -1,5 +1,5 @@
 <template>
-    <div v-if="data?.length" class="flex justify-center">
+    <div v-if="data?.length" class="flex justify-center border-b">
         <button 
             v-for="(item, index) in data"
             :key="index"
@@ -13,7 +13,7 @@
         >
             <img
                 v-if="courierConfigs[item.slug]?.logo"
-                class="w-[80px]"
+                class="w-[110px]"
                 :src="courierConfigs[item.slug].logo"
             />
             <span v-else>{{ item.title }}</span>

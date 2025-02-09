@@ -1,7 +1,7 @@
 <template>
     <div 
         v-if="form" 
-        class="grid gap-4 max-w-[500px] mx-auto py-10"
+        class="grid gap-4 max-w-[500px] mx-auto md:py-10"
     >
         <Input.Primary
             label="API Key *"

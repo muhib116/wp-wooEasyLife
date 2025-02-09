@@ -1,5 +1,5 @@
 <template>
-    <Card.Native>
+    <Card.Native class="px-0 md:px-6 shadow-none md:shadow-md">
         <MessageBox
             v-if="alertMessage.title.trim()"
             :title="alertMessage.title"
