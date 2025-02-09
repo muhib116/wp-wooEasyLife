@@ -1,6 +1,6 @@
 <template>
     <Card.Native>
-        <div v-if="showCustomDateInput" class="w-full text-sm flex items-end mb-2 gap-3">
+        <div v-if="showCustomDateInput" class="w-full text-sm flex flex-col md:flex-row items-end mb-2 gap-3">
             <div class="flex-1 grid grid-cols-2 gap-3">
                 <div class="grid">
                     Start date
@@ -53,7 +53,7 @@
                     class="font-light border px-2 py-1 rounded-sm"
                 >
                     <select 
-                        class="outline-none bg-transparent w-full !border-none focus:outline-none"
+                        class="outline-none bg-transparent min-[150px] w-full !border-none focus:outline-none"
                         v-model="selectedStatusOption"
                         @change="handleLoadData()"
                     >

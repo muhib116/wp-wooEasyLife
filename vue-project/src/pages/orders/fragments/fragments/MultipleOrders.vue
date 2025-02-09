@@ -95,7 +95,7 @@
             class="relative min-h-[150px]"
         >
             <Loader
-                class="absolute inset-1/2"
+                class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2"
             />
         </div>
     </div>

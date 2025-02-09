@@ -34,7 +34,7 @@
                 title="No records found for the Top Selling Product!"
                 type="info"
             />
-            <Table.Table v-else-if="!isLoading">
+            <Table.Table v-else-if="!isLoading" class="whitespace-nowrap">
                 <Table.THead>
                     <Table.Th>#SL</Table.Th>
                     <Table.Th>Product</Table.Th>

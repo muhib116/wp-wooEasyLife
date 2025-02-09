@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="data && data?.report?.total_order"
-        class="progress-bar h-[15px] mt-2 mb-[25px] bg-red-500 rounded relative text-[10px] flex shadow"
+        class="h-[15px] mt-2 mb-[25px] bg-red-500 rounded relative text-[10px] flex shadow"
     >
         <div class="relative h-full bg-green-500 flex-shrink-0 rounded-sm shadow" :style="{ width: data.report.success_rate }">
             <span title="Success rate." class="progress-tool-tip bg-green-500 text-white border border-gray-200 absolute py-[1px] px-1 rounded-sm top-full mt-1 left-1/2 -translate-x-1/2 shadow">

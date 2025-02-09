@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div class="border-b pb-6 mb-0">
+    <div class="border-b pb-3 mb-3">
         <h3 class="font-bold">
             Name: 
             {{ order.customer_name }}

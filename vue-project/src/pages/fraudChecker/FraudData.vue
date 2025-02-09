@@ -7,7 +7,7 @@
         >
             <h3 
                 v-if="data?.report?.success_rate == '100%'"
-                class="font-bold text-xl mb-4 text-center animate-bounce text-green-600"
+                class="font-bold lg:text-xl mb-4 text-center animate-bounce text-green-600"
             >
                 🎉 The number has no fraud history! ✅
             </h3>

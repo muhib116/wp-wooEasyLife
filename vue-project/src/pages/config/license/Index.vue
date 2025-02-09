@@ -37,7 +37,7 @@
         </div>
         
         <hr class="mt-10 mb-6" />
-        <div class="space-y-1 flex justify-center gap-6 -mb-2 text-lg">
+        <div class="space-y-1 flex flex-col md:flex-row justify-center gap-6 -mb-2 md:text-lg">
             <a
                 class="flex items-center gap-3"
                 href="tel:+8801789909958"
