@@ -133,6 +133,19 @@ class CustomOrderStatusAPI extends WP_REST_Controller
                 display: inline-flex !important;
                 align-items: center !important;
             }
+            tr.status-cancelled {
+                background-color: #DC354522 !important;
+            }
+            .order-status.status-cancelled {
+                background-color:#DC3545 !important;
+                color: ' . get_contrast_color('#DC3545') . ' !important;
+            }
+            .button.order-status.status-cancelled {
+                border-radius: 2px !important;
+                height: 30px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
                 
             tr.status-on-hold {
                 background-color: #976e6e22 !important;

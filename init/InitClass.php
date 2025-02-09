@@ -14,14 +14,6 @@ class InitClass {
                 'color'       => '#444444',
                 'description' => 'Order is being prepared.',
             ],
-            'processing' => [
-                'title'       => 'Processing',
-                'slug'        => 'processing',
-                'is_default'  => true,
-                'not_using'   => false,
-                'color'       => '#FFA500',
-                'description' => 'Order is being prepared.',
-            ],
             'follow-up' => [
                 'title'       => 'Follow Up',
                 'slug'        => 'follow-up',
@@ -46,13 +38,13 @@ class InitClass {
                 'color'       => '#6C757D',
                 'description' => 'Customer call not received.',
             ],
-            'canceled' => [
-                'title'       => 'Canceled',
-                'slug'        => 'canceled',
+            '2nd-call-not-received' => [
+                'title'       => '2nd Call Not Received',
+                'slug'        => '2nd-call-not-received',
                 'is_default'  => true,
                 'not_using'   => false,
-                'color'       => '#DC3545',
-                'description' => 'Order has been canceled.',
+                'color'       => '#f97315',
+                'description' => 'Customer 2nd time call not received.',
             ],
             'fake' => [
                 'title'       => 'Fake Order',
