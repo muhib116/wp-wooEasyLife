@@ -57,7 +57,7 @@
                 <fraudCheckImg
                     class="mx-auto max-w-[300px] mb-10"
                 />
-                <h3 class="animate-bounce">
+                <h3 class="animate-bounce text-[16px]">
                     🫣 Search for fraud using a phone number.
                 </h3>
             </div>

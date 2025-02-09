@@ -1,7 +1,7 @@
 <template>
 
     <h3 class="font-bold m-0 mb-[10px]">Customer Details</h3>
-        <div class="grid gap-x-4 gap-y-2 grid-cols-[auto_1fr] mb-4">
+        <div class="grid gap-x-4 gap-y-2 lg:grid-cols-[auto_1fr] mb-4">
         <h4>
             <span style="font-weight: bold">
                 Name: 
@@ -18,12 +18,12 @@
             </span>
             {{ order.customer_email || 'n/a' }}</h4>
         <h4>
-            <span style="font-weight: bold"> Address: </span> Mymensingh, guail kandi,
-            Mymensingh, guail kandi
+            <span style="font-weight: bold"> Address: </span> 
+            {{ order.billing_address }}
         </h4>
     </div>
 
-    <Table.Table>
+    <Table.Table class="whitespace-nowrap">
         <Table.THead>
             <Table.Th>Image</Table.Th>
             <Table.Th>Product name</Table.Th>

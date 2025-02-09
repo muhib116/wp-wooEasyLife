@@ -36,8 +36,15 @@
       <div class="truncate">
         📅 {{ printDate(item.created_at) }}
       </div>
+      <div class="block lg:hidden">
+        <br />
+        🏠 <span class="font-semibold text-sky-500">Billing address:</span>
+        <br />
+        {{ item.billing_address }}
+      </div>
     </Table.Td>
-    <Table.Td class="space-y-2">
+
+    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
       <div>
         🏠 <span class="font-semibold text-sky-500">Billing address:</span>
         <br />
@@ -50,7 +57,7 @@
         {{ item.shipping_address }}
       </div>
     </Table.Td>
-    <Table.Td class="capitalize">
+    <Table.Td class="capitalize min-w-[160px] text-center lg:text-left space-y-2">
       <span
         :style="{
           color: selectedOption.color
@@ -58,8 +65,14 @@
       >
         {{ item.status }}
       </span>
-    </Table.Td>
-    <Table.Td class="truncate">
+      <Button.Primary
+          class="mt-1"
+          @click="toggleModal=true"
+          icon="PhEye"
+      >
+          Cart Info
+      </Button.Primary>
+
       <div v-if="item.abandoned_at">
         <span class="font-semibold text-red-500">
           Abandoned At: 
@@ -74,33 +87,20 @@
         <br />
         {{ printDate(item.recovered_at) }}
       </div>
+    </Table.Td>
 
-    </Table.Td>
     <Table.Td class="truncate">
-        <Button.Primary
-            class="mx-auto"
-            @click="toggleModal=true"
-            icon="PhEye"
-        >
-            Cart Info
-        </Button.Primary>
-    </Table.Td>
-    <Table.Td class="truncate">
-      <div class="grid gap-3">
+      <div class="grid gap-3 min-w-[135px]">
         <Select.Primary
           :options="options"
           v-model="selectedStatus"
         />
 
         <Button.Primary
-          class="!bg-green-500"
+          class="!bg-green-500 justify-center"
           @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
         >
-          <Icon
-            name="PhUserCheck"
-            weight="bold"
-          />
-          Apply
+          Apply now
         </Button.Primary>
       </div>
     </Table.Td>
