@@ -20,6 +20,7 @@ define('__PREFIX', 'woo_easy_life_');
 define('__API_NAMESPACE', 'wooeasylife/v1');
 define('WEL_PLUGIN_FILE', __FILE__);
 
+$current_version = null;
 // Global variables for license and configuration data.
 global $config_data, $license_key;
 
@@ -44,6 +45,8 @@ if (!class_exists('WooEasyLife')) :
         {
             // Initialize WooCommerce session if available.
             add_action('woocommerce_init', [$this, 'initialize_wc_session']);
+            add_filter('admin_footer_text', [$this, 'custom_modify_admin_footer']);
+            add_filter('update_footer', [$this, 'custom_modify_footer_version'], 9999);
 
             // Load license key and configuration data.
             $this->load_license_key();
@@ -52,6 +55,18 @@ if (!class_exists('WooEasyLife')) :
             // Initialize various components of the plugin.
             $this->initialize_components();
         }
+
+        public function custom_modify_admin_footer() {
+            echo '<span style="color: #f97315; margin-left: 16px">Thank you for using WooEasyLife</span>'; // Change this text
+        }
+
+
+        // Modify the right-side footer version
+        public function custom_modify_footer_version() {
+            global $current_version;
+            return "Version $current_version"; // Change this text
+        }
+
 
         /**
          * Initialize WooCommerce session.
@@ -94,12 +109,16 @@ if (!class_exists('WooEasyLife')) :
          */
         private function initialize_components()
         {
+            global $current_version;
+
             // Initialize core plugin classes.
             new WooEasyLife\Init\BootClass();
-            new WooEasyLife\PluginLifecycleHandle();
             new WooEasyLife\API\API_Register();
             new WooEasyLife\Admin\Admin_Class_Register();
             new WooEasyLife\Frontend\Frontend_Class_Register();
+            $lifeCycleObj = new WooEasyLife\PluginLifecycleHandle();
+
+            $current_version = $lifeCycleObj->get_current_plugin_version();
         }
     }
 

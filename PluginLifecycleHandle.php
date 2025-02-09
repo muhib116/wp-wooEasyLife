@@ -104,7 +104,7 @@ class PluginLifecycleHandle {
      *
      * @return string|null Plugin version
      */
-    private function get_current_plugin_version() {
+    static function get_current_plugin_version() {
         $plugin_file = WEL_PLUGIN_FILE;
 
         if (file_exists($plugin_file)) {

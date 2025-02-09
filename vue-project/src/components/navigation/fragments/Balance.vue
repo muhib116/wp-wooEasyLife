@@ -3,7 +3,7 @@
         <Button.Native
             v-if="isValidLicenseKey"
             :loading="userDataLoading"
-            class="py-[4px] px-2 rounded font-medium text-[12px] text-white"
+            class="py-[4px] px-2 rounded font-medium text-[12px] lg:text-medium text-white"
             :class="{
                 'animate-bounce' : balance <= 5
             }"
