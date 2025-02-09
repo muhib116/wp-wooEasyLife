@@ -1,5 +1,15 @@
 <template>
     <div class="p-6 bg-white h-[100vh] overflow-auto fixed z-[99999] w-full left-0 bottom-0">
+        <button 
+            class="fixed right-4 top-1/2 -translate-y-1/2 size-8 rounded-full grid place-content-center bg-red-500 text-white shadow animate-bounce"
+            @click="$emit('close')"
+        >
+            <Icon
+                name="PhCaretDown"
+                size="20"
+                weight="bold"
+            />
+        </button>
         <div class="flex justify-between items-center font-bold border-b pb-3 mb-4">
             <h2 class="text-xl">Order details</h2>
             <button
