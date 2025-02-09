@@ -140,9 +140,14 @@
     padding-left: 0 !important;
   }
   input[type=checkbox], input[type=radio] {
-    width: 10px !important;
+    width: 12px !important;
     height: 17px !important;
     aspect-ratio: 1/1 !important;
+  }
+  input[type=checkbox]:checked:before {
+    width: 1.875rem;
+    height: 1.875rem;
+    margin: -10px -7px;
   }
 }
 
