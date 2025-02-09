@@ -5,23 +5,32 @@
             :title="alertMessage.message"
             :type="alertMessage.type"
         />
-        <div class="mb-2 flex justify-between sticky -top-6 z-50 bg-white">
+        <div class="mb-2 flex justify-between sticky -top-6 z-[20] bg-white">
             <Loader
                 class="absolute inset-x-1/2 top-[5px] -translate-x-1/2 z-[51]"
                 :active="isLoading"
             />
             
-            <h3 class="text-xl font-semibold text-gray-900">
+            <h3 class="lg:text-xl font-semibold text-gray-900">
                 Configure your preference
             </h3>
 
             <Button.Primary
+                class="!bg-green-500"
                 @onClick="UpdateConfig"
             >
-                Save Changes
+                <span class="hidden lg:inline-block">
+                    Save
+                </span>
+                <Icon
+                    class="lg:hidden inline-block"
+                    name="PhChecks"
+                    weight="bold"
+                    size="22"
+                />
             </Button.Primary>
         </div>
-        <Table.Table>
+        <Table.Table class="whitespace-nowrap">
             <Table.THead>
                 <Table.Th>#sl</Table.Th>
                 <Table.Th>Config Name</Table.Th>
@@ -44,7 +53,7 @@
 
 
 <script setup>
-    import { Table, MessageBox, Loader, Card, Button } from '@components'
+    import { Table, MessageBox, Loader, Card, Button, Icon } from '@components'
     import { useIntegration } from './useIntegration'
     import { provide } from 'vue'
     import TableTrow from './fragment/TableRow.vue'

@@ -51,7 +51,7 @@
                     <br />
 
     
-                    <div class="grid gap-4 p-8 rounded" :style="{backgroundColor: item.bg}">
+                    <div class="grid gap-2 md:gap-4 p-4 md:p-8 rounded" :style="{backgroundColor: item.bg}">
                         <Input.Primary
                             :label="`Your ${item.paymentPartner} account number *`"
                             placeholder="01xxxxxxxxx"

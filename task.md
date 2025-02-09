@@ -71,6 +71,8 @@ Dashboard:
 👉🏻 new customer er fraud score dekhay 10%
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
+👉🏻 status bangla language a create korte gele status create hoyna
+
 👉🏻 Send message for abandoned order customer
 👉🏻 Order list filter by courier partner
 👉🏻 landing page view calculation

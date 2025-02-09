@@ -13,7 +13,10 @@
                 Blacklisted Customers
             </h3>
         </div>
-        <Table.Table v-if="blackListData?.length">
+        <Table.Table
+            class="whitespace-nowrap"
+            v-if="blackListData?.length"
+        >
             <Table.THead>
                 <Table.Th>#sl</Table.Th>
                 <Table.Th>Phone/Email/Ip</Table.Th>

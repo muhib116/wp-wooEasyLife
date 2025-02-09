@@ -8,7 +8,7 @@
             title="Status list"
             class="mb-2"
         />
-        <Table.Table>
+        <Table.Table class="whitespace-nowrap">
             <Table.THead class="truncate bg-gray-700 text-white">
                 <Table.Th>Title</Table.Th>
                 <Table.Th>Slug</Table.Th>

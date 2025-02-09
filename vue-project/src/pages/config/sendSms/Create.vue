@@ -8,6 +8,7 @@
             <span class='bg-red-500 inline-block px-1 text-[9px] text-white'>Check your SMS Count before sending sms.</span>
         "
         type="info"
+        class="hidden md:flex"
     />
     <div class="max-w-[500px] mx-auto">
         <MessageBox
