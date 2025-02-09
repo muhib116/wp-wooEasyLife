@@ -20,15 +20,15 @@
             />
         </Table.Td>
         <Table.Td class="space-y-1">
+            <span 
+                class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
+                title="Order Id"
+            >
+                #{{ order.id }}
+            </span>
             <div
                 class="flex flex-wrap items-start gap-2 relative"
             >
-                <span 
-                    class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
-                    title="Order Id"
-                >
-                    #{{ order.id }}
-                </span>
                 <span 
                     v-if="order.order_source "
                     class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
@@ -43,17 +43,23 @@
                     🚨 CFS: 
                     {{order?.customer_custom_data?.fraud_score?.toFixed(0) || 0}}%
                 </span>
-                <a 
-                    class="absolute top-0 right-0 text-orange-500"
-                    :href="`${baseUrl}/wp-admin/post.php?post=${order.id}&action=edit`"
-                    target="_blank"
+
+                <span 
+                    title="Delivery success probability"
+                    class="font-semibold w-fit flex gap-1 text-[12px] items-center bg-sky-500 px-2 rounded-sm"
+                    :style="{
+                        background: +deliveryProbability >=0 ? `hsl(${ (+deliveryProbability / 100) * 120 }deg 75% 35%)` : `red`,
+                        color: '#fff'
+                    }"
                 >
-                    <Icon 
-                        name="PhArrowSquareOut"
-                        size="20"
-                        weight="bold"
+                    {{ +deliveryProbability >= 0 ? `DSP: ${deliveryProbability}%` : deliveryProbability }}
+                    <Icon
+                        class="text-red-100 cursor-pointer"
+                        title="This is just a prediction based on available data. \nWe do not guarantee the accuracy of the outcome, as various external factors may influence the actual results."
+                        name="PhInfo"
+                        size="18"
                     />
-                </a>
+                </span>
             </div>
             <div
                 class="flex gap-1 font-medium"
@@ -194,7 +200,7 @@
 
 <script setup lang="ts">
     import { Table, Icon, Modal } from '@components'
-    import { inject, ref } from 'vue'
+    import { inject, ref, computed } from 'vue'
     import Address from '../address/Index.vue'
     import { baseUrl } from '@/api'
     import FraudHistory from '../FraudHistory.vue'
@@ -204,7 +210,7 @@
     import { useTableRowForMobile } from './useTableRowForMobile'
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
 
-    defineProps<{
+    const props = defineProps<{
         order: {
             customer_custom_data?: {
                 fraud_score?: string | number;
@@ -235,7 +241,8 @@
     const {
         setSelectedOrder,
         selectedOrders,
-        courierStatusInfo
+        courierStatusInfo,
+        getDeliveryProbability
     } = inject('useOrders')
 
     const toggleAddressModel = ref(false)
@@ -249,6 +256,10 @@
         cancelLongPress,
         onTouchMove
     } = useTableRowForMobile()
+
+    const deliveryProbability = computed(() => {
+        return getDeliveryProbability(props.order)
+    })
 </script>
 
 <style>

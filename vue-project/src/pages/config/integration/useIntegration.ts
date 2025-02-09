@@ -1,14 +1,11 @@
 import { getWPOption, createOrUpdateWPOption } from '@/api'
+import { showNotification } from '@/helper'
 import { onMounted, ref } from 'vue'
 
 export const useIntegration = () => {
     const optionName = 'config'
     const isLoading = ref(false)
     const configData = ref([])
-    const alertMessage = ref({
-        message: '',
-        type: ''
-    })
 
     const UpdateConfig = async (btn: {isLoading?: boolean}) => {
         try {
@@ -21,18 +18,13 @@ export const useIntegration = () => {
         } catch (error) {
             console.log(error)
         } finally {
-            alertMessage.value.message = 'Configuration updated successfully!'
-            alertMessage.value.type = 'Success'
+            showNotification({
+                type: 'success',
+                message: 'Configuration updated successfully!'
+            })
             isLoading.value = false
             btn ? btn.isLoading = false : ''
         }
-
-        setTimeout(() => {
-            alertMessage.value = {
-                message: '',
-                type: ''
-            }
-        }, 4000)
     }
 
     const getData = async () => {
@@ -55,7 +47,6 @@ export const useIntegration = () => {
         optionName,
         isLoading,
         configData,
-        alertMessage,
         getData,
         UpdateConfig
     }
