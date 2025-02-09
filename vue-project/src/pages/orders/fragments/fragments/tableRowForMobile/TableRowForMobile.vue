@@ -1,6 +1,6 @@
 <template>
     <Table.Tr
-        class="group"
+        class="group active:bg-gray-100"
         :class="`status-${order.status}`"
         :active="selectedOrders.has(order)"
         @touchstart="startLongPress" 

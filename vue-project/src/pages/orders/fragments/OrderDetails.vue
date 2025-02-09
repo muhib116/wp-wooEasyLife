@@ -5,17 +5,20 @@
             class="mb-4 px-6"
         />
         <Button.Primary
+            class="!bg-green-500"
             @click="setActiveOrder('')"
         >
             <Icon
                 name="PhCaretLeft"
+                size="20"
+                weight="bold"
             />
-            Back
+            <span class="hidden md:inline-block">Back</span>
         </Button.Primary>
     </div>
 
     <div class="px-6">
-        <div v-if="activeOrder" class="grid grid-cols-2 mb-4">
+        <div v-if="activeOrder" class="grid md:grid-cols-2 mb-4">
             <h4>
                 <span style="font-weight: bold;">
                     Name:
@@ -43,7 +46,7 @@
             </h4>
         </div>
 
-        <Table.Table>
+        <Table.Table class="whitespace-nowrap">
             <Table.THead>
                 <Table.Th style="width: 30px;">Image</Table.Th>
                 <Table.Th>Product Name</Table.Th>

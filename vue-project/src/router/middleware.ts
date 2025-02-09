@@ -33,11 +33,6 @@ export default function (router) {
         return next({ name: "license" });
       }
 
-      // Restrict premium routes if balance is depleted
-      if (premiumRoutesName.includes(to.name) && (userData.value?.remaining_order ?? 0) <= 0) {
-        return next({ name: "RestrictionAlert" });
-      }
-
       // Allow navigation to the intended route
       return next();
     } catch (error) {

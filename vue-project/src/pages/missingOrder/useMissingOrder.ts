@@ -42,18 +42,24 @@ export const useMissingOrder = () => {
     const getDashboardData = computed(() => {
         const data = {
             loosedAmount: 0,
-            totalAbandonedOrder: 0,
+            totalAbandonedOrder: abandonOrders.value?.length || 0,
+            remainingAbandonedOrder: 0,
             totalRecoveredOrder: 0,
+            totalCallNotReceived: 0,
             recoveredAmount: 0,
         }
 
         abandonOrders.value.forEach(item => {
             if(item.status == 'confirmed'){
+                data.totalCallNotReceived += 1
+            }
+            
+            if(item.status == 'confirmed'){
                 data.totalRecoveredOrder += 1
                 data.recoveredAmount +=  +item.total_value
                 return
             }else {
-                data.totalAbandonedOrder += 1
+                data.remainingAbandonedOrder += 1
                 data.loosedAmount +=  +item.total_value
             }
         })

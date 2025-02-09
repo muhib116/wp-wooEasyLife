@@ -9,7 +9,7 @@ export const useTableRowForMobile = () => {
         tapTimer = setTimeout(() => {
             e.preventDefault()
             showOrderDetailsPopup.value = true
-        }, 1000)
+        }, 300)
     }
 
     const cancelLongPress = () => {

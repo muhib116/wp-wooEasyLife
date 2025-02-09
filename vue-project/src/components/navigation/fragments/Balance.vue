@@ -3,7 +3,7 @@
         <Button.Native
             v-if="isValidLicenseKey"
             :loading="userDataLoading"
-            class="py-[4px] px-2 rounded font-medium text-[10px] text-white"
+            class="py-[4px] px-2 rounded font-medium text-[12px] text-white"
             :class="{
                 'animate-bounce' : balance <= 5
             }"
@@ -18,7 +18,7 @@
         <Button.Native
             v-if="isValidLicenseKey"
             :loading="userDataLoading"
-            class="py-[4px] px-2 rounded bg-gray-700 font-medium text-[10px] text-white mr-4"
+            class="py-[4px] px-2 rounded bg-gray-700 font-medium text-[12px] text-white mr-4"
             :title="`Remaining SMS Balance ${userData?.sms_balance || 0}tk`"
         >
             SMS: {{ userData?.sms_balance || 0 }}tk

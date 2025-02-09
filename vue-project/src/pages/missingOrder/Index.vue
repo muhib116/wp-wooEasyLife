@@ -26,7 +26,7 @@
                     <div 
                         class="responsive_menu lg:flex gap-4 mb-5 lg:-ml-6 -mr-6 lg:-mt-6 rounded-t-md border-b px-6 py-3 bg-white text-black"
                         :class="{
-                            '!hidden': !toggleMenu
+                            'hidden': !toggleMenu
                         }"
                     >
                         <Button.Native
@@ -48,8 +48,19 @@
                     </div>
                 </div>
 
-                <Dashboard v-if="selectedOption.id == 'dashboard'" />
-                <OrderList v-else />
+                <div
+                    v-if="(userData?.remaining_order) > 0"
+                >
+                    <Dashboard v-if="selectedOption.id == 'dashboard'" />
+                    <OrderList v-else />
+                </div>
+
+                <div v-else-if="!isLoading" >
+                    <MessageBox
+                        title="Insufficient balance! Access denied."
+                        type="danger"
+                    />
+                </div>
 
             </Card.Native>
         </Container>
@@ -58,11 +69,11 @@
 
 <script setup lang="ts">
     import { Layout, Container } from '@layout'
-    import { Button, Card, Loader, Icon } from '@/components'
+    import { Button, Card, Loader, Icon, MessageBox } from '@/components'
     import { useMissingOrder } from './useMissingOrder'
     import OrderList from './fragments/OrderList.vue'
     import Dashboard from './fragments/Dashboard.vue'
-    import { provide, ref } from 'vue'
+    import { inject, provide, ref } from 'vue'
 
     const _useMissingOrder = useMissingOrder()
     const {
@@ -73,7 +84,7 @@
     } = _useMissingOrder
 
     const toggleMenu = ref(false)
-
+    const { userData }  = inject("useServiceProvider")
     provide('useMissingOrder', _useMissingOrder)
 </script>
 
@@ -90,7 +101,6 @@
     white-space: nowrap;
     z-index: 99;
     padding: 0;
-    display: grid;
     gap: 0;
 
     button+button {
