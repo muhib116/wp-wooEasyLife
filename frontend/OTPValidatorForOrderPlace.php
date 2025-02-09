@@ -45,7 +45,21 @@ class OTPValidatorForOrderPlace
             $custom_button .= $order_button_text; // Custom text for the button
             $custom_button .= '</button>';
 
-            return $custom_button . $btn;
+            $default_button = '
+                <button 
+                    type="submit" 
+                    class="button alt" 
+                    name="woocommerce_checkout_place_order" 
+                    id="place_order" 
+                    value="Place order" 
+                    data-value="Place order"
+                    style="display: none;"
+                >';
+            
+            $default_button .= $order_button_text;
+            $default_button .= '</button>';
+
+            return $custom_button . $default_button;
         }
 
         return $btn;

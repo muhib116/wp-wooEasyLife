@@ -1,6 +1,7 @@
 <template>
-    <div v-bind="$attrs" class="flex justify-between text-[10px] px-4 my-4">
+    <div class="flex justify-between text-[10px] px-4 my-4">
         <div 
+            v-bind="$attrs"
             class="flex justify-center md:justify-start flex-wrap gap-2 items-center relative"
             v-click-outside="() => toggleCourierDropdown = false"
         >
@@ -68,7 +69,7 @@
 
             <Button.Native
                 v-if="configData.courier_automation"
-                class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm px-1 py-1"
+                class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
                 title="Refresh CourierData"
                 @onClick="async (btn) => {
                     await refreshBulkCourierData(btn)
@@ -85,7 +86,7 @@
 
             <Button.Native
                 v-if="orders[0]?.total_new_orders_not_handled_by_wel_plugin && userData?.remaining_order > 0"
-                class="opacity-100 w-fit text-white bg-green-500 shadow rounded-sm px-1 py-1"
+                class="opacity-100 w-fit text-white bg-green-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
                 title="Include your previous new orders that are missing from this order list."
                 @onClick="async (btn) => {
                     await include_past_new_orders_thats_not_handled_by_wel_plugin(orders[0].total_new_orders_not_handled_by_wel_plugin, btn)
@@ -104,7 +105,7 @@
 
             <Button.Native
                 v-if="orders[0]?.total_new_order_handled_by_wel_but_balance_cut_failed && userData?.remaining_order > 0"
-                class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm px-1 py-1"
+                class="opacity-100 w-fit text-white bg-teal-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
                 title="Include your new orders that failed to deduct balance."
                 @onClick="async (btn) => {
                     await include_balance_cut_failed_new_orders(orders[0].total_new_order_handled_by_wel_but_balance_cut_failed, btn)

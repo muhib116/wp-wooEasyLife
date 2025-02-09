@@ -69,6 +69,8 @@
             <TableHeaderAction 
                 class="hidden md:flex"
             />
+
+            <Pagination  class="block md:hidden" />
         </div>
     </div>
 </template>

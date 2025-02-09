@@ -19,13 +19,22 @@
                 :checked="[...selectedOrders].find(item => item.id == order.id)"
             />
         </Table.Td>
-        <Table.Td class="space-y-1">
-            <span 
-                class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
-                title="Order Id"
-            >
-                #{{ order.id }}
-            </span>
+        <Table.Td class="space-y-2">
+            <div class="flex justify-between items-center">
+                <span 
+                    class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
+                    title="Order Id"
+                >
+                    #{{ order.id }}
+                </span>
+                <button class="opacity-30">
+                    <Icon
+                        name="PhChecks"
+                        size="25"
+                        weight="bold"
+                    />
+                </button>
+            </div>
             <div
                 class="flex flex-wrap items-start gap-2 relative"
             >
@@ -106,10 +115,12 @@
                     {{ order.billing_address.address_2 }}
                 </p>
             </div>
+
             <BlackListData
                 :order="order"
             />
-            <div class="flex gap-2 items-center mt-2">
+
+            <div class="flex gap-2 items-center">
                 <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">
                     {{ order.status=='processing' ? 'New Order' : order?.status?.replace(/-/g, ' ') }}
     
@@ -136,6 +147,26 @@
                     />
                 </span>
             </div>
+            <hr />
+            <div class="grid gap-2 grid-cols-2">
+                <button
+                    class="relative flex flex-col whitespace-nowrap justify-center items-center text-white bg-blue-500 w-full text-center py-1 px-2 rounded-sm pointer-events-auto hover:brightness-95"
+                    title="Order details"
+                    @click="(e) => {
+                        e.preventDefault();
+                        setActiveOrder(order)
+                    }"
+                >
+                    Order Details
+                </button>
+                <button
+                    class="relative flex flex-col whitespace-nowrap justify-center items-center text-white bg-orange-500 w-full text-center py-1 px-2 rounded-sm pointer-events-auto hover:brightness-95"
+                    @click="toggleNotesModel = true"
+                >
+                    Notes
+                </button>
+            </div>
+
         </Table.Td>
     </Table.Tr>
 
@@ -242,7 +273,8 @@
         setSelectedOrder,
         selectedOrders,
         courierStatusInfo,
-        getDeliveryProbability
+        getDeliveryProbability,
+        setActiveOrder
     } = inject('useOrders')
 
     const toggleAddressModel = ref(false)

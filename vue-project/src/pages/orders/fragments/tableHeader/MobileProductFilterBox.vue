@@ -1,5 +1,9 @@
 <template>
-    <div class="fixed bg-white top-0 left-0 z-[99999] bottom-0 max-w-[400px] w-full p-4 shadow">
+    <div class="fixed bg-white top-0 left-0 z-[99999] bottom-0 max-w-[400px] w-full p-4 shadow overflow-auto">
+        <Loader
+            :active="isLoading"
+            class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
         <div class="flex justify-between items-center border-b mb-4 pb-2">
             <span class="mb-1 mt-2 block text-gray-800 text-xl font-semibold">
                 Filter & Action
@@ -65,6 +69,7 @@
 
         
         <TableHeaderAction
+            class="flex-col bg-red-50 w-full [&>*]:w-full [&>*>*]:w-full [&>*]:text-[16px]"
             @close="$emit('close')"
         />
     </div>
@@ -76,12 +81,14 @@ import {
 } from '@components'
 import { inject, ref } from 'vue'
 import TableHeaderAction from '@/pages/orders/fragments/TableHeaderAction.vue'
+import { Loader } from '@/components';
 
 const {
     orderStatusWithCounts,
     orderFilter,
     handleFilter,
-    totalRecords
+    totalRecords,
+    isLoading
 } = inject('useOrders')
 
 const toggleStatus = ref(false)
