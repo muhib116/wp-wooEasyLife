@@ -69,7 +69,18 @@ export const saveOrderNote = async (payload: {
     payload
   );
   return data;
-};
+}
+
+export const toggleIsDone = async (payload: {
+  order_id: number | string
+  is_done: boolean
+}) => {
+  const { data } = await axios.post(
+    `${localApiBaseURL}/mark-as-done-undone`,
+    payload
+  )
+  return data;
+}
 // functions for order list
 
 export const updateCourierData = async (payload: {

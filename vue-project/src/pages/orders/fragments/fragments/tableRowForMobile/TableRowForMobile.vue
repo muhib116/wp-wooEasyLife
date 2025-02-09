@@ -27,13 +27,21 @@
                 >
                     #{{ order.id }}
                 </span>
-                <button class="opacity-30">
+                
+                <Button.Native
+                    class="opacity-30 flex items-center gap-2"
+                    :class="{
+                        '!opacity-100 text-green-500' : order.is_done == 1
+                    }"
+                    @onClick="btn => markAsDone(order, btn)"
+                >
                     <Icon
                         name="PhChecks"
                         size="25"
                         weight="bold"
                     />
-                </button>
+                    {{ order.is_done == 1 ? 'done' : '' }}
+                </Button.Native>
             </div>
             <div
                 class="flex flex-wrap items-start gap-2 relative"
@@ -220,6 +228,7 @@
         />
     </Modal>
     <!-- customer notes end -->
+
     <Transition name="slide">
         <OrderDetailsForMobile
             v-if="showOrderDetailsPopup"
@@ -230,7 +239,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Icon, Modal } from '@components'
+    import { Table, Icon, Modal, Button } from '@components'
     import { inject, ref, computed } from 'vue'
     import Address from '../address/Index.vue'
     import { baseUrl } from '@/api'
@@ -274,7 +283,8 @@
         selectedOrders,
         courierStatusInfo,
         getDeliveryProbability,
-        setActiveOrder
+        setActiveOrder,
+        markAsDone
     } = inject('useOrders')
 
     const toggleAddressModel = ref(false)

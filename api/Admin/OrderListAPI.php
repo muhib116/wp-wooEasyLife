@@ -67,6 +67,15 @@ class OrderListAPI
                 'permission_callback' => api_permission_check(), // Or add your permission logic here
             ]
         );
+        register_rest_route(
+            __API_NAMESPACE, 
+            '/mark-as-done-undone', 
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'mark_as_done_undone'],
+                'permission_callback' => api_permission_check(), // Or add your permission logic here
+            ]
+        );
 
         register_rest_route(
             __API_NAMESPACE, 
@@ -198,6 +207,7 @@ class OrderListAPI
                 'total'         => $order->get_total(),
                 'is_wel_order_handled' => $order->get_meta('is_wel_order_handled', true),
                 'is_wel_balance_cut'   => $order->get_meta('is_wel_balance_cut', true),
+                'is_done'   => $order->get_meta('woo_easy_is_done', true),
                 'customer_custom_data' => $customer_custom_data,
                 'total_new_orders_not_handled_by_wel_plugin' => $total_new_orders_not_handled_by_wel_plugin,
                 'total_new_order_handled_by_wel_but_balance_cut_failed' => $total_new_order_handled_by_wel_but_balance_cut_failed,
@@ -428,6 +438,43 @@ class OrderListAPI
             ],
         ], 200);
     } 
+
+    public function mark_as_done_undone($request) {
+        global $wpdb;
+        $params = $request->get_json_params();
+    
+        // Validate the payload
+        if (!isset($params['order_id'])) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Missing order_id in the payload.',
+            ], 400);
+        }
+    
+        $order_id = intval($params['order_id']);
+        $is_done = isset($params['is_done']) ? intval($params['is_done']) : 0;
+    
+        // Retrieve the order
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Order not found.',
+            ], 404);
+        }
+    
+        // Update the order meta
+        $order->update_meta_data('woo_easy_is_done', $is_done);
+        $order->save_meta_data(); // Ensure the changes are saved
+    
+        return new \WP_REST_Response([
+            'status' => 'success',
+            'message' => 'Order updated successfully.',
+            'order_id' => $order_id,
+            'is_done' => $is_done,
+        ], 200);
+    }
+    
     
     public function change_order_status(\WP_REST_Request $request) {
         // Get the payload from the request

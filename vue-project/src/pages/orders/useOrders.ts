@@ -8,7 +8,8 @@ import {
   checkFraudCustomer,
   updateCourierData,
   includePastNewOrdersToWELPlugin,
-  includeMissingNewOrdersOfFailedBalanceCut
+  includeMissingNewOrdersOfFailedBalanceCut,
+  toggleIsDone
 } from "@/api";
 import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
@@ -434,6 +435,29 @@ export const useOrders = () => {
     return statuses[courier_status];
   }
 
+  const markAsDone = async (order, btn: { isLoading: boolean }) => {
+    btn.isLoading = true;
+  
+    const isDone = Number(!order.is_done);
+    const payload = { order_id: order.id, is_done: isDone };
+  
+    try {
+      await toggleIsDone(payload);
+      order.is_done = isDone;
+  
+      showNotification({
+        type: isDone ? 'success' : 'warning',
+        message: `Marked as ${isDone ? 'done!' : 'undone'}`,
+      });
+    } catch (err) {
+      console.error(err);
+      showNotification({ type: 'danger', message: 'Something went wrong!' });
+    } finally {
+      btn.isLoading = false;
+    }
+  }
+  
+
   let timeoutId: any;
   const totalPages = computed(() =>
       orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
@@ -582,6 +606,7 @@ export const useOrders = () => {
     totalPages,
     currentPage,
     getOrders,
+    markAsDone,
     handleFilter,
     handleIPBlock,
     setActiveOrder,
