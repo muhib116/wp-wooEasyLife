@@ -129,7 +129,6 @@
     </div>
 </div>
 
-
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
@@ -149,7 +148,7 @@
             const isOTPValidated = ref(false)
             const modalToggle = ref(false)
             const otpIsNotValid = ref(false)
-            const apiBaseUrl = 'http://localhost:8080/wordpress/wp-json/wooeasylife/v1'
+            const apiBaseUrl = "<?php echo get_rest_url(). __API_NAMESPACE; ?>"
 
             const woo_easy_life_startCountdown = () => {
                 isOTPValidated.value = false

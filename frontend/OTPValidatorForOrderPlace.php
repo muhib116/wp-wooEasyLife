@@ -45,7 +45,7 @@ class OTPValidatorForOrderPlace
             $custom_button .= $order_button_text; // Custom text for the button
             $custom_button .= '</button>';
 
-            return $custom_button;
+            return $custom_button . $btn;
         }
 
         return $btn;

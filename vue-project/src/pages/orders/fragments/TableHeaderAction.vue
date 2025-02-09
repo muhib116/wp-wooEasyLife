@@ -29,7 +29,6 @@
                                         ? toggleCourierDropdown = !toggleCourierDropdown 
                                         : 
                                         await item.method(btn)
-                                        $emit('close')
                             }
                         "
                     >
@@ -108,9 +107,9 @@
                 class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm px-1 py-1"
                 title="Include your new orders that failed to deduct balance."
                 @onClick="async (btn) => {
-                await include_balance_cut_failed_new_orders(orders[0].total_new_order_handled_by_wel_but_balance_cut_failed, btn)
-                $emit('close')
-        }"
+                    await include_balance_cut_failed_new_orders(orders[0].total_new_order_handled_by_wel_but_balance_cut_failed, btn)
+                    $emit('close')
+                }"
             >
                 <Icon
                     name="PhArrowSquareIn"
