@@ -435,10 +435,12 @@ export const useOrders = () => {
     return statuses[courier_status];
   }
 
-  const markAsDone = async (order, btn: { isLoading: boolean }) => {
+  const markAsDone = async (order, btn: { isLoading: boolean }) => 
+  {
+    const isDone = Number(!Number(order.is_done));
+    if(!isDone && !confirm('Are sure to make this undone?')) return
     btn.isLoading = true;
   
-    const isDone = Number(!order.is_done);
     const payload = { order_id: order.id, is_done: isDone };
   
     try {
