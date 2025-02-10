@@ -131,8 +131,9 @@ class InitClass {
         $site_title = get_bloginfo('name');
         $custom_logo_id = get_theme_mod('custom_logo');
         $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
-
-        $config = [
+    
+        // New default configuration
+        $new_config = [
             "admin_phone" => '',
             "invoice_company_name" => $site_title,
             "invoice_logo" => $logo_url,
@@ -140,6 +141,7 @@ class InitClass {
             "invoice_phone" => '',
             "invoice_print" => false,
             "clear_data_when_deactivate_plugin" => false,
+            "validate_checkout_form" => false,
             "ip_block" => true,
             "phone_number_block" => true,
             "email_block" => true,
@@ -149,10 +151,24 @@ class InitClass {
             "courier_automation" => false,
             "fraud_customer_checker" => false,
         ];
-
-        // Save the updated config
-        if (empty(get_option(__PREFIX.'config'))) {
-            update_option(__PREFIX.'config', $config);
+    
+        // Fetch existing config from the database
+        $existing_config = get_option(__PREFIX . 'config');
+    
+        // If no config exists, save new config
+        if (empty($existing_config)) {
+            update_option(__PREFIX . 'config', $new_config);
+            return;
         }
-    }
+    
+        // Ensure existing config is an array (handles serialization issues)
+        if (!is_array($existing_config)) {
+            $existing_config = maybe_unserialize($existing_config);
+        }
+    
+        // Compare existing config with new config
+        if ($existing_config !== $new_config) {
+            update_option(__PREFIX . 'config', $new_config);
+        }
+    }    
 }

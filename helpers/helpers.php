@@ -519,3 +519,37 @@ function getMetaDataOfOrderForArgs (){
         ]
     ];
 }
+
+function get_woo_easy_registered_user() {
+    global $license_key;
+    $url = get_api_end_point("get-user");
+
+    $headers = [
+        'Authorization' => 'Bearer ' . $license_key,
+        'Content-Type'  => 'application/json',
+        'origin'        => site_url()
+    ];
+
+    // Make GET request
+    $response = wp_remote_get($url, [
+        'headers'   => $headers,
+        'timeout'   => 45,
+        'sslverify' => false,
+    ]);
+
+    // Check for request errors
+    if (is_wp_error($response)) {
+        return false; // API request failed
+    }
+
+    // Decode API response
+    $body = wp_remote_retrieve_body($response);
+    $user_data = json_decode($body, true);
+
+    // Validate API response
+    if (!$user_data || !isset($user_data['success']) || !$user_data['success']) {
+        return false; // API response indicates failure
+    }
+
+    return $user_data; // Return user data if successful
+}

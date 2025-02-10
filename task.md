@@ -68,7 +68,7 @@ Dashboard:
 
 
 --------heigh priority task------------
-👉🏻 new customer er fraud score dekhay 10%
+👉🏻 billing and shipping phone validatio checkout page
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
 👉🏻 status bangla language a create korte gele status create hoyna
@@ -80,10 +80,14 @@ Dashboard:
 👉🏻 missing order theke create order er button dite hobe
 👉🏻 abandont order a sound dite hobe
 👉🏻 sound on and off localstorage theke control korte hobe
+
+
 👉🏻 FB Ad cost plugins a ante hobe
 👉🏻 Message and comment theke order api diye ane ai diye filter kore plugins a ante hobe
 👉🏻 Centralize data base a black list er data rekhe plugins er fake order komate hobe
 👉🏻 abandont, comment and message er lead gulu fb er ad cost er 50% price sale korte hobe.
+
+
 👉🏻 
 👉🏻 
 👉🏻 
@@ -153,22 +157,6 @@ Task Assignment: Assign order fulfillment tasks to specific team members.
 
 
 
-
-
-
-phone => string
-content => string // sms content
-
-endpoint: 
-/api/sms/send -> POST
-api/sms/recharge -> post
-{amount: 100}
-
-api/sms/balance -> get
-api/sms/recharge-history -> get
-api/sms/use-history -> get
-start_date?: string
-end_date?: string
 
 
 
