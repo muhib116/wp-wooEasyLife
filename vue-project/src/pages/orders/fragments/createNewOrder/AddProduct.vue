@@ -117,51 +117,17 @@
             />
             Add Product *
         </Button.Primary>
-        <div v-if="toggleProductList" class="border border-gray-200 p-4 bg-gray-50 z-40 w-full mt-1 relative">
-            <Button.Native 
-                class="absolute right-0 top-0 p-1 bg-red-500 text-white z-20"
-                @click="toggleProductList = false"
-            >
-                <Icon name="PhX" />
-            </Button.Native>
-            <Input.Primary
-                placeholder="Search Product"
-                v-model="productSearchKey"
-                type="search"
-                wrapperClass="!mr-3"
-            />
 
-            <div class="max-h-[190px] overflow-auto mt-4 [&>div+div]:border-t">
-                <div
-                    v-for="item in filteredProducts"
-                    :key="item.id"
-                    class="flex gap-4 items-center justify-between p-2"
-                    @click="addProductToForm(item)"
-                >
-                    <div class="flex gap-4 items-center">
-                        <img
-                            :src="item.image"
-                            class="size-8"
-                        />
-                        <p>
-                            #{{ item.id }} {{ item.name }}
-                        </p>
-                    </div>
 
-                    <Button.Primary
-                        class="px-1 py-0 !bg-green-500 !font-light text-sm"
-                        title="Add Product"
-                    >
-                        Add
-                    </Button.Primary>
-                </div>
-            </div>
-        </div>
+        <ProductListWithSearch
+            v-if="toggleProductList"
+            :addProductToForm="addProductToForm"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-    import { Input, Button, Icon, Table } from '@components'
+    import { Input, Button, Icon, Table, ProductListWithSearch } from '@components'
     import { inject, ref } from 'vue'
 
     const toggleProductList = ref(false)

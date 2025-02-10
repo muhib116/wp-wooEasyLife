@@ -1,11 +1,11 @@
 <template>
-    <Select.Primary
+    <!-- <Select.Primary
         label="Order status"
         defaultOption="Select Status"
         :options="wooCommerceStatuses"
         itemKey="slug"
         v-model="form.order_status"
-    />
+    /> -->
     <div class="grid md:grid-cols-2 gap-4">
         <Input.Primary
             label="Customer Name *"

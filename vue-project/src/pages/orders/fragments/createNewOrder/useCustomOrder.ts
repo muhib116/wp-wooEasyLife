@@ -1,18 +1,16 @@
-import { createOrder, getProducts, validateCoupon } from "@/api"
+import { createOrder, validateCoupon } from "@/api"
 import { normalizePhoneNumber, validateBDPhoneNumber } from "@/helper";
-import { computed, onMounted, ref, inject } from "vue"
+import { computed, ref, inject } from "vue"
 
 export const useCustomOrder = () => 
 {
     const { getOrders, toggleNewOrder } = inject('useOrders');
 
-    const products = ref([])
-    const productSearchKey = ref('')
     const couponValidationErrorMessage = ref('')
     const appliedCoupon = ref('')
     const couponDiscount = ref(0);
     const placeHolderData = {
-        order_status: 'wc-confirmed',
+        order_status: 'wc-processing',
         first_name: '',
         last_name: '',
         address_1: '',
@@ -39,15 +37,6 @@ export const useCustomOrder = () =>
     })
 
     const isLoading = ref(false)
-    const loadProducts = async () => {
-        try {
-            isLoading.value = true
-            const { data } = await getProducts()
-            products.value = data
-        } finally {
-            isLoading.value = false
-        }
-    }
 
     const addProductToForm = (item) => {
         // Check existence of product
@@ -289,23 +278,15 @@ export const useCustomOrder = () =>
         }
     }
 
-    onMounted(() => {
-        if(!products.value.length){
-            loadProducts()
-        }
-    })
     return {
         form,
-        products,
         isLoading,
         getItemsTotal,
         appliedCoupon,
         couponDiscount,
-        productSearchKey,
         filteredProducts,
         couponValidationErrorMessage,
         handleCreateOrder,
-        loadProducts,
         handleCouponValidation,
         addProductToForm,
         calculateCouponDiscountAmount,

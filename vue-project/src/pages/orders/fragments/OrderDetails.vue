@@ -2,7 +2,7 @@
     <div class="flex justify-between pr-6">
         <Heading
             title="Order Details"
-            class="mb-4 px-6"
+            class="mb-4 px-4 lg:px-6"
         />
         <Button.Primary
             class="!bg-green-500"
@@ -17,7 +17,7 @@
         </Button.Primary>
     </div>
 
-    <div class="px-6">
+    <div class="px-4 lg:px-6">
         <div v-if="activeOrder" class="grid md:grid-cols-2 mb-4">
             <h4>
                 <span style="font-weight: bold;">
@@ -45,49 +45,24 @@
                 {{ activeOrder.billing_address?.address_2 }}
             </h4>
         </div>
-
-        <Table.Table class="whitespace-nowrap">
-            <Table.THead>
-                <Table.Th style="width: 30px;">Image</Table.Th>
-                <Table.Th>Product Name</Table.Th>
-                <Table.Th>Price</Table.Th>
-                <Table.Th>Quantity</Table.Th>
-                <Table.Th>Total Price</Table.Th>
-            </Table.THead>
-            <Table.TBody>
-                <Table.Tr 
-                    v-for="item in activeOrder.product_info?.product_info || []"
-                    :key="item.id"
-                >
-                    <Table.Td>
-                        <img 
-                            :src="item.product_image" 
-                            alt="product image"
-                            style="
-                                width: 60px;
-                                height: 60px;
-                                object-fit: cover;
-                                object-position: center;
-                            "
-                        />
-                    </Table.Td>
-                    <Table.Td>{{ item.product_name }}</Table.Td>
-                    <Table.Td>
-                        <span v-html="activeOrder.currency_symbol"></span>{{ item.product_price }}
-                    </Table.Td>
-                    <Table.Td>{{ item.product_quantity }}</Table.Td>
-                    <Table.Td>
-                        <span v-html="activeOrder.currency_symbol"></span>{{ item.product_total }}
-                    </Table.Td>
-                </Table.Tr>
-            </Table.TBody>
-        </Table.Table>
+        
+        <DesktopOrderedProductDetails
+            class="hidden lg:grid"
+        />
+        <MobileOrderedProductDetails 
+            class="block lg:hidden"
+        />
     </div>
+        
+    
+        
 </template>
 
 <script setup lang="ts">
     import { Table, Button, Icon, Heading } from '@components'
     import { inject } from 'vue'
+    import DesktopOrderedProductDetails from './DesktopOrderedProductDetails.vue'
+    import MobileOrderedProductDetails from './MobileOrderedProductDetails.vue'
 
     const {
         activeOrder,
