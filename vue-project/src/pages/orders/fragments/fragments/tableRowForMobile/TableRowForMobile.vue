@@ -19,7 +19,7 @@
                 :checked="[...selectedOrders].find(item => item.id == order.id)"
             />
         </Table.Td>
-        <Table.Td class="space-y-2">
+        <Table.Td class="space-y-2 w-fit">
             <div class="flex justify-between items-center">
                 <span 
                     class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
@@ -78,8 +78,9 @@
                     />
                 </span>
             </div>
+
             <div
-                class="flex gap-1 font-medium"
+                class="flex gap-1 font-medium w-fit"
             >
                 {{ order.billing_address.first_name }}
                 {{ order.billing_address.last_name }}
@@ -91,14 +92,18 @@
                     (Repeat)
                 </span>
             </div>
-            <div v-if="order?.courier_data?.consignment_id" title="Consignment Id">
+            <div 
+                class="w-fit"
+                v-if="order?.courier_data?.consignment_id" 
+                title="Consignment Id"
+            >
                 🆔 {{ order?.courier_data?.consignment_id }}
             </div>
 
             <div
                 v-if="order.customer_report?.success_rate"
                 title="Courier success rate"
-                class="flex gap-1"
+                class="flex gap-1 w-fit"
                 @click="toggleFraudHistoryModel = true"
             >
                 ✅ Rate:
@@ -107,14 +112,16 @@
                 </strong>
             </div>
 
-            <div class="text-sm flex gap-1 items-center">
+            <div 
+                class="text-sm flex gap-1 items-center w-fit"
+            >
                 📅 {{ order.date_created }}
             </div>
-            <div class="text-sm flex gap-1 items-center">
+            <div class="text-sm flex gap-1 items-center w-fit">
                 📞 {{ order.billing_address.phone }}
             </div>
             <div
-                class="text-sm flex gap-1 items-center"
+                class="text-sm flex gap-1 items-center w-fit"
                 @click="toggleAddressModel = true"
             >
                 <p>
