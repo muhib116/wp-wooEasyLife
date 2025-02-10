@@ -205,22 +205,18 @@ export const  detectInternetState = (callback) => {
             return;
         }
 
-        if ('connection' in navigator) {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const effectiveType = connection.effectiveType;
-
-            if (effectiveType === "3g") {
-                callback({
-                    type: "warning",
-                    message: 'Slow internet connection.'
-                })
-            }else if(effectiveType != "4g") {
-                callback({
-                    type: "danger",
-                    message: 'Poor internet connection.'
-                })
+        if (navigator.connection) {
+            const { effectiveType } = navigator.connection;
+        
+            const messages = {
+                "2g": { type: "warning", message: "Slow internet connection." },
+                "slow": { type: "danger", message: "Poor internet connection." }
+            };
+        
+            if (messages[effectiveType]) {
+                callback(messages[effectiveType]);
             }
-        }
+        }        
     }
 
     // Initial check
