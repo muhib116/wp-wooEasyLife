@@ -1,4 +1,4 @@
-import { normalizePhoneNumber } from "@/helper"
+import { normalizePhoneNumber, showNotification } from "@/helper"
 
 type SteadFastPayload = {
     orders: {
@@ -11,24 +11,51 @@ type SteadFastPayload = {
 }
 
 export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
-    const payload: SteadFastPayload = {
-        orders: selectedOrders
-        .map(item => {
-            const shipping_address = `${item?.shipping_address?.address_1 || ''} ${item?.shipping_address?.address_2 || ''}`
-            const billing_address = `${item?.billing_address?.address_1 || ''} ${item?.billing_address?.address_2 || ''}`
-            return {
-                invoice: item?.id,
-                recipient_name: item?.customer_name || '',
-                recipient_phone: normalizePhoneNumber(item?.shipping_address?.phone || item?.billing_address?.phone || ''),
-                recipient_address: shipping_address || billing_address,
-                cod_amount: item?.total,
-                note: item?.order_notes?.courier_note || '',
-            }
-        })
-    }
+    if (!Array.isArray(selectedOrders)) return { orders: [] }; // Safety check
 
-    return payload
+    const orders = selectedOrders.map(item => {
+        const {
+            id,
+            customer_name = '',
+            shipping_address = {},
+            billing_address = {},
+            total = 0,
+            order_notes = {}
+        } = item || {};
+
+        // Build addresses safely
+        const shipping_address_str = [
+            shipping_address?.address_1?.trim(),
+            shipping_address?.address_2?.trim()
+        ].filter(Boolean).join(' ');
+
+        const billing_address_str = [
+            billing_address?.address_1?.trim(),
+            billing_address?.address_2?.trim()
+        ].filter(Boolean).join(' ');
+
+        if (!shipping_address_str && !billing_address_str) {
+            showNotification({
+                type: 'danger',
+                message: 'Address not found.'
+            })
+        }
+
+        return {
+            invoice: id || '',
+            recipient_name: customer_name,
+            recipient_phone: normalizePhoneNumber(
+                shipping_address?.phone || billing_address?.phone || ''
+            ),
+            recipient_address: shipping_address_str || billing_address_str,
+            cod_amount: total,
+            note: order_notes?.courier_note || '',
+        };
+    });
+
+    return { orders };
 }
+
 export const getSteadFastResponsePayload = (data) => {
     return data.map(item => {
         return {
