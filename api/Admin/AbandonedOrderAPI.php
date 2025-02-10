@@ -61,29 +61,86 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         global $wpdb;
     
         $cutoff_time = strtotime('-25 minutes'); // 25 minutes ago
-
+    
         // for testing when development environment start
         $server_ip = $_SERVER['SERVER_ADDR'];
         if ($server_ip === '127.0.0.1' || $server_ip === '::1') {
-            $cutoff_time = strtotime('-1 minutes'); // 1 minutes ago
+            $cutoff_time = strtotime('-1 minutes'); // 1 minute ago
         }
         // for testing when development environment end
-
+    
         $cutoff_date = date('Y-m-d H:i:s', $cutoff_time);
     
+        // Fetch all records matching the condition
         $query = $wpdb->prepare(
-            "UPDATE {$this->table_name} 
-            SET 
-                status = 'abandoned', 
-                abandoned_at = NOW(), 
-                updated_at = NOW() 
-            WHERE 
-                status = 'active' 
-                AND created_at < %s",
+            "SELECT * FROM {$this->table_name} 
+            WHERE status = 'active'
+            AND created_at < %s",
             $cutoff_date
         );
     
-        $wpdb->query($query);
+        $records = $wpdb->get_results($query);
+    
+        // If records found, update them one by one
+        if (!empty($records)) {
+            return $records;
+            foreach ($records as $record) {
+                $update_query = $wpdb->prepare(
+                    "UPDATE {$this->table_name} 
+                    SET 
+                        status = 'abandoned', 
+                        abandoned_at = NOW(), 
+                        updated_at = NOW() 
+                    WHERE id = %d",
+                    $record->id
+                );
+    
+                $wpdb->query($update_query);
+    
+                // Call balance_cut function after each update
+                $this->balance_cut($record);
+            }
+        }
+    }
+
+    private function balance_cut($record) {
+        global $license_key;
+    
+        $url = get_api_end_point("package-order-use");
+        $cart_contents = $record->cart_contents;
+        $total_value = $record->total_value;
+        
+        // Encode data properly for API request
+        $data = json_encode([
+            'order_count' => 1,
+            'use_details' => [[
+                "from" => "missing_order",
+                "cart_contents" => $cart_contents,
+                "total_value" => $total_value
+            ]]
+        ]);
+    
+        $headers = [
+            'Authorization' => 'Bearer ' . $license_key,
+            'Content-Type'  => 'application/json', // JSON format
+            'origin' => site_url()
+        ];
+
+        error_log($data);
+    
+        // Use wp_remote_post for HTTP requests
+        $response = wp_remote_post($url, [
+            'method'      => 'POST',
+            'body'        => $data,
+            'headers'     => $headers,
+            'timeout'     => 45,
+            'sslverify'   => false,
+        ]);
+
+        error_log(json_encode($response));
+        
+        // Decode and return the response
+        $response_body = wp_remote_retrieve_body($response);
     }
 
 

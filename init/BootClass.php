@@ -124,6 +124,6 @@ class BootClass {
                     </p>
                   </div>';
         }
-        return;
+        return $is_wooCommerce_installed;
     }
 }
