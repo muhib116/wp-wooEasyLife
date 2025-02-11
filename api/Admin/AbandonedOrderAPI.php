@@ -83,7 +83,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     
         // If records found, update them one by one
         if (!empty($records)) {
-            return $records;
             foreach ($records as $record) {
                 $update_query = $wpdb->prepare(
                     "UPDATE {$this->table_name} 
@@ -149,7 +148,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
      */
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
-        $this->mark_abandoned_carts();
+        return $this->mark_abandoned_carts();
     
         // Initialize query condition
         $query_conditions = "status != %s";

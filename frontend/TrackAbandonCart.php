@@ -46,7 +46,7 @@ class TrackAbandonCart {
 
 
     public function update_wc_session_for_abandoned_order() {
-        if ( ! class_exists( 'WC_Session_Handler' ) ) {
+        if ( !class_exists( 'WC_Session_Handler' ) ) {
             wp_send_json_error( 'WooCommerce session handler not available.' );
             return;
         }
