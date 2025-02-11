@@ -9,7 +9,8 @@ import {
   updateCourierData,
   includePastNewOrdersToWELPlugin,
   includeMissingNewOrdersOfFailedBalanceCut,
-  toggleIsDone
+  toggleIsDone,
+  updateOrder
 } from "@/api";
 import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
@@ -459,6 +460,42 @@ export const useOrders = () => {
     }
   }
   
+  const handleUpdateOrder = async (product, btn) => {
+    const payload: {
+      order_id: number | string
+      product_id: number | string
+      quantity: number
+    } = {
+      order_id: activeOrder.value.id,
+      product_id: product.id,
+      quantity: product.product_quantity
+    }
+    
+    try {
+      btn.isLoading = true
+
+      if(product.from == 'new-product'){
+        payload.quantity ++
+        product.product_quantity = payload.quantity
+      }
+      
+      const response = await updateOrder(payload)
+      if(response) {
+        /**
+         * if user set quantity to 0, then remove the item from product list,
+         * after removing this product from order in DB
+         * updateOrder function remove the product from order if quant set to 0
+         */
+        activeOrder.value.product_info = response
+      }
+
+      getOrders()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      btn.isLoading = false
+    }
+  }
 
   let timeoutId: any;
   const totalPages = computed(() =>
@@ -595,6 +632,8 @@ export const useOrders = () => {
     orders,
     selectAll,
     isLoading,
+    totalPages,
+    currentPage,
     activeOrder,
     orderFilter,
     showInvoices,
@@ -605,10 +644,9 @@ export const useOrders = () => {
     courierStatusInfo,
     wooCommerceStatuses,
     orderStatusWithCounts,
-    totalPages,
-    currentPage,
     getOrders,
     markAsDone,
+    handleUpdateOrder,
     handleFilter,
     handleIPBlock,
     setActiveOrder,

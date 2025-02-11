@@ -48,9 +48,11 @@
         
         <DesktopOrderedProductDetails
             class="hidden lg:grid"
+            
         />
         <MobileOrderedProductDetails 
             class="block lg:hidden"
+            
         />
     </div>
         

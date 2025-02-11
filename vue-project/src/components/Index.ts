@@ -17,8 +17,10 @@ import Switch from './Switch.vue'
 import Select from './select/index'
 import Invoice from './invoice/Index'
 import Chart from './chart'
+import ProductListWithSearch from './ProductListWithSearch.vue'
 
 export {
+    ProductListWithSearch,
     Icon,
     Navigation,
     Card,

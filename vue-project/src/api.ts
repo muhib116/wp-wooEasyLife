@@ -81,6 +81,18 @@ export const toggleIsDone = async (payload: {
   )
   return data;
 }
+
+export const updateOrder = async (payload: {
+  order_id: number | string
+  product_id: number | string
+  quantity: number
+}) => {
+  const { data } = await axios.post(
+    `${localApiBaseURL}/update-or-add-product-to-order`,
+    payload
+  )
+  return data;
+}
 // functions for order list
 
 export const updateCourierData = async (payload: {

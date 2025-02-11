@@ -109,6 +109,16 @@ class OrderListAPI
 
         register_rest_route(
             __API_NAMESPACE, 
+            '/update-or-add-product-to-order',
+            [
+                'methods'  => 'POST',
+                'callback' => [$this, 'update_or_add_product_to_order'], // Ensure this function exists and is callable
+                'permission_callback' => api_permission_check(),
+            ]
+        );
+
+        register_rest_route(
+            __API_NAMESPACE, 
             '/include-past-new-orders-to-wel-plugin',
             [
                 'methods'  => 'PUT',
@@ -326,6 +336,108 @@ class OrderListAPI
         
         return $order_count;        
     }
+    public function update_or_add_product_to_order(\WP_REST_Request $request) {
+        // Get the payload from the request
+        $data = $request->get_json_params();
+        $order_id = $data['order_id'];
+        $product_id = $data['product_id'];
+        $quantity = $data['quantity'];
+    
+        // Load the WooCommerce order object
+        $order = wc_get_order($order_id);
+    
+        if (!$order) {
+            return new WP_Error('invalid_order', 'Invalid order ID.');
+        }
+    
+        // Check if the product exists in the order
+        $order_items = $order->get_items();
+        $product_exists = false;
+        $item_id_to_remove = null;
+    
+        foreach ($order_items as $item_id => $item) {
+            if ($item->get_product_id() == $product_id) {
+                if ($quantity == 0) {
+                    $item_id_to_remove = $item_id;
+                } else {
+                    // Update quantity
+                    $item->set_quantity($quantity);
+                    $product = wc_get_product($product_id);
+    
+                    if ($product) {
+                        $regular_price = $product->get_regular_price();
+                        $sale_price = $product->get_sale_price() ?: $regular_price;
+    
+                        // Apply sequential discounts
+                        $subtotal = $regular_price * $quantity;
+                        $discounted_total = $sale_price * $quantity;
+    
+                        // Apply additional WooCommerce discounts
+                        if (function_exists('WC_Discounts')) {
+                            $discounts = new WC_Discounts($order);
+                            $discounted_total = $discounts->apply_cart_discounts($discounted_total);
+                        }
+    
+                        // Update item prices
+                        $item->set_subtotal($subtotal);
+                        $item->set_total($discounted_total);
+                    }
+    
+                    $order->save();
+                }
+                $product_exists = true;
+                break;
+            }
+        }
+    
+        // Remove item if quantity is 0
+        if ($item_id_to_remove) {
+            $order->remove_item($item_id_to_remove);
+            $order->save(); // Save after removal
+        }
+    
+        // If product is not found and quantity > 0, add as new item
+        if (!$product_exists && $quantity > 0) {
+            $product = wc_get_product($product_id);
+            if (!$product) {
+                return new WP_Error('invalid_product', 'Invalid product ID.');
+            }
+    
+            $regular_price = $product->get_regular_price();
+            $sale_price = $product->get_sale_price() ?: $regular_price;
+    
+            // Apply sequential discounting
+            $subtotal = $regular_price * $quantity;
+            $discounted_total = $sale_price * $quantity;
+    
+            // Apply WooCommerce cart discounts
+            if (function_exists('WC_Discounts')) {
+                $discounts = new WC_Discounts($order);
+                $discounted_total = $discounts->apply_cart_discounts($discounted_total);
+            }
+    
+            
+            // Create and set new item data
+            $item = new \WC_Order_Item_Product();
+            $item->set_product_id($product_id);
+            $item->set_quantity($quantity);
+            $item->set_subtotal($subtotal);
+            $item->set_total($discounted_total);
+            
+            // Add item to order
+            $order->add_item($item);
+        }
+        
+        // Recalculate order totals
+        $order->calculate_totals();
+        $order->save();
+        
+        // Fetch updated product list
+        $updated_items = getProductInfo($order);
+        
+        return $updated_items; // Return updated product list
+    }
+    
     
     public function get_order_status_with_counts()
     {
@@ -604,6 +716,7 @@ function getProductInfo($order)
                 $product_total = $item->get_total(); // Total for the line item (quantity * price)
                 $productInfo["total_price"] = (int)$productInfo["total_price"] += (int)$product_total;
                 $productInfo["product_info"][] = [
+                    'id' => $product->get_id(),
                     'product_name' => $product->get_name(),
                     'product_price' => $product->get_price(),
                     'product_total' => $product_total,
