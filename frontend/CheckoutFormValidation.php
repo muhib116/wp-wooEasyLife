@@ -54,14 +54,14 @@ class CheckoutFormValidation {
         }
     
         // Validate billing phone number
-        if (validate_BD_phoneNumber($billing_phone)) { // Fixed the logic
+        if (!validate_BD_phoneNumber(normalize_phone_number($billing_phone))) { // Fixed the logic
             throw new \Exception(__('Your billing phone number is invalid. Please enter a valid number.', 'your-text-domain'));
             $errors->add( 'validation', 'Your billing phone number is invalid. Please enter a valid number.');
             return;
         }
     
         // Validate shipping phone number (if provided)
-        if (!empty($shipping_phone) && validate_BD_phoneNumber($shipping_phone)) { // Fixed the logic
+        if (!empty($shipping_phone) && !validate_BD_phoneNumber(normalize_phone_number($shipping_phone))) { // Fixed the logic
             throw new \Exception(__('Your shipping phone number is invalid. Please enter a valid number.', 'your-text-domain'));
             $errors->add( 'validation', 'Your shipping phone number is invalid. Please enter a valid number.');
             return;

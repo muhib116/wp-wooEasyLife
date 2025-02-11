@@ -91,8 +91,11 @@ class TrackAbandonCart {
         $customer_email = WC()->session->get('billing_email');
         $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
     
-        if (empty($customer_phone) && empty($customer_email)) {
-            return false;
+        // block invalid phone
+        if (empty($customer_phone) || !validate_BD_phoneNumber($customer_phone)) {
+            if (empty($customer_email)) {
+                return false;
+            }
         }
 
         // Check if the customer has already placed a new order with 'wc-processing' status

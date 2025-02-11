@@ -82,6 +82,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $records = $wpdb->get_results($query);
     
         // If records found, update them one by one
+        $balance_cut_data = [];
         if (!empty($records)) {
             foreach ($records as $record) {
                 $update_query = $wpdb->prepare(
@@ -96,10 +97,12 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     
                 $wpdb->query($update_query);
     
-                // Call balance_cut function after each update
-                $this->balance_cut($record);
+                // // Call balance_cut function after each update
+                $balance_cut_data[] = $this->balance_cut($record);
             }
         }
+
+        return $balance_cut_data;
     }
 
     private function balance_cut($record) {
@@ -124,8 +127,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             'Content-Type'  => 'application/json', // JSON format
             'origin' => site_url()
         ];
-
-        error_log($data);
     
         // Use wp_remote_post for HTTP requests
         $response = wp_remote_post($url, [
@@ -140,6 +141,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         
         // Decode and return the response
         $response_body = wp_remote_retrieve_body($response);
+        return $response_body;
     }
 
 
@@ -148,7 +150,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
      */
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
-        return $this->mark_abandoned_carts();
+        $this->mark_abandoned_carts();
     
         // Initialize query condition
         $query_conditions = "status != %s";
