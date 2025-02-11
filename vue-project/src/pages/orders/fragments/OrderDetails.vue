@@ -20,17 +20,28 @@
     <div class="px-4 lg:px-6">
         <div v-if="activeOrder" class="grid md:grid-cols-2 mb-4">
             <h4>
-                <span style="font-weight: bold;">
-                    Name:
-                </span> 
-                {{ activeOrder?.customer_name }}
+                <span class="block">
+                    <span style="font-weight: bold;">
+                        Name:
+                    </span> 
+                    {{ activeOrder?.customer_name }}
+                </span>
+                <span class="block">
+                    <span style="font-weight: bold;">
+                        Date:
+                    </span> 
+                    {{ activeOrder?.date_created }}
+                </span>
             </h4>
-            <h4>
+            <a 
+                class="block text-orange-500 underline"
+                :href="`tel:${activeOrder.billing_address?.phone}`"
+            >
                 <span style="font-weight: bold;">
                     Phone:
                 </span> 
                 {{ activeOrder.billing_address?.phone }}
-            </h4>
+            </a>
             <h4 v-if="activeOrder.billing_address?.email">
                 <span style="font-weight: bold;">
                     Email:

@@ -8,7 +8,7 @@
             class="bg-white/90 rounded-full p-[2px] absolute inset-1/2 -translate-x-1/2"
         />
         <div 
-            v-if="!courierBalanceData"
+            v-if="!isEmpty(courierBalanceData)"
             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
         >
             <Card.Stylist
@@ -115,6 +115,7 @@
     import DashboardCard from '../DashboardCard.vue'
     import { useBalance } from './useBalance'
     import { onMounted } from 'vue'
+    import { isEmpty } from 'lodash'
 
     const {
         isLoading,

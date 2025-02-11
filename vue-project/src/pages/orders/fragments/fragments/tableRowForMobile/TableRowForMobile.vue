@@ -117,9 +117,12 @@
             >
                 📅 {{ order.date_created }}
             </div>
-            <div class="text-sm flex gap-1 items-center w-fit">
+            <a 
+                class="text-sm flex gap-1 items-center w-fit text-orange-500 underline"
+                :href="`tel: ${order.billing_address.phone}`"
+            >
                 📞 {{ order.billing_address.phone }}
-            </div>
+            </a>
             <div
                 class="text-sm flex gap-1 items-center w-fit"
                 @click="toggleAddressModel = true"
@@ -135,6 +138,16 @@
                 :order="order"
             />
 
+            <a
+                v-if='order?.courier_data?.parcel_tracking_link'
+                class="font-medium text-blue-500" 
+                title="Click to track your parcel"
+                :href="order?.courier_data?.parcel_tracking_link"
+                target="_black"
+            >
+                📍 Track Parcel
+            </a>
+            
             <div class="flex gap-2 items-center">
                 <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">
                     {{ order.status=='processing' ? 'New Order' : order?.status?.replace(/-/g, ' ') }}

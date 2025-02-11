@@ -22,13 +22,13 @@
       </div>
 
       <div>
-        <div v-if="item.customer_phone">
-          <span class="font-semibold text-[#02b795]"> 📞 Phone: </span>
+        <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
+          <span class="font-semibold"> 📞 Phone: </span>
           {{ item.customer_phone }}
-        </div>
+        </a>
 
         <div v-if="item.customer_email" class="truncate">
-          <span class="font-semibold text-orange-500"> 📨 Email: </span>
+          <span class="font-semibold"> 📨 Email: </span>
           {{ item.customer_email || 'n/a' }}
         </div>
       </div>
