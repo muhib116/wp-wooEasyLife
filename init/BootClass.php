@@ -7,6 +7,7 @@ class BootClass {
     public $css_file_name;
     public $js_file_name;
     public $assets_file_name;
+    public $svg_icon_wel = '<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#a)" fill="#FFC149"><path d="M12.565 1.879H9.21a.838.838 0 1 0 0 1.677h1.33L7.535 6.562l-2.761-2.76a.84.84 0 0 0-1.185 0L.235 7.154A.838.838 0 0 0 1.421 8.34l2.76-2.76 2.761 2.76a.84.84 0 0 0 1.185 0l3.6-3.599v1.33a.838.838 0 1 0 1.676 0V2.717a.84.84 0 0 0-.838-.838"/><path d="M7.743 12.099q0 .835-.3 1.56-.298.716-.814 1.246a3.9 3.9 0 0 1-1.211.828q-.69.3-1.483.3-.787 0-1.483-.3a4 4 0 0 1-1.211-.828 4 4 0 0 1-.815-1.246 4 4 0 0 1-.3-1.56q0-.849.3-1.573.3-.725.815-1.247a3.8 3.8 0 0 1 1.211-.828q.696-.3 1.483-.3.793 0 1.483.286.696.28 1.211.8.516.516.815 1.247.3.723.3 1.615m-1.914 0q0-.459-.154-.828a1.9 1.9 0 0 0-.403-.641 1.7 1.7 0 0 0-.606-.41 1.8 1.8 0 0 0-.731-.147q-.39 0-.738.146-.34.14-.599.411-.251.264-.397.64a2.2 2.2 0 0 0-.146.829q0 .432.146.8.147.37.397.641.258.271.599.432.348.153.738.153t.73-.146a1.82 1.82 0 0 0 1.01-1.051q.154-.376.154-.829m10.17 0q0 .835-.3 1.56-.298.716-.814 1.246a3.9 3.9 0 0 1-1.211.828q-.69.3-1.483.3-.787 0-1.483-.3a4 4 0 0 1-1.211-.828 4 4 0 0 1-.815-1.246 4 4 0 0 1-.3-1.56q0-.849.3-1.573.3-.725.815-1.247a3.8 3.8 0 0 1 1.21-.828q.698-.3 1.484-.3.793 0 1.483.286.696.28 1.211.8.516.516.815 1.247.3.723.299 1.615m-1.915 0q0-.459-.153-.828a1.9 1.9 0 0 0-.404-.641 1.7 1.7 0 0 0-.605-.41 1.8 1.8 0 0 0-.731-.147q-.39 0-.738.146-.341.14-.599.411-.251.264-.397.64a2.2 2.2 0 0 0-.146.829q0 .432.146.8.147.37.397.641.258.271.599.432.348.153.738.153t.73-.146a1.82 1.82 0 0 0 1.01-1.051q.153-.376.153-.829"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 .956h16v16H0z"/></clipPath></defs></svg>';
 
     public function __construct()
     {
@@ -17,6 +18,9 @@ class BootClass {
         $this->assets_file_name = $this->manifest['src/main.ts']['assets'][0] ?? null;
 
         add_action('admin_menu', [$this, 'wel_add_menu']);
+        add_action('admin_head', [$this, 'wel_custom_menu_icon']);
+
+        add_action('admin_bar_menu', [$this, 'wel_add_bar_menu'], 60);
         add_action('admin_enqueue_scripts', [$this, 'wel_enqueue_scripts']);
         add_filter('script_loader_tag', function ($tag, $handle, $src) {
             if ('woo-easy-life' === $handle) {
@@ -34,9 +38,35 @@ class BootClass {
             'manage_options',
             'woo-easy-life',
             [$this, 'wel_render_admin_page'],
-            'dashicons-admin-site-alt',
+            '',
             6
         );
+    }
+
+    public function wel_custom_menu_icon() {
+        global $icon_url;
+        echo '<style>
+            #toplevel_page_woo-easy-life .wp-menu-image:before,
+            #toplevel_page_woo-easy-life .wp-menu-image img {
+                display: none; /* Hide default icon */
+            }
+            #toplevel_page_woo-easy-life .wp-menu-image {
+                background: url("' . esc_url($icon_url) . '") no-repeat center center !important;
+                background-size: 20px !important;
+            }
+        </style>';
+    }
+
+    public function wel_add_bar_menu($wp_admin_bar) {
+        $wp_admin_bar->add_node(array(
+            'id'    => 'woo-easy-life-bar-menu',
+            'title' => 'My Plugin', // The text shown in the admin bar
+            'title' => '<span style="height: 100%; display: flex; align-items: center; justify-content: center;">' . $this->svg_icon_wel . '<span style="margin-left: 8px;">WEL</span></span>',
+            'href'  => admin_url('admin.php?page=woo-easy-life'), // Link to your plugin settings page
+            'meta'  => array(
+                'title' => __('Go to WooEasyLife'), // Tooltip on hover
+            ),
+        ));
     }
 
     public function wel_render_admin_page() {

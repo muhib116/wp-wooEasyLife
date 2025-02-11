@@ -19,6 +19,8 @@ if (!defined('ABSPATH')) {
 define('__PREFIX', 'woo_easy_life_');
 define('__API_NAMESPACE', 'wooeasylife/v1');
 define('WEL_PLUGIN_FILE', __FILE__);
+define('WEL_PLUGIN_DIR', __DIR__);
+$icon_url = plugin_dir_url(__FILE__) . 'assets/wooEasyLifeIcon.svg'; // Path to your SVG    
 
 $current_version = null;
 // Global variables for license and configuration data.
