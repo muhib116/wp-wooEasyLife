@@ -564,7 +564,6 @@ export const useOrders = () => {
   }
 
   const include_balance_cut_failed_new_orders = async (totalNewOrders: Number, btn: { isLoading: boolean}) => {
-
     let alertMsg = `Are you sure you want to include your missing new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
     if(!confirm(alertMsg)) return
     if(totalNewOrders > userData.value.remaining_order) {
