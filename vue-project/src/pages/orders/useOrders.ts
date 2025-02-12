@@ -389,7 +389,7 @@ export const useOrders = () => {
               new_status: statusName,
             }]);
   
-            order.status =  statusName.replace('wc', '')
+            order.status =  statusName.replace('wc-', '')
           } catch (err) {
             console.error(err)
           }

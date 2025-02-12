@@ -1,14 +1,8 @@
 import { useLicense } from "@/pages/config/license/UseLicense";
 import {
-  userData,
   licenseKey,
   isValidLicenseKey
 } from '@/service/useServiceProvider';
-
-const premiumRoutesName = [
-  'missingOrders',
-  'fraudCheck',
-];
 
 export default function (router) {
   const { loadLicenseKey } = useLicense(false);

@@ -239,17 +239,20 @@ export const getTutorials = async () => {
 }
 
 
+const handleLicenseClean = () => {
+  licenseKey.value = ''
+  isValidLicenseKey.value = false;
+  localStorage.removeItem('license_key')
+  return 
+}
+
 const handleLicenseValidations = (err) => 
 {
   const msg = err.response?.data?.message.replace('.', '').trim()
 
-  if(msg == 'Invalid domain') {
+  if(msg == 'Invalid domain' || msg == 'Invalid Token') {
+    handleLicenseClean()
     handleRedirect(err.response.status)
-
-    licenseKey.value = ''
-    isValidLicenseKey.value = false;
-    localStorage.removeItem('license_key')
-
     return 
   }
   
@@ -292,6 +295,7 @@ const handleLicenseValidations = (err) =>
         `,
         type: 'danger'
       };
+      handleLicenseClean()
     break;
 
     default:

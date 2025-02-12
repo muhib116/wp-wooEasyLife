@@ -104,5 +104,5 @@ class Remote_UsePackageHistory {
             'status'  => 'success',
             'message' => $response_body,
         ];
-    }    
+    } 
 }

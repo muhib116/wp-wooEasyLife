@@ -64,13 +64,15 @@ Dashboard:
 ✅ api key add hoyna
 ✅ sms recharge korte hobe
 ✅ The table "customer_data" was not created. Please deactivate and reactivate the "WooEasyLife" plugin.
+✅ Missing order a paginatioon add korte hobe
+✅ billing and shipping phone validatio checkout page
 
 
 
 --------heigh priority task------------
-👉🏻 *** Missing order a paginatioon add korte hobe
+👉🏻 missing order theke real order a niwar bebosta korte hobe
+👉🏻 status er color niye kaj korte hobe
 👉🏻 *** Curier cod edit er option dite hobe
-👉🏻 billing and shipping phone validatio checkout page
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
 👉🏻 status bangla language a create korte gele status create hoyna

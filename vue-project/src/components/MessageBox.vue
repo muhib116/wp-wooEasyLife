@@ -1,7 +1,7 @@
 <template>
     <div 
         v-if="title"
-        class="relative print:hidden group flex items-center shadow rounded text-sm p-4 mb-4 border-l-4 border-current gap-3 z-50" role="alert"
+        class="relative print:hidden group flex items-center shadow rounded text-sm p-4 mb-4 border-l-4 border-current gap-3 z-10" role="alert"
         :style="styles[type.toLowerCase()]"
     >
         <button 
