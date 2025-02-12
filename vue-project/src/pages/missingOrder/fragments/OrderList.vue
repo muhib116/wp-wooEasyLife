@@ -10,7 +10,8 @@
     <Table.Table>
         <Table.THead>
             <Table.Th class="truncate">Customer Info</Table.Th>
-            <Table.Th class="truncate hidden lg:table-cell">Contact Info</Table.Th>
+            <Table.Th class="truncate hidden lg:table-cell">Shipping</Table.Th>
+            <Table.Th class="truncate">Payment</Table.Th>
             <Table.Th class="truncate">Cart Info</Table.Th>
             <Table.Th class="truncate text-right">Action</Table.Th>
         </Table.THead>

@@ -1,5 +1,5 @@
-import { getDashboardData, getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
-import { showNotification } from "@/helper"
+import { getDashboardData, getAbandonedOrders, updateAbandonedOrderStatus, createOrder } from "@/api"
+import { normalizePhoneNumber, showNotification, validateBDPhoneNumber } from "@/helper"
 import { computed, onMounted, ref } from "vue"
 
 export const useMissingOrder = () => {
@@ -7,24 +7,24 @@ export const useMissingOrder = () => {
     const abandonOrders = ref([])
     const options = ref([
         {
-          title: 'Abandoned',
-          id: 'abandoned',
-          color: '#8cc520'
+            title: 'Abandoned',
+            id: 'abandoned',
+            color: '#8cc520'
         },
         {
-          title: 'Call not received',
-          id: 'call-not-received',
-          color: '#f97315'
+            title: 'Call not received',
+            id: 'call-not-received',
+            color: '#f97315'
         },
         {
-          title: 'Confirmed',
-          id: 'confirmed',
-          color: '#00b002'
+            title: 'Confirmed',
+            id: 'confirmed',
+            color: '#00b002'
         },
         {
-          title: 'Delete',
-          id: 'canceled',
-          color: '#e82661'
+            title: 'Delete',
+            id: 'canceled',
+            color: '#e82661'
         }
     ])
 
@@ -58,35 +58,6 @@ export const useMissingOrder = () => {
         )
         return filteredOrders
     })
-    
-
-    // const getDashboardData = computed(() => {
-    //     const data = {
-    //         loosedAmount: 0,
-    //         totalAbandonedOrder: abandonOrders.value?.length || 0,
-    //         remainingAbandonedOrder: 0,
-    //         totalRecoveredOrder: 0,
-    //         totalCallNotReceived: 0,
-    //         recoveredAmount: 0,
-    //     }
-
-    //     abandonOrders.value.forEach(item => {
-    //         if(item.status == 'confirmed'){
-    //             data.totalCallNotReceived += 1
-    //         }
-            
-    //         if(item.status == 'confirmed'){
-    //             data.totalRecoveredOrder += 1
-    //             data.recoveredAmount +=  +item.total_value
-    //             return
-    //         }else {
-    //             data.remainingAbandonedOrder += 1
-    //             data.loosedAmount +=  +item.total_value
-    //         }
-    //     })
-
-    //     return data
-    // })
 
     const updateStatus = async (item, selectedStatus: string, btn) => {
         try {
@@ -96,7 +67,9 @@ export const useMissingOrder = () => {
                 ...item,
                 status: selectedStatus
             }
-            await createOrderFromAbandonedData(item)
+            await createOrderFromAbandonedData(item, btn)
+            return
+
             const { message, status } = await updateAbandonedOrderStatus(item.id, payload)
             showNotification({
                 type: 'success',
@@ -104,7 +77,7 @@ export const useMissingOrder = () => {
             })
 
             await loadAbandonedOrder()
-        } catch({response}) {
+        } catch ({ response }) {
             showNotification({
                 type: 'danger',
                 message: response?.data?.message
@@ -119,8 +92,61 @@ export const useMissingOrder = () => {
         selectedOption.value = item
     }
 
-    const createOrderFromAbandonedData = () => {
-        
+    const createOrderFromAbandonedData = async (form, btn) => 
+    {
+        if (!validateBDPhoneNumber(normalizePhoneNumber(form.customer_phone.trim()))) {
+            showNotification({
+                type: 'danger',
+                message: 'Phone number is not valid bangladeshi number!'
+            })
+            return
+        }
+
+
+        try {
+            btn.isLoading = true
+            const products = form.cart_contents.map(item => {
+                return {
+                    id: item.product_id,
+                    quantity: item.quantity
+                }
+            })
+
+            const address = [
+                { first_name: form.customer_name },
+                { last_name: '' },
+                { address_1: form.billing_address },
+                { address_2: '' },
+                { phone: form.customer_phone }
+            ]
+
+            // const coupon_codes = form.coupons.map(item => item.coupon_code)
+
+            const payload = {
+                products: products,
+                address,
+                payment_method_id: form?.paymentMethod?.id || '',
+                shipping_method_id: form?.shippingMethod?.method_id || '',
+                shipping_cost: form?.shippingMethod?.shipping_cost || '',
+                customer_note: form.customer_note,
+                order_source: 'abandoned',
+                order_status: 'wc-confirmed',
+                // coupon_codes: coupon_codes
+            }
+
+            const { data } = await createOrder(payload)
+            if (data.order_id) {
+                showNotification({
+                    type: 'success',
+                    message: 'Order created successfully!'
+                })
+            }
+        } catch (err) {
+            console.log({ err })
+        } finally {
+            btn.isLoading = false
+            isLoading.value = false
+        }
     }
 
     const loadAbandonedOrder = async () => {
@@ -170,5 +196,6 @@ export const useMissingOrder = () => {
         handleFilter,
         loadDashboardData,
         loadAbandonedOrder,
+        createOrderFromAbandonedData,
     }
 }

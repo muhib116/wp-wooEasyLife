@@ -36,27 +36,29 @@
       <div class="truncate">
         📅 {{ printDate(item.created_at) }}
       </div>
-      <div class="block lg:hidden">
-        <br />
-        🏠 <span class="font-semibold text-sky-500">Billing address:</span>
-        <br />
-        {{ item.billing_address }}
+      <div>
+        🏠 {{ item.billing_address }}
       </div>
     </Table.Td>
 
     <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
-      <div>
-        🏠 <span class="font-semibold text-sky-500">Billing address:</span>
-        <br />
-        {{ item.billing_address }}
-      </div>
-
-      <div>
-        📍 <span class="font-semibold text-red-500">Shipping address:</span>
-        <br />
-        {{ item.shipping_address }}
-      </div>
+      <h3>💵 Price: {{ item.total_value || 0 }}৳</h3>
+      <h3>💰 Discount: {{ item?.cart_contents?.total_discount || 0 }}৳</h3>
+      <h3>🎟️ Coupons: {{ item?.cart_contents?.coupon_codes?.length ? item.cart_contents.coupon_codes.join(', ') : 'N/A' }}</h3>
     </Table.Td>
+
+    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
+      <h3 title="Payment method">
+        🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
+      </h3>
+      <h3 title="Shipping method">
+        📍 {{ item.cart_contents?.shipping_method || 'n/a' }}
+      </h3>
+      <h3 title="Shipping cost">
+        💰 Cost: {{ item.cart_contents?.shipping_cost || 'n/a' }}
+      </h3>
+    </Table.Td>
+    
     <Table.Td class="capitalize min-w-[160px] text-center lg:text-left space-y-2">
       <span
         :style="{

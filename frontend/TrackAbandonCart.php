@@ -111,13 +111,28 @@ class TrackAbandonCart {
         $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email);
     
         // Serialize cart contents
-        $cart_contents = [];
+        $cart_contents = [
+            'products' => [],
+            'coupon_codes'      => array_values(WC()->session->get('applied_coupons', [])), // Get applied coupons
+            'customer_note'     => WC()->session->get('customer_note', ''), // Get customer note if available
+            'payment_method_id' => WC()->session->get('chosen_payment_method', ''), // Get chosen payment method
+            'payment_method' => $this->get_selected_payment_method(), // Get chosen payment method
+            'shipping_method_id'=> WC()->session->get('chosen_shipping_methods')[0] ?? '', // Get selected shipping method
+            'shipping_method'   => $this->get_selected_shipping_method(), // Get selected shipping method
+            'total_discount_before_tax'    => WC()->cart->get_discount_tax(),
+            'subtotal'        => WC()->cart->get_subtotal(), 
+            'total'           => WC()->cart->get_total(), 
+            'total_discount'  => WC()->cart->get_discount_total(), 
+            'coupon_discounts'=> WC()->cart->get_coupon_discount_totals(), 
+            'shipping_cost'   => WC()->cart->get_shipping_total(), 
+        ];
         $total_value = 0;
     
         foreach ($cart as $cart_item) {
             $product = $cart_item['data']; // WC_Product object
     
-            $cart_contents[] = [
+            $cart_contents['products'][] = [
+                'product_id'  => $product->get_id(),
                 'name'        => $product->get_name(),
                 'image'       => wp_get_attachment_url($product->get_image_id()),
                 'product_url' => get_permalink($product->get_id()),
@@ -197,6 +212,52 @@ class TrackAbandonCart {
                 ]
             );
         }
+    }
+
+
+    private function get_selected_payment_method() {
+        // Get chosen payment method ID
+        $chosen_payment_method = WC()->session->get('chosen_payment_method');
+    
+        // Get available payment gateways
+        $payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+    
+        // Return payment method name as a string, or a default message
+        return isset($payment_gateways[$chosen_payment_method]) 
+            ? $payment_gateways[$chosen_payment_method]->get_title() // Get the name as a string
+            : __('No payment method selected', 'woocommerce');
+    }
+    
+
+
+    /**
+     * Get the name of the selected shipping method.
+     *
+     * @return string Shipping method name or default message
+     */
+    private function get_selected_shipping_method() {
+        // Get chosen shipping methods from session
+        $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
+
+        // Ensure a shipping method is selected
+        if (empty($chosen_shipping_methods) || !is_array($chosen_shipping_methods)) {
+            return __('No shipping method selected', 'woocommerce');
+        }
+
+        // Get shipping method ID (usually formatted like "flat_rate:1" or "free_shipping:2")
+        $shipping_method_id = reset($chosen_shipping_methods); // Get the first selected method
+
+        // Get available shipping rates for the current session
+        $shipping_packages = WC()->shipping->get_packages();
+        foreach ($shipping_packages as $package) {
+            foreach ($package['rates'] as $rate_id => $rate) {
+                if ($rate_id === $shipping_method_id) {
+                    return $rate->get_label(); // Return human-readable shipping method name
+                }
+            }
+        }
+
+        return __('Unknown shipping method', 'woocommerce');
     }
        
 

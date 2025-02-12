@@ -1,6 +1,14 @@
 <template>
 
-    <h3 class="font-bold m-0 mb-[10px]">Customer Details</h3>
+    <h3 class="font-bold m-0 mb-[10px]">
+        <span 
+            v-if="!order?.cart_contents?.products"
+            class="text-red-500 font-light block"
+        >
+            (Not convert to real order)
+        </span>
+        Customer Details 
+    </h3>
         <div class="grid gap-x-4 gap-y-2 lg:grid-cols-[1fr_1fr] mb-4">
         <h4>
             <span style="font-weight: bold">
@@ -47,7 +55,7 @@
 
         <Table.TBody>
             <Table.Tr
-                v-for="(item, index) in order.cart_contents || []"
+                v-for="(item, index) in order.cart_contents.products || order.cart_contents"
                 :key="index"
             >
                 <Table.Td>
