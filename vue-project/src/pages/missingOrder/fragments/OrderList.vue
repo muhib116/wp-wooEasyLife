@@ -2,6 +2,11 @@
     <p class="mb-4 font-medium text-blue-500 bg-blue-100/70 py-1 px-4">
         If the cart remains inactive for 25 minutes, it will be considered an abandoned order.
     </p>
+
+    <div class="flex justify-end mb-2">
+        <Pagination />
+    </div>
+
     <Table.Table>
         <Table.THead>
             <Table.Th class="truncate">Customer Info</Table.Th>
@@ -30,6 +35,7 @@
     import { Table } from '@components'
     import { inject } from 'vue'
     import TableRow from './TableRow.vue'
+    import Pagination from './Pagination.vue'
 
     const {
         isLoading,

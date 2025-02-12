@@ -68,6 +68,7 @@ Dashboard:
 
 
 --------heigh priority task------------
+👉🏻 *** Missing order a paginatioon add korte hobe
 👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 billing and shipping phone validatio checkout page
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.

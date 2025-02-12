@@ -283,13 +283,15 @@ export const checkFraudCustomer = async (payload: { phone: string[] }) => {
 // custom order end
 
 // abandoned order start
-export const getAbandonedOrders = async (date?: {
-  start_date: string;
-  end_date: string;
+export const getAbandonedOrders = async (filter?: {
+  page: number,
+  per_page: number,
+  status: string,
+  search: string,
 }) => {
   const { data } = await axios.post(
     `${localApiBaseURL}/abandoned-orders`,
-    date
+    filter
   );
   return data;
 };

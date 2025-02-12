@@ -91,13 +91,11 @@ class TrackAbandonCart {
         $customer_email = WC()->session->get('billing_email');
         $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
     
-        // block invalid phone
+        // **Validate phone number**
         if (empty($customer_phone) || !validate_BD_phoneNumber($customer_phone)) {
-            if (empty($customer_email)) {
-                return false;
-            }
+            return; // Exit if phone is invalid (no insertion/update allowed)
         }
-
+    
         // Check if the customer has already placed a new order with 'wc-processing' status
         $existingNewOrder = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email, 'wc-processing');
         
@@ -105,13 +103,14 @@ class TrackAbandonCart {
             return;
         }
     
+        // Get billing & shipping addresses
         $billing_address = WC()->customer->get_billing_address_1() . ', ' . WC()->customer->get_billing_city() . ', ' . WC()->customer->get_billing_state() . ', ' . WC()->customer->get_billing_postcode();
         $shipping_address = WC()->customer->get_shipping_address_1() . ', ' . WC()->customer->get_shipping_city() . ', ' . WC()->customer->get_shipping_state() . ', ' . WC()->customer->get_shipping_postcode();
     
-        // Determine if the customer is a repeat customer (check WooCommerce orders)
+        // Check if customer is a repeat customer
         $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email);
     
-        // Serialize cart contents to store in the database
+        // Serialize cart contents
         $cart_contents = [];
         $total_value = 0;
     
@@ -131,17 +130,14 @@ class TrackAbandonCart {
         }
     
         $serialized_cart_contents = maybe_serialize($cart_contents);
-
-        
+    
         // Check if the cart is already stored
         $session_id = $session->get_customer_id();
         $existing_cart = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT id FROM $table_name 
                 WHERE session_id = %s 
-                AND (
-                    status = 'active' 
-                )",
+                AND status = 'active'",
                 $session_id
             )
         );
@@ -201,7 +197,8 @@ class TrackAbandonCart {
                 ]
             );
         }
-    }    
+    }
+       
 
     private function is_repeat_customer_by_billing_phone($billing_phone=null, $billing_email=null, $status='wc-completed') {
         if (empty($billing_phone) && empty($billing_email)) {
@@ -225,10 +222,10 @@ class TrackAbandonCart {
             $args['billing_email'] = $billing_email;
         }
 
-        $completed_orders = wc_get_orders($args);
+        $orders = wc_get_orders($args);
 
         // If there are any remaining completed orders, the customer is a repeat customer
-        return count($completed_orders) > 0;
+        return count($orders) > 0;
     }
 
     public function deleteAbandonedOrderIfOrderProcessedSuccessfully($order_id) {
@@ -247,22 +244,23 @@ class TrackAbandonCart {
         // Define the abandoned cart table name
         $table_name = $wpdb->prefix . __PREFIX . 'abandon_cart';
     
-        // Check if an abandoned order exists for this customer where status is 'active'
-        $abandoned_cart_id = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT id FROM $table_name WHERE (customer_email = %s OR customer_phone = %s) AND status = 'active'",
-                $customer_email,
-                $customer_phone
-            )
-        );
-    
-        if ($abandoned_cart_id) {
-            // Delete the abandoned order record
-            $wpdb->delete(
-                $table_name,
-                ['id' => $abandoned_cart_id],
-                ['%d']
+        if (!empty($customer_phone)) {
+            // Delete all records with matching phone and status 'active' or 'abandoned'
+            $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM $table_name WHERE customer_phone = %s AND (status = 'active' OR status = 'abandoned')",
+                    $customer_phone
+                )
+            );
+        } elseif (!empty($customer_email)) {
+            // If phone does not exist, delete all records with matching email and status 'active' or 'abandoned'
+            $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM $table_name WHERE customer_email = %s AND (status = 'active' OR status = 'abandoned')",
+                    $customer_email
+                )
             );
         }
-    }    
+    }
+       
 }

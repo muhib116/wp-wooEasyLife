@@ -28,6 +28,16 @@ export const useMissingOrder = () => {
         }
     ])
 
+    const totalRecords = ref(0)
+    const currentPage = ref(1)
+    const totalPages = ref(0)
+    const orderFilter = ref({
+        page: 1,
+        per_page: 30,
+        status: "",
+        search: "",
+    });
+
     const selectedOption = ref(options.value[0])
 
     const filteredAbandonOrders = computed(() => {
@@ -102,10 +112,16 @@ export const useMissingOrder = () => {
         
     }
 
-    const loadAbandonedOrder = async (date?: {start_date: string, end_date: string}) => {
+    const loadAbandonedOrder = async () => {
         try {
             isLoading.value = true
-            const { data } = await getAbandonedOrders(date)
+            if (orderFilter.value.page == 0) {
+                orderFilter.value.page = 1;
+            }
+            const { data, pagination } = await getAbandonedOrders(orderFilter.value)
+            totalRecords.value = pagination.total_count
+            currentPage.value = pagination.current_page
+            totalPages.value = pagination.total_pages
             abandonOrders.value = data
         } finally {
             isLoading.value = false
@@ -120,6 +136,10 @@ export const useMissingOrder = () => {
     return {
         options,
         isLoading,
+        totalPages,
+        orderFilter,
+        currentPage,
+        totalRecords,
         abandonOrders,
         selectedOption,
         getDashboardData,

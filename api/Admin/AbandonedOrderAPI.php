@@ -60,7 +60,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     private function mark_abandoned_carts() {
         global $wpdb;
     
-        $cutoff_time = strtotime('-25 minutes'); // 25 minutes ago
+        $cutoff_time = strtotime('-120 minutes'); // 25 minutes ago
     
         // for testing when development environment start
         $server_ip = $_SERVER['SERVER_ADDR'];
@@ -144,26 +144,25 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         return $response_body;
     }
 
-
     /**
-     * Get all abandoned orders
+     * Get all abandoned orders with pagination
      */
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
         $this->mark_abandoned_carts();
-    
+
         // Initialize query condition
         $query_conditions = "status != %s";
         $query_params = ['active'];
-    
+
         // Add date range condition if start_date and end_date are defined
         $start_date = $request->get_param('start_date');
         $end_date = $request->get_param('end_date');
-    
+
         if ($start_date && $end_date) {
             $start_date = sanitize_text_field($start_date);
             $end_date = sanitize_text_field($end_date);
-    
+
             // Validate date format
             if (!strtotime($start_date) || !strtotime($end_date)) {
                 return new WP_REST_Response([
@@ -171,40 +170,64 @@ class AbandonedOrderAPI extends WP_REST_Controller {
                     'message' => 'Invalid date format. Use YYYY-MM-DD.',
                 ], 400);
             }
-    
+
             $query_conditions .= " AND abandoned_at BETWEEN %s AND %s";
             $query_params[] = $start_date . ' 00:00:00';
             $query_params[] = $end_date . ' 23:59:59';
         }
-    
-        // Query the database
+
+        // Get pagination parameters
+        $page = max(1, intval($request->get_param('page') ?? 1));
+        $per_page = max(1, intval($request->get_param('per_page') ?? 10));
+        $offset = ($page - 1) * $per_page;
+
+        // Get total count of abandoned orders
+        $total_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$this->table_name} WHERE $query_conditions",
+            ...$query_params
+        ));
+
+        // Query the database with pagination
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE $query_conditions ORDER BY abandoned_at DESC",
-                ...$query_params
+                "SELECT * FROM {$this->table_name} WHERE $query_conditions ORDER BY abandoned_at DESC LIMIT %d OFFSET %d",
+                ...array_merge($query_params, [$per_page, $offset])
             ),
             ARRAY_A
         );
-    
+
+        // If no results found
         if (empty($results)) {
             return new WP_REST_Response([
                 'status'  => 'success',
                 'message' => 'No abandoned orders found.',
                 'data'    => [],
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page'     => $per_page,
+                    'total_count'  => $total_count,
+                    'total_pages'  => ceil($total_count / $per_page),
+                ],
             ], 200);
         }
-    
+
         // Deserialize cart_contents for each result
         foreach ($results as &$result) {
             if (isset($result['cart_contents'])) {
                 $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
             }
         }
-    
+
         return new WP_REST_Response([
             'status'  => 'success',
             'message' => 'Abandoned orders retrieved successfully.',
             'data'    => $results,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page'     => $per_page,
+                'total_count'  => $total_count,
+                'total_pages'  => ceil($total_count / $per_page),
+            ],
         ], 200);
     }
 
