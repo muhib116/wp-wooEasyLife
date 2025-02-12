@@ -296,6 +296,16 @@ export const getAbandonedOrders = async (filter?: {
   return data;
 };
 
+export const getDashboardData = async (date) => {
+  const { data } = await axios.get(
+    `${localApiBaseURL}/abandoned-dashboard-data`,
+    {
+      params: date
+    }
+  );
+  return data;
+}
+
 
 export const updateAbandonedOrderStatus = async (
   id: string,

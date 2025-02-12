@@ -43,7 +43,7 @@ export const useNotification = () => {
       showNotification(data)
     })
 
-    intervalId = setInterval(checkNewOrderStatus, 10000)
+    intervalId = setInterval(checkNewOrderStatus, 15000)
   })
 
   onBeforeUnmount(() => {

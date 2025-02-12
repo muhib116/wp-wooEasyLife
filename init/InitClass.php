@@ -130,9 +130,9 @@ class InitClass {
     {
         $site_title = get_bloginfo('name');
         $custom_logo_id = get_theme_mod('custom_logo');
-        $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+        $logo_url = $custom_logo_id ? wp_get_attachment_image_url($custom_logo_id, 'full') : '';
     
-        // New default configuration
+        // New default configuration (only new fields will be added)
         $new_config = [
             "admin_phone" => '',
             "invoice_company_name" => $site_title,
@@ -142,10 +142,10 @@ class InitClass {
             "invoice_print" => false,
             "clear_data_when_deactivate_plugin" => false,
             "validate_checkout_form" => false,
+            "place_order_otp_verification" => false,
             "ip_block" => true,
             "phone_number_block" => true,
             "email_block" => true,
-            "place_order_otp_verification" => false,
             "daily_order_place_limit_per_customer" => 3,
             "only_bangladeshi_ip" => false,
             "courier_automation" => false,
@@ -153,22 +153,23 @@ class InitClass {
         ];
     
         // Fetch existing config from the database
-        $existing_config = get_option(__PREFIX . 'config');
-    
-        // If no config exists, save new config
-        if (empty($existing_config)) {
-            update_option(__PREFIX . 'config', $new_config);
-            return;
-        }
+        $option_key = 'your_plugin_prefix_config'; // Ensure correct prefix
+        $existing_config = get_option($option_key);
     
         // Ensure existing config is an array (handles serialization issues)
         if (!is_array($existing_config)) {
             $existing_config = maybe_unserialize($existing_config);
         }
+        if (!is_array($existing_config)) {
+            $existing_config = []; // Fallback to empty array
+        }
     
-        // Compare existing config with new config
-        if ($existing_config !== $new_config) {
-            update_option(__PREFIX . 'config', $new_config);
+        // Merge new config with existing config, ensuring existing values are not changed
+        $merged_config = array_merge($new_config, $existing_config);
+    
+        // Compare before updating to prevent unnecessary writes
+        if (maybe_serialize($existing_config) !== maybe_serialize($merged_config)) {
+            update_option($option_key, $merged_config, true); // Update only if changes are needed
         }
     }    
 }

@@ -382,10 +382,17 @@ export const useOrders = () => {
             courier_data: order.courier_data,
           });
 
-          changeStatus({
-            order_id: order.id,
-            new_status: get_status(courierUpdatedStatus),
-          });
+          let statusName = get_status(courierUpdatedStatus)
+          try {
+            await changeStatus([{
+              order_id: order.id,
+              new_status: statusName,
+            }]);
+  
+            order.status =  statusName.replace('wc', '')
+          } catch (err) {
+            console.error(err)
+          }
         }
       })
 
@@ -432,7 +439,6 @@ export const useOrders = () => {
       delivered: "wc-complete",
       hold: "wc-on-hold",
     };
-
     return statuses[courier_status];
   }
 

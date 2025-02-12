@@ -1,6 +1,5 @@
-import { showNotification } from "@/helper"
 import { getUser } from "@/remoteApi"
-import { ref, watchEffect } from "vue"
+import { ref } from "vue"
 
 export const userData = ref()
 export const licenseKey = ref(localStorage.getItem('license_key'))

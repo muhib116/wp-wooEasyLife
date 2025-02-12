@@ -1,4 +1,4 @@
-import { createOrder, getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
+import { getDashboardData, getAbandonedOrders, updateAbandonedOrderStatus } from "@/api"
 import { showNotification } from "@/helper"
 import { computed, onMounted, ref } from "vue"
 
@@ -28,6 +28,17 @@ export const useMissingOrder = () => {
         }
     ])
 
+    const dashboardData = ref({
+        total_abandoned_orders: 0,
+        total_remaining_abandoned: 0,
+        lost_amount: 0,
+        total_recovered_orders: 0,
+        recovered_amount: 0,
+        total_active_carts: 0,
+        total_confirmed_orders: 0,
+        total_call_not_received_orders: 0,
+        average_cart_value: 0
+    })
     const totalRecords = ref(0)
     const currentPage = ref(1)
     const totalPages = ref(0)
@@ -49,33 +60,33 @@ export const useMissingOrder = () => {
     })
     
 
-    const getDashboardData = computed(() => {
-        const data = {
-            loosedAmount: 0,
-            totalAbandonedOrder: abandonOrders.value?.length || 0,
-            remainingAbandonedOrder: 0,
-            totalRecoveredOrder: 0,
-            totalCallNotReceived: 0,
-            recoveredAmount: 0,
-        }
+    // const getDashboardData = computed(() => {
+    //     const data = {
+    //         loosedAmount: 0,
+    //         totalAbandonedOrder: abandonOrders.value?.length || 0,
+    //         remainingAbandonedOrder: 0,
+    //         totalRecoveredOrder: 0,
+    //         totalCallNotReceived: 0,
+    //         recoveredAmount: 0,
+    //     }
 
-        abandonOrders.value.forEach(item => {
-            if(item.status == 'confirmed'){
-                data.totalCallNotReceived += 1
-            }
+    //     abandonOrders.value.forEach(item => {
+    //         if(item.status == 'confirmed'){
+    //             data.totalCallNotReceived += 1
+    //         }
             
-            if(item.status == 'confirmed'){
-                data.totalRecoveredOrder += 1
-                data.recoveredAmount +=  +item.total_value
-                return
-            }else {
-                data.remainingAbandonedOrder += 1
-                data.loosedAmount +=  +item.total_value
-            }
-        })
+    //         if(item.status == 'confirmed'){
+    //             data.totalRecoveredOrder += 1
+    //             data.recoveredAmount +=  +item.total_value
+    //             return
+    //         }else {
+    //             data.remainingAbandonedOrder += 1
+    //             data.loosedAmount +=  +item.total_value
+    //         }
+    //     })
 
-        return data
-    })
+    //     return data
+    // })
 
     const updateStatus = async (item, selectedStatus: string, btn) => {
         try {
@@ -129,6 +140,17 @@ export const useMissingOrder = () => {
         }
     }
 
+    const loadDashboardData = async (date) => {
+        try {
+            isLoading.value = true
+            const { data } = await getDashboardData(date)
+            dashboardData.value = data
+        } finally {
+            isLoading.value = false
+
+        }
+    }
+
     onMounted(() => {
         loadAbandonedOrder()
     })
@@ -140,12 +162,13 @@ export const useMissingOrder = () => {
         orderFilter,
         currentPage,
         totalRecords,
+        dashboardData,
         abandonOrders,
         selectedOption,
-        getDashboardData,
         filteredAbandonOrders,
         updateStatus,
         handleFilter,
+        loadDashboardData,
         loadAbandonedOrder,
     }
 }
