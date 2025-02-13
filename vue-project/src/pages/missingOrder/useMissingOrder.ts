@@ -47,17 +47,11 @@ export const useMissingOrder = () => {
         per_page: 30,
         status: "",
         search: "",
+        start_date: null,
+        end_date: null
     });
 
     const selectedOption = ref(options.value[0])
-
-    const filteredAbandonOrders = computed(() => {
-        let filteredOrders = [];
-        filteredOrders = abandonOrders.value.filter(
-            (item) => item?.status?.toLowerCase() == selectedOption.value.id
-        )
-        return filteredOrders
-    })
 
     const updateStatus = async (item, selectedStatus: string, btn) => {
         try {
@@ -90,8 +84,10 @@ export const useMissingOrder = () => {
         }
     }
 
-    const handleFilter = (item) => {
-        selectedOption.value = item
+    const handleFilter = (option) => {
+        orderFilter.value.status = option.title //this title==status
+        selectedOption.value = option
+        loadAbandonedOrder()
     }
 
     const createOrderFromAbandonedData = async (form, btn) => 
@@ -157,6 +153,7 @@ export const useMissingOrder = () => {
             if (orderFilter.value.page == 0) {
                 orderFilter.value.page = 1;
             }
+
             const { data, pagination } = await getAbandonedOrders(orderFilter.value)
             totalRecords.value = pagination.total_count
             currentPage.value = pagination.current_page
@@ -193,7 +190,6 @@ export const useMissingOrder = () => {
         dashboardData,
         abandonOrders,
         selectedOption,
-        filteredAbandonOrders,
         updateStatus,
         handleFilter,
         loadDashboardData,

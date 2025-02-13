@@ -32,7 +32,7 @@
             </a>
         </div>
         <div
-            class="flex gap-1 font-medium"
+            class="flex gap-1 font-medium truncate"
         >
             {{ order.billing_address.first_name }}
             {{ order.billing_address.last_name }}

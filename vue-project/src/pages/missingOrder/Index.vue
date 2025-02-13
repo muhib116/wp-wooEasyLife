@@ -38,12 +38,12 @@
                         </Button.Native>
 
                         <Button.Native
-                            v-for="item in options"
-                            @onClick="btn => handleFilter(item, btn)"
+                            v-for="option in options"
+                            @onClick="btn => handleFilter(option, btn)"
                             class="hover:text-sky-500 font-medium"
-                            :class="selectedOption.id == item.id ? 'text-sky-500 font-semibold' : ''"
+                            :class="selectedOption.id == option.id ? 'text-sky-500 font-semibold' : ''"
                         >
-                            {{ item.title }}
+                            {{ option.title }}
                         </Button.Native>
                     </div>
                 </div>

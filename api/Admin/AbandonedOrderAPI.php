@@ -151,23 +151,31 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $response_body = wp_remote_retrieve_body($response);
         return $response_body;
     }
-
+    
     /**
-     * Get all abandoned orders with pagination
+     * Get all abandoned orders with optional filters (status, start_date, end_date) and pagination
      */
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
-        $this->mark_abandoned_carts();
+        $this->mark_abandoned_carts(); // Ensure abandoned carts are marked before fetching
 
-        // Initialize query condition
-        $query_conditions = "status != %s";
-        $query_params = ['active'];
+        // Initialize query conditions
+        $query_conditions = "1=1"; // Always true, allowing optional conditions
+        $query_params = [];
 
-        // Add date range condition if start_date and end_date are defined
+        // Get status filter (optional)
+        $status = $request->get_param('status');
+        if (!empty($status)) {
+            $status = sanitize_text_field($status);
+            $query_conditions .= " AND status = %s";
+            $query_params[] = $status;
+        }
+
+        // Get date filters (optional)
         $start_date = $request->get_param('start_date');
         $end_date = $request->get_param('end_date');
 
-        if ($start_date && $end_date) {
+        if (!empty($start_date) && !empty($end_date)) {
             $start_date = sanitize_text_field($start_date);
             $end_date = sanitize_text_field($end_date);
 
@@ -189,7 +197,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $per_page = max(1, intval($request->get_param('per_page') ?? 10));
         $offset = ($page - 1) * $per_page;
 
-        // Get total count of abandoned orders
+        // Get total count of filtered abandoned orders
         $total_count = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$this->table_name} WHERE $query_conditions",
             ...$query_params
@@ -238,6 +246,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ],
         ], 200);
     }
+
 
     public function get_abandoned_dashboard_data(WP_REST_Request $request) {
         global $wpdb;

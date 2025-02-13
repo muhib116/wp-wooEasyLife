@@ -16,9 +16,9 @@
             <Table.Th class="truncate text-right">Action</Table.Th>
         </Table.THead>
         <Table.TBody>
-            <template v-if="filteredAbandonOrders?.length">
+            <template v-if="abandonOrders?.length">
                 <TableRow
-                    v-for="item in filteredAbandonOrders || []"
+                    v-for="item in abandonOrders || []"
                     :key="item.id"
                     :item="item"
                 />
@@ -40,6 +40,6 @@
 
     const {
         isLoading,
-        filteredAbandonOrders
+        abandonOrders
     } = inject('useMissingOrder')
 </script>
