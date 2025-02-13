@@ -82,6 +82,15 @@ class CustomOrderHandleAPI extends WP_REST_Controller
         $order->set_created_via('admin');
         $order->set_meta_data('_wc_order_attribution_utm_source', $order_source);
     
+
+        if($order_source == 'abandoned') {
+            // balance already cut when abandoned order created in TrackAbandonCart.php
+            // so don't need to cut ballance
+            $order->update_meta_data( 'is_wel_balance_cut', 1);
+            $order->update_meta_data('is_wel_order_handled', 1);
+        }
+
+
         // Step 7: Apply Coupon Codes
         if (!empty($coupon_codes)) {
             foreach ($coupon_codes as $coupon) {

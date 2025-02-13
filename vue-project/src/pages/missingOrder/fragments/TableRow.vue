@@ -52,7 +52,7 @@
         🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
       </h3>
       <h3 title="Shipping method">
-        📍 {{ item.cart_contents?.shipping_method || 'n/a' }}
+        📍 {{ item.cart_contents?.shipping_method_title || 'n/a' }}
       </h3>
       <h3 title="Shipping cost">
         💰 Cost: {{ item.cart_contents?.shipping_cost || 'n/a' }}

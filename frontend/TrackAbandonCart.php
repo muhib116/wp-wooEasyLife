@@ -72,6 +72,52 @@ class TrackAbandonCart {
     }
     
 
+    public function get_shipping_method_title($shipping_method) {
+        // Get all shipping zones
+        $shipping_zones = \WC_Shipping_Zones::get_zones();
+    
+        foreach ($shipping_zones as $zone) {
+            foreach ($zone['shipping_methods'] as $method) {
+                if ($method->id === $shipping_method) {
+                    return $method->get_title();
+                }
+            }
+        }
+    
+        // Check default shipping methods (like "local_pickup" or "free_shipping")
+        $default_methods = WC()->shipping()->get_shipping_methods();
+    
+        if (isset($default_methods[$shipping_method])) {
+            return $default_methods[$shipping_method]->get_method_title();
+        }
+    
+        return 'Unknown Shipping Method';
+    }
+    
+    function get_selected_shipping_data() {
+        // Get selected shipping method from session
+        $chosen_shipping = WC()->session->get('chosen_shipping_methods')[0] ?? '';
+    
+        if (!$chosen_shipping) {
+            return (object) [
+                'title'  => '',
+                'method' => '',
+                'id'     => '',
+            ];
+        }
+    
+        // Extract method and ID
+        list($shipping_method, $shipping_id) = explode(':', $chosen_shipping);
+    
+        // Return shipping data as an object
+        return (object) [
+            'title'  => $this->get_shipping_method_title($shipping_method),
+            'method' => $shipping_method,
+            'id'     => $shipping_id,
+        ];
+    }
+    
+    
     public function store_abandoned_cart_data() {
         global $wpdb;
     
@@ -106,10 +152,13 @@ class TrackAbandonCart {
         // Get billing & shipping addresses
         $billing_address = WC()->customer->get_billing_address_1() . ', ' . WC()->customer->get_billing_city() . ', ' . WC()->customer->get_billing_state() . ', ' . WC()->customer->get_billing_postcode();
         $shipping_address = WC()->customer->get_shipping_address_1() . ', ' . WC()->customer->get_shipping_city() . ', ' . WC()->customer->get_shipping_state() . ', ' . WC()->customer->get_shipping_postcode();
-    
+        
+        $shipping_data = $this->get_selected_shipping_data();
+
         // Check if customer is a repeat customer
         $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email);
-    
+        
+        
         // Serialize cart contents
         $cart_contents = [
             'products' => [],
@@ -117,8 +166,9 @@ class TrackAbandonCart {
             'customer_note'     => WC()->session->get('customer_note', ''), // Get customer note if available
             'payment_method_id' => WC()->session->get('chosen_payment_method', ''), // Get chosen payment method
             'payment_method' => $this->get_selected_payment_method(), // Get chosen payment method
-            'shipping_method_id'=> WC()->session->get('chosen_shipping_methods')[0] ?? '', // Get selected shipping method
-            'shipping_method'   => $this->get_selected_shipping_method(), // Get selected shipping method
+            'shipping_method_id'=>  $shipping_data->id, // Get selected shipping method
+            'shipping_method'   => $shipping_data->method, // Get selected shipping method
+            'shipping_method_title'   => $shipping_data->title, // Get selected shipping method
             'total_discount_before_tax'    => WC()->cart->get_discount_tax(),
             'subtotal'        => WC()->cart->get_subtotal(), 
             'total'           => WC()->cart->get_total(), 

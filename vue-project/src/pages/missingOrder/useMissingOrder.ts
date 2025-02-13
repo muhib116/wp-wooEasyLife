@@ -105,7 +105,7 @@ export const useMissingOrder = () => {
 
         try {
             btn.isLoading = true
-            const products = form.cart_contents.map(item => {
+            const products = form.cart_contents.products.map(item => {
                 return {
                     id: item.product_id,
                     quantity: item.quantity
@@ -125,13 +125,13 @@ export const useMissingOrder = () => {
             const payload = {
                 products: products,
                 address,
-                payment_method_id: form?.paymentMethod?.id || '',
-                shipping_method_id: form?.shippingMethod?.method_id || '',
-                shipping_cost: form?.shippingMethod?.shipping_cost || '',
-                customer_note: form.customer_note,
+                payment_method_id: form?.cart_contents?.payment_method_id || '',
+                shipping_method_id: form?.cart_contents?.shipping_method || '',
+                shipping_cost: form?.cart_contents?.shipping_cost || '',
+                customer_note: form?.cart_contents?.customer_note || '',
                 order_source: 'abandoned',
                 order_status: 'wc-confirmed',
-                // coupon_codes: coupon_codes
+                coupon_codes: form?.cart_contents?.coupon_codes || ''
             }
 
             const { data } = await createOrder(payload)
