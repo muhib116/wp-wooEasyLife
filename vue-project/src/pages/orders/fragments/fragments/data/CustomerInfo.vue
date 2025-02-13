@@ -10,14 +10,17 @@
                 #{{ order.id }}
             </span>
             <span 
-                v-if="order.order_source "
+                v-if="order.order_source"
                 class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
+                :class="{
+                    '!bg-orange-500' : order.order_source   
+                }"
                 title="Order source"
             >
                 {{ order.order_source }}
             </span>
             <a 
-                class="absolute top-0 right-0 text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"
+                class="absolute top-0 left-full text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"
                 :href="`${baseUrl}/wp-admin/post.php?post=${order.id}&action=edit`"
                 target="_blank"
             >

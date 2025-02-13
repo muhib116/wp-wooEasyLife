@@ -67,8 +67,10 @@ export const useMissingOrder = () => {
                 ...item,
                 status: selectedStatus
             }
-            await createOrderFromAbandonedData(item, btn)
-            return
+            
+            if(selectedStatus == 'confirmed'){
+                await createOrderFromAbandonedData(item, btn)
+            }
 
             const { message, status } = await updateAbandonedOrderStatus(item.id, payload)
             showNotification({

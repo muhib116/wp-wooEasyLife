@@ -91,8 +91,13 @@
       </div>
     </Table.Td>
 
-    <Table.Td class="truncate">
-      <div class="grid gap-3 min-w-[135px]">
+    <Table.Td 
+      class="truncate"
+    >
+      <div
+        v-if="item.status == 'abandoned' || item.status == 'call-not-received'"
+        class="grid gap-3 min-w-[135px]"
+      >
         <Select.Primary
           :options="options"
           v-model="selectedStatus"
@@ -104,6 +109,9 @@
         >
           Apply now
         </Button.Primary>
+      </div>
+      <div v-else>
+          n/a
       </div>
     </Table.Td>
   </Table.Tr>

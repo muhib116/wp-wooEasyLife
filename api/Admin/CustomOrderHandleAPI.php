@@ -80,7 +80,7 @@ class CustomOrderHandleAPI extends WP_REST_Controller
         }
     
         $order->set_created_via('admin');
-        $order->set_meta_data('_wc_order_attribution_utm_source', $order_source);
+        $order->update_meta_data('_wc_order_attribution_utm_source', $order_source);
     
 
         if($order_source == 'abandoned') {
