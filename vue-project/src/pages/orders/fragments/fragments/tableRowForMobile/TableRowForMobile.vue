@@ -117,12 +117,26 @@
             >
                 📅 {{ order.date_created }}
             </div>
-            <a 
-                class="text-sm flex gap-1 items-center w-fit text-orange-500 underline"
-                :href="`tel: ${order.billing_address.phone}`"
-            >
-                📞 {{ order.billing_address.phone }}
-            </a>
+
+            <div class="flex gap-2">
+                <a 
+                    class="text-sm flex gap-1 items-center w-fit text-orange-500 underline"
+                    :href="`tel: ${order.billing_address.phone}`"
+                >
+                    📞 {{ order.billing_address.phone }}
+                </a>
+                <a 
+                    :href="`https://wa.me/${order.billing_address.phone}`" 
+                    class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
+                >
+                    <Icon
+                        name="PhWhatsappLogo"
+                        size="20"
+                        weight="fill"
+                    />
+                </a>
+            </div>
+
             <div
                 class="text-sm flex gap-1 items-center w-fit"
                 @click="toggleAddressModel = true"
