@@ -5,8 +5,9 @@
             :for="uid"
             :class="labelClass"
             :style="{ ...labelStyle }"
+            class="flex justify-between w-full"
         >
-            {{ label }}
+            <span>{{ label }}</span>
         </Label>
 
         <div class="relative">
@@ -14,7 +15,18 @@
                 class="absolute inset-0"
                 :style="{ ...bgStyle }"
             ></span>
-            <div class="flex relative z-10 items-center gap-2 w-full">
+            <div class="flex z-10 items-center gap-2 w-full relative">
+                <Button.Native
+                    class="absolute z-10 right-[6px] bottom-[6px] size-[25px] grid place-content-center rounded-full opacity-50 hover:opacity-100"
+                    @click="handleVoiceToText"
+                    :loading="isRecognizing"
+                >
+                    <Icon
+                        name="PhMicrophone"
+                        size="20"
+                    />
+                </Button.Native>
+
                 <textarea
                     v-model="localValue"
                     v-bind="$attrs"
@@ -30,9 +42,16 @@
 <script setup>
     import Label from './Label.vue'
     import { provide, getCurrentInstance, computed, useAttrs } from 'vue'
+    import { Icon, Button } from '@components'
+    import { useVoiceToText } from '@/service/useVoiceToText.ts'
 
     const instance = getCurrentInstance()
     const attrs = useAttrs()
+    const {
+        isRecognizing,
+        startSpeechRecognition
+    } = useVoiceToText()
+    
     defineOptions({
         name: 'BaseInput',
         inheritAttrs: false,
@@ -52,4 +71,9 @@
     provide('props', props) // ignore
 
     const localValue = defineModel()
+    const handleVoiceToText = () => {
+        startSpeechRecognition((text) => {
+            localValue.value = text
+        })
+    }
 </script>

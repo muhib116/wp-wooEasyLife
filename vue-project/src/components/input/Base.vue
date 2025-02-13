@@ -18,12 +18,23 @@
                 class="absolute inset-0"
                 :style="{ ...bgStyle }"
             ></span>
+            <Button.Native
+                class="absolute z-10 right-1 top-1/2 -translate-y-1/2 size-[25px] grid place-content-center rounded-full opacity-50 hover:opacity-100"
+                @click="handleVoiceToText"
+                :loading="isRecognizing"
+            >
+                <Icon
+                    name="PhMicrophone"
+                    size="20"
+                />
+            </Button.Native>
             <div class="flex relative z-10 items-center gap-2 w-full">
+
                 <Native
                     v-model="localValue"
                     v-bind="$attrs"
                     :id="uid"
-                    class="bg-transparent !w-full"
+                    class="bg-transparent !w-full pr-4"
                     :style="inputStyle"
                 />
                 <Icon
@@ -45,11 +56,17 @@
 <script setup>
     import Native from './ui/Native.vue'
     import Label from './Label.vue'
-    import { Icon } from '@components'
+    import { Icon, Button } from '@components'
     import { provide, getCurrentInstance, computed, useAttrs } from 'vue'
-
+    import { useVoiceToText } from '@/service/useVoiceToText.ts'
+    
+    const {
+        isRecognizing,
+        startSpeechRecognition
+    } = useVoiceToText()
     const instance = getCurrentInstance()
     const attrs = useAttrs()
+    
     defineOptions({
         name: 'BaseInput',
         inheritAttrs: false,
@@ -81,4 +98,9 @@
     provide('props', props) // ignore
 
     const localValue = defineModel()
+    const handleVoiceToText = () => {
+        startSpeechRecognition((text) => {
+            localValue.value = text
+        })
+    }
 </script>
