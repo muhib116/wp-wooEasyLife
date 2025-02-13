@@ -31,7 +31,7 @@
     </DashboardCard>
 </template>
 <script setup lang="ts">
-    import { Card, Loader } from '@components'
+    import { Card, Loader, MessageBox } from '@components'
     import { useOrderStatistics } from './useOrderStatistics'
     import DashboardCard from '../DashboardCard.vue'
 

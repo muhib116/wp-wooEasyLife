@@ -79,6 +79,7 @@
 <script setup lang="ts">
     import { Table, Button, Icon } from '@components'
     import { inject } from 'vue'
+
     import CustomerInfo from '@/pages/orders/fragments/fragments/data/CustomerInfo.vue'
     import CustomerBehavior from '@/pages/orders/fragments/fragments/data/CustomerBehavior.vue'
     import DeliveryHistory from '@/pages/orders/fragments/fragments/data/DeliveryHistory.vue'

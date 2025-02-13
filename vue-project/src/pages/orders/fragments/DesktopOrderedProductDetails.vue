@@ -13,7 +13,7 @@
             </Table.THead>
             <Table.TBody>
                 <Table.Tr 
-                    v-for="item in activeOrder.product_info?.product_info || []"
+                    v-for="item in activeOrder?.product_info?.product_info || []"
                     :key="item.id"
                 >
                     <Table.Td>

@@ -5,7 +5,7 @@
             class="mb-4 px-4 lg:px-6"
         />
         <Button.Primary
-            class="!bg-green-500"
+            class="!bg-red-500"
             @click="setActiveOrder('')"
         >
             <Icon

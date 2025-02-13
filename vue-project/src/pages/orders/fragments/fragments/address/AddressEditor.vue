@@ -34,7 +34,7 @@
                 <Button.Native
                     v-else
                     class="!p-0 bg-transparent shadow-none opacity-60"
-                    @onClick="handleUpdate"
+                    @onClick="isEditable = true"
                     title="Click to edit"
                 >
                     <Icon

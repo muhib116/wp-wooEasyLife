@@ -2,7 +2,7 @@
     <div class="grid gap-4">
         <ProductAddButton />
         <div
-            v-for="item in activeOrder.product_info?.product_info || []"
+            v-for="item in activeOrder?.product_info?.product_info || []"
             :key="item.id"
             class="p-4 border border-gray-200/70 rounded"
         >
