@@ -54,8 +54,8 @@ class PluginLifecycleHandle {
      * Uninstall function
      */
     public static function woo_easy_life_uninstall_function() {
-        $handleDBTable = new Admin\DBTable\HandleDBTable();
-        self::cleanPluginData($handleDBTable);
+        // $handleDBTable = new Admin\DBTable\HandleDBTable();
+        // self::cleanPluginData($handleDBTable);
     }
 
     /**
