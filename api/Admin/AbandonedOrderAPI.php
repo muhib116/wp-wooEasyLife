@@ -158,27 +158,27 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
         $this->mark_abandoned_carts(); // Ensure abandoned carts are marked before fetching
-
+    
         // Initialize query conditions
         $query_conditions = "1=1"; // Always true, allowing optional conditions
         $query_params = [];
-
-        // Get status filter (optional)
+    
+        // Get status filter (optional) - Case Insensitive Search
         $status = $request->get_param('status');
         if (!empty($status)) {
             $status = sanitize_text_field($status);
-            $query_conditions .= " AND status = %s";
+            $query_conditions .= " AND LOWER(status) = LOWER(%s)";
             $query_params[] = $status;
         }
-
+    
         // Get date filters (optional)
         $start_date = $request->get_param('start_date');
         $end_date = $request->get_param('end_date');
-
+    
         if (!empty($start_date) && !empty($end_date)) {
             $start_date = sanitize_text_field($start_date);
             $end_date = sanitize_text_field($end_date);
-
+    
             // Validate date format
             if (!strtotime($start_date) || !strtotime($end_date)) {
                 return new WP_REST_Response([
@@ -186,23 +186,23 @@ class AbandonedOrderAPI extends WP_REST_Controller {
                     'message' => 'Invalid date format. Use YYYY-MM-DD.',
                 ], 400);
             }
-
+    
             $query_conditions .= " AND abandoned_at BETWEEN %s AND %s";
             $query_params[] = $start_date . ' 00:00:00';
             $query_params[] = $end_date . ' 23:59:59';
         }
-
+    
         // Get pagination parameters
         $page = max(1, intval($request->get_param('page') ?? 1));
         $per_page = max(1, intval($request->get_param('per_page') ?? 10));
         $offset = ($page - 1) * $per_page;
-
+    
         // Get total count of filtered abandoned orders
         $total_count = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$this->table_name} WHERE $query_conditions",
             ...$query_params
         ));
-
+    
         // Query the database with pagination
         $results = $wpdb->get_results(
             $wpdb->prepare(
@@ -211,7 +211,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ),
             ARRAY_A
         );
-
+    
         // If no results found
         if (empty($results)) {
             return new WP_REST_Response([
@@ -226,14 +226,14 @@ class AbandonedOrderAPI extends WP_REST_Controller {
                 ],
             ], 200);
         }
-
+    
         // Deserialize cart_contents for each result
         foreach ($results as &$result) {
             if (isset($result['cart_contents'])) {
                 $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
             }
         }
-
+    
         return new WP_REST_Response([
             'status'  => 'success',
             'message' => 'Abandoned orders retrieved successfully.',
@@ -246,14 +246,14 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ],
         ], 200);
     }
-
+    
 
     public function get_abandoned_dashboard_data(WP_REST_Request $request) {
         global $wpdb;
-
+    
         $start_date = $request->get_param('start_date');
         $end_date = $request->get_param('end_date');
-        
+    
         // Default date range (last 7 days)
         if (!$start_date) {
             $start_date = date('Y-m-d 00:00:00', strtotime('-7 days'));
@@ -265,70 +265,70 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         // Query for different statistics
         $stats = [];
     
-        // Total Abandoned Orders
+        // Total Abandoned Orders (case-insensitive search)
         $stats['total_abandoned_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'abandoned' AND abandoned_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND abandoned_at BETWEEN %s AND %s",
+            'abandoned', $start_date, $end_date
         ));
     
         // Total Remaining Abandoned Orders (Not recovered)
         $stats['total_remaining_abandoned'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'abandoned' AND recovered_at IS NULL AND abandoned_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at IS NULL AND abandoned_at BETWEEN %s AND %s",
+            'abandoned', $start_date, $end_date
         ));
     
         // Total Lost Amount (Sum of total_value where abandoned)
         $stats['lost_amount'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT SUM(total_value) FROM $this->table_name WHERE status = 'abandoned' AND abandoned_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND abandoned_at BETWEEN %s AND %s",
+            'abandoned', $start_date, $end_date
         ));
         $stats['lost_amount'] = $stats['lost_amount'] ?: 0;
     
         // Total Recovered Orders
         $stats['total_recovered_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'recovered' AND recovered_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
+            'recovered', $start_date, $end_date
         ));
     
         // Total Recovered Amount
         $stats['recovered_amount'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT SUM(total_value) FROM $this->table_name WHERE status = 'recovered' AND recovered_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
+            'recovered', $start_date, $end_date
         ));
         $stats['recovered_amount'] = $stats['recovered_amount'] ?: 0;
     
         // Total Active Carts (Not yet abandoned)
         $stats['total_active_carts'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'active' AND created_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
+            'active', $start_date, $end_date
         ));
     
         // Total Confirmed Orders (if applicable)
         $stats['total_confirmed_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'confirmed' AND created_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
+            'confirmed', $start_date, $end_date
         ));
     
         // Total call not received Orders (if applicable)
         $stats['total_call_not_received_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE status = 'call-not-received' AND created_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
+            'call-not-received', $start_date, $end_date
         ));
     
         // Average Cart Value (for abandoned orders)
         $stats['average_cart_value'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT AVG(total_value) FROM $this->table_name WHERE status = 'abandoned' AND abandoned_at BETWEEN %s AND %s",
-            $start_date, $end_date
+            "SELECT AVG(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND abandoned_at BETWEEN %s AND %s",
+            'abandoned', $start_date, $end_date
         ));
         $stats['average_cart_value'] = $stats['average_cart_value'] ?: 0;
     
-
         return new WP_REST_Response([
             'status'  => 'success',
-            'message' => 'Abandoned dashboard data retrieve successfully.',
+            'message' => 'Abandoned dashboard data retrieved successfully.',
             'data'    => $stats
         ], 200);
     }
+    
     
 
     /**

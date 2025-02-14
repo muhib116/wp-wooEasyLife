@@ -1,5 +1,5 @@
 <template>
-    <div class="flex justify-center sm:justify-stretch items-center text-[12px] sm:gap-2 md:gap-y-2 flex-wrap sm:px-2 md:px-4 mb-4 text-extralight">
+    <div class="flex justify-stretch sm:justify-start items-center text-[12px] sm:gap-2 md:gap-y-2 flex-wrap sm:px-2 md:px-4 mb-4 text-extralight">
         <Button.Native
             class="capitalize sm:px-2 py-[2px] leading-[14px] text-black"
             :class="orderFilter.status == '' ? 'font-semibold' : 'font-light'"

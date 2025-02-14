@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.toplevel_page_woo-easy-life {
+  font-size: 16px !important;
+}
 .toplevel_page_woo-easy-life :is(#wpcontent, #wpfooter) {
   margin-left: 140px !important;
 }

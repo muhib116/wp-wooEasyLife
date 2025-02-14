@@ -52,7 +52,7 @@
                 📞 {{ order.billing_address.phone }}
             </a>
             <a 
-                :href="`https://wa.me/${order.billing_address.phone}`" 
+                :href="`https://wa.me/+88${order.billing_address.phone}`" 
                 class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
             >
                 <Icon
@@ -66,11 +66,11 @@
             class="flex gap-1 items-center"
             :title="`${order.billing_address.address_1}, ${order.billing_address.address_2}`"
         >
-            <p class="max-w-[240px]">
+            <div class="max-w-[240px]">
                 🏠 
                 {{ order.billing_address.address_1 }},
                 {{ order.billing_address.address_2 }}
-            </p>
+            </div>
         </div>
 
         <div class="flex flex-wrap gap-x-2">

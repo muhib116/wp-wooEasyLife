@@ -79,7 +79,7 @@ const menus = [
     to: {
       name: "fraudCheck",
     },
-    visible: configData.value.fraud_customer_checker,
+    visible: configData?.value?.fraud_customer_checker,
   },
 ];
 </script>

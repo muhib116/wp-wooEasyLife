@@ -45,7 +45,7 @@ export const useMissingOrder = () => {
     const orderFilter = ref({
         page: 1,
         per_page: 30,
-        status: "",
+        status: "abandoned",
         search: "",
         start_date: null,
         end_date: null
@@ -85,7 +85,7 @@ export const useMissingOrder = () => {
     }
 
     const handleFilter = (option) => {
-        orderFilter.value.status = option.title //this title==status
+        orderFilter.value.status = option.id //this id==status
         selectedOption.value = option
         loadAbandonedOrder()
     }
