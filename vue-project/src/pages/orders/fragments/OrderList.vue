@@ -4,9 +4,15 @@
             class="absolute top-[30vh] left-1/2 -translate-x-1/2 z-30"
             :active="isLoading"
         />
+        <Modal 
+            v-model="activeOrder"
+            @close="setActiveOrder('')"
+            title="Order Details"
+        >
+            <OrderDetails />
+        </Modal>
 
-        <OrderDetails v-if="activeOrder" />
-        <div v-else>
+        <div>
             <TableHeaderForDesktop class="hidden md:block" />
             <TableHeaderForMobile class="block md:hidden" />
 
@@ -76,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Loader, MessageBox } from '@components'
+    import { Table, Loader, MessageBox, Modal } from '@components'
     import { inject } from 'vue'
     import TableHeaderAction from './TableHeaderAction.vue'
     import TableHeader from './fragments/TableHeader.vue'
@@ -93,6 +99,7 @@
         orders,
         isLoading,
         selectAll,
+        setActiveOrder,
         toggleSelectAll
     } = inject('useOrders')
 </script>
