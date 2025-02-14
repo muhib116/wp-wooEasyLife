@@ -17,7 +17,7 @@
     </span>
 
     <div 
-        v-if="Object.keys(order?.courier_data)?.length"
+        v-if="!isEmpty(order?.courier_data)"
         class="grid relative"
     >
         <div title="Delivery partner" class="mb-1">
@@ -62,6 +62,7 @@
 <script setup lang="ts">
     import { Icon } from '@components'
     import { computed, inject } from 'vue'
+    import { isEmpty } from 'lodash'
 
     const props = defineProps({
         order: Object

@@ -47,7 +47,7 @@
         <div class="flex gap-1 items-center">
             📅 {{ order.date_created }}
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 truncate">
             <a :href="`tel:${order.billing_address.phone}`" class="flex gap-1 items-center text-orange-500 underline">
                 📞 {{ order.billing_address.phone }}
             </a>
