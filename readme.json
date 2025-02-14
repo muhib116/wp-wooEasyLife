@@ -1,0 +1,20 @@
+{
+    "name": "Woo Easy Life",
+    "slug": "woo-easy-life",
+    "version": "1.0.1",
+    "author": "Muhibbullah | Nasir",
+    "homepage": "https://api.wpsalehub.com/get-metadata",
+    "download_url": "https://api.wpsalehub.com/download-plugins",
+    "requires": "wooCommerce",
+    "tested": 6.2,
+    "requires_php": 7.3,
+    "sections": {
+      "description": "=== Woo Easy Life ===\nContributors: muhibbullah, nasir\nTags: woocommerce, sms, otp validation, fraud prevention, abandoned cart\nRequires at least: 5.0\nTested up to: 6.2\nStable tag: 1.1.6\nRequires PHP: 7.4\nLicense: GPLv2 or later\nLicense URI: https://www.gnu.org/licenses/gpl-2.0.html\n\nWoo Easy Life is an all-in-one WooCommerce plugin designed to enhance store management with automation, customer engagement, and fraud prevention tools.\n\n== Description ==\n\n**Woo Easy Life** simplifies WooCommerce operations with features such as bulk SMS notifications, abandoned cart recovery, fraud prevention, and courier integrations.\n\n### **Key Features**\n\n- **Bulk SMS & Status-Based Notifications**: Automate customer communication for orders, status updates, and promotions.\n- **On-Click Courier Entry**: Quickly assign courier details from the order dashboard.\n- **Voucher Printing**: Generate printable vouchers for orders.\n- **Fraud Prevention Tools**: Identify and block suspicious customers by phone or IP.\n- **OTP Validation at Checkout**: Secure transactions by verifying phone numbers.\n- **Custom Order Statuses & SMS Updates**: Define and notify customers about custom statuses.\n- **Dashboard Analytics**: View sales trends, abandoned carts, and courier balances in one place.\n- **Blacklist Management**: Block fraudulent customers from making future purchases.\n\n### **Recent Updates (v1.1.6)**\n- Improved fraud detection accuracy.\n- Enhanced SMS campaign tracking and analytics.\n- Better compatibility with WooCommerce 6.2+.\n\n== Installation ==\n\n1. Upload the plugin to `/wp-content/plugins/`.\n2. Activate it from the 'Plugins' menu in WordPress.\n3. Configure settings via Woo Easy Life Dashboard.\n\n== Frequently Asked Questions ==\n\n**Q: How do I enable OTP validation at checkout?**  \nA: Enable it in the plugin settings and configure your preferred SMS provider.\n\n**Q: Can I block customers by phone number or IP?**  \nA: Yes, use the blacklist feature to prevent fraudulent purchases.\n\n**Q: Does it support multiple courier services?**  \nA: Yes, Woo Easy Life integrates with various courier partners.\n\n== Changelog ==\n\n= 1.1.6 =\n* Enhanced fraud detection and customer validation.\n* Improved SMS campaign analytics.\n* Optimized performance for large WooCommerce stores.\n\n= 1.1.0 =\n* Added bulk SMS management.\n* Introduced OTP validation at checkout.\n* Improved courier entry process.\n\n== Upgrade Notice ==\n\n**1.1.6** - Critical updates for fraud detection and WooCommerce compatibility. Upgrade for better performance and security.",
+      "changelog": null
+    },
+    "icons": {
+      "1x": "https://wpsalehub.com/wp-content/uploads/2025/01/Health-care-logo-3.webp",
+      "2x": "https://wpsalehub.com/wp-content/uploads/2025/01/Health-care-logo-3.webp",
+      "svg": null
+    }
+  }

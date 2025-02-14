@@ -40,6 +40,7 @@ class UpdatePlugin
         }
 
         $update_data = $this->get_meta_data();
+
         if(!$update_data){
             return $transient;
         }
@@ -162,7 +163,6 @@ class UpdatePlugin
             echo '</div>';
         }
     }
-
 
     private function get_meta_data () {
         $response = wp_remote_get(
