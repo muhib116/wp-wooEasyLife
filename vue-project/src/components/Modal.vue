@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="bg-black/30 md:p-6 fixed inset-0 z-50 flex items-center justify-center"
+        class="bg-black/30 md:p-6 fixed inset-0 z-[999999] flex items-center justify-center"
         v-if="modelValue"
         @click.self="$emit('close')"
     >

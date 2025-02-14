@@ -135,8 +135,6 @@
         form,
         getItemsTotal,
         couponDiscount,
-        filteredProducts,
-        productSearchKey,
         addProductToForm,
         calculateCouponDiscountAmount,
     } = inject('useCustomOrder')
