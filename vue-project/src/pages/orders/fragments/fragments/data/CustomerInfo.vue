@@ -52,7 +52,8 @@
                 📞 {{ order.billing_address.phone }}
             </a>
             <a 
-                :href="`https://wa.me/+88${order.billing_address.phone}`" 
+                target="_blank"
+                :href="`https://wa.me/88${order.billing_address.phone}`" 
                 class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
             >
                 <Icon

@@ -17,7 +17,7 @@
             ></span>
             <div class="flex z-10 items-center gap-2 w-full relative">
                 <Button.Native
-                    class="absolute z-10 right-[6px] bottom-[6px] size-[25px] grid place-content-center rounded-full opacity-50 hover:opacity-100"
+                    class="absolute z-10 bg-gray-200 right-[6px] bottom-[6px] size-[25px] grid place-content-center rounded-full opacity-50 hover:opacity-100"
                     @click="handleVoiceToText"
                     :loading="isRecognizing"
                 >

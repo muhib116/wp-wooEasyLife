@@ -50,7 +50,7 @@ export const useOrders = () => {
 
   const orderFilter = ref({
     page: 1,
-    per_page: 30,
+    per_page: 20,
     status: "",
     search: "",
   });

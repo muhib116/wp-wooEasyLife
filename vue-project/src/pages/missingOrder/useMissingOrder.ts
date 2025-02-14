@@ -44,7 +44,7 @@ export const useMissingOrder = () => {
     const totalPages = ref(0)
     const orderFilter = ref({
         page: 1,
-        per_page: 30,
+        per_page: 20,
         status: "abandoned",
         search: "",
         start_date: null,
