@@ -68,7 +68,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     private function mark_abandoned_carts() {
         global $wpdb;
     
-        $cutoff_time = strtotime('-120 minutes'); // 25 minutes ago
+        $cutoff_time = strtotime('-25 minutes'); // 25 minutes ago
     
         // for testing when development environment start
         $server_ip = $_SERVER['SERVER_ADDR'];

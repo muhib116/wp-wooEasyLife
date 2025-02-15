@@ -128,10 +128,10 @@ class InitClass {
 
     public function save_default_config()
     {
-        $site_title = get_bloginfo('name');
+        $site_title = get_bloginfo('name') ?: 'Default Site Title';
         $custom_logo_id = get_theme_mod('custom_logo');
         $logo_url = $custom_logo_id ? wp_get_attachment_image_url($custom_logo_id, 'full') : '';
-    
+
         // New default configuration (only new fields will be added)
         $new_config = [
             "admin_phone" => '',
@@ -151,11 +151,11 @@ class InitClass {
             "courier_automation" => false,
             "fraud_customer_checker" => false,
         ];
-    
+
         // Fetch existing config from the database
-        $option_key = 'your_plugin_prefix_config'; // Ensure correct prefix
+        $option_key = __PREFIX . 'config'; // Ensure correct prefix
         $existing_config = get_option($option_key);
-    
+
         // Ensure existing config is an array (handles serialization issues)
         if (!is_array($existing_config)) {
             $existing_config = maybe_unserialize($existing_config);
@@ -163,13 +163,14 @@ class InitClass {
         if (!is_array($existing_config)) {
             $existing_config = []; // Fallback to empty array
         }
-    
-        // Merge new config with existing config, ensuring existing values are not changed
+
+        // Merge existing config with new fields (existing values are not changed)
         $merged_config = array_merge($new_config, $existing_config);
-    
+
         // Compare before updating to prevent unnecessary writes
         if (maybe_serialize($existing_config) !== maybe_serialize($merged_config)) {
             update_option($option_key, $merged_config, true); // Update only if changes are needed
         }
-    }    
+    }
+ 
 }
