@@ -117,153 +117,179 @@ class TrackAbandonCart {
         ];
     }
     
-    
     public function store_abandoned_cart_data() {
         global $wpdb;
     
-        // Define the table name
-        $table_name = $wpdb->prefix . __PREFIX . 'abandon_cart';
-        
-        // Get WooCommerce session data
-        $session = WC()->session;
+        // **Step 1: Get customer details from WooCommerce session**
+        $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
+        $customer_email = strtolower(WC()->session->get('billing_email')); // Normalize email case
+    
+        // Validate phone or fallback to email
+        if (!empty($customer_phone) && validate_BD_phoneNumber($customer_phone)) {
+            $identifier = $customer_phone; // Use valid phone
+        } elseif (!empty($customer_email) && filter_var($customer_email, FILTER_VALIDATE_EMAIL)) {
+            $identifier = $customer_email; // Use valid email
+        } else {
+            return; // Exit if both phone & email are invalid
+        }
+    
+        // **Step 2: Retrieve cart products from WooCommerce**
         $cart = WC()->cart->get_cart();
-        
         if (empty($cart)) {
             return; // Exit if the cart is empty
         }
-        
-        // Get customer details
-        $customer_name = WC()->session->get('billing_first_name') . ' ' . WC()->session->get('billing_last_name');
-        $customer_email = WC()->session->get('billing_email');
-        $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
     
-        // **Validate phone number**
-        if (empty($customer_phone) || !validate_BD_phoneNumber($customer_phone)) {
-            return; // Exit if phone is invalid (no insertion/update allowed)
+        // Get product IDs from the cart
+        $cart_product_ids = array_map(function ($cart_item) {
+            return $cart_item['product_id'];
+        }, $cart);
+    
+        // **Step 3: Check for an existing order with `wc-processing` status**
+        $args = [
+            'status' => 'wc-processing',
+            'limit'  => 1
+        ];
+
+        if(!empty($customer_phone)) {
+            $args['billing_phone'] = $identifier;
+        }else if(!empty($customer_email)) {
+            $args['billing_email'] = $identifier;
         }
+
+        $existing_orders = wc_get_orders($args);
+        $existing_order = !empty($existing_orders) ? $existing_orders[0] : null;
     
-        // Check if the customer has already placed a new order with 'wc-processing' status
-        $existingNewOrder = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email, 'wc-processing');
         
-        if ($existingNewOrder) {
+        // **Step 4: If no order exists, store the abandoned cart**
+        if (!$existing_order) {
+            $this->store_abandoned_cart();
             return;
         }
     
-        // Get billing & shipping addresses
-        $billing_address = WC()->customer->get_billing_address_1() . ', ' . WC()->customer->get_billing_city() . ', ' . WC()->customer->get_billing_state() . ', ' . WC()->customer->get_billing_postcode();
-        $shipping_address = WC()->customer->get_shipping_address_1() . ', ' . WC()->customer->get_shipping_city() . ', ' . WC()->customer->get_shipping_state() . ', ' . WC()->customer->get_shipping_postcode();
-        
+        // **Step 5: If order exists, compare cart and ordered products**
+        $ordered_product_ids = [];
+        foreach ($existing_order->get_items() as $item) {
+            $ordered_product_ids[] = $item->get_product_id();
+        }
+    
+        // **Step 6: If cart products & ordered products don't fully match, store the abandoned cart**
+        if (!empty(array_diff($cart_product_ids, $ordered_product_ids))) {
+            $this->store_abandoned_cart();
+        }
+    }
+    
+    /**
+     * Function to store abandoned cart using WooCommerce functions
+     */
+    private function store_abandoned_cart() {
+        global $wpdb;
+
+        // Define the abandoned cart table
+        $table_name = $wpdb->prefix . __PREFIX . 'abandon_cart';
+    
+        // Get WooCommerce session details
+        $session = WC()->session;
+        $customer_name = WC()->session->get('billing_first_name') . ' ' . WC()->session->get('billing_last_name');
+        $customer_email = strtolower(WC()->session->get('billing_email'));
+        $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
+        $session_id = $session->get_customer_id();
+    
+        $billing_address = WC()->customer->get_billing_address();
+        $shipping_address = WC()->customer->get_shipping_address();
         $shipping_data = $this->get_selected_shipping_data();
 
-        // Check if customer is a repeat customer
-        $is_repeat_customer = $this->is_repeat_customer_by_billing_phone($customer_phone, $customer_email);
-        
-        
-        // Serialize cart contents
+
+    
+        // clean the record if session_id match
+        $this->delete_cart_by_session_id($session_id, $table_name);
+
+        // Prepare cart details
         $cart_contents = [
             'products' => [],
-            'coupon_codes'      => array_values(WC()->session->get('applied_coupons', [])), // Get applied coupons
-            'customer_note'     => WC()->session->get('customer_note', ''), // Get customer note if available
-            'payment_method_id' => WC()->session->get('chosen_payment_method', ''), // Get chosen payment method
-            'payment_method' => $this->get_selected_payment_method(), // Get chosen payment method
-            'shipping_method_id'=>  $shipping_data->id, // Get selected shipping method
-            'shipping_method'   => $shipping_data->method, // Get selected shipping method
-            'shipping_method_title'   => $shipping_data->title, // Get selected shipping method
-            'total_discount_before_tax'    => WC()->cart->get_discount_tax(),
-            'subtotal'        => WC()->cart->get_subtotal(), 
-            'total'           => WC()->cart->get_total(), 
-            'total_discount'  => WC()->cart->get_discount_total(), 
-            'coupon_discounts'=> WC()->cart->get_coupon_discount_totals(), 
-            'shipping_cost'   => WC()->cart->get_shipping_total(), 
+            'coupon_codes' => WC()->session->get('applied_coupons', []),
+            'customer_note' => WC()->session->get('customer_note', ''),
+            'payment_method' => WC()->session->get('chosen_payment_method', ''),
+            'shipping_method_id' => $shipping_data->id,
+            'shipping_method' => $shipping_data->method,
+            'shipping_method_title' => $shipping_data->title,
+            'subtotal' => WC()->cart->get_subtotal(),
+            'total'     => WC()->cart->get_total(),
+            'total_discount' => WC()->cart->get_discount_total(),
+            'shipping_cost' => WC()->cart->get_shipping_total(),
         ];
+    
         $total_value = 0;
-    
-        foreach ($cart as $cart_item) {
-            $product = $cart_item['data']; // WC_Product object
-    
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            $product = $cart_item['data'];
             $cart_contents['products'][] = [
                 'product_id'  => $product->get_id(),
                 'name'        => $product->get_name(),
                 'image'       => wp_get_attachment_url($product->get_image_id()),
                 'product_url' => get_permalink($product->get_id()),
                 'quantity'    => $cart_item['quantity'],
-                'price'       => $product->get_price(), // Unit price of the product
-                'total_price' => $cart_item['line_total'], // Total price for the quantity of this item
+                'price'       => $product->get_price(),
+                'total_price' => $cart_item['line_total'],
             ];
-            
             $total_value += $cart_item['line_total'];
         }
     
         $serialized_cart_contents = maybe_serialize($cart_contents);
     
-        // Check if the cart is already stored
-        $session_id = $session->get_customer_id();
-        $existing_cart = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT id FROM $table_name 
-                WHERE session_id = %s 
-                AND status = 'active'",
-                $session_id
-            )
-        );
+        // // Check if abandoned cart already exists
+        $existing_cart = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_name 
+             WHERE session_id = %s 
+             AND status = 'abandoned'",
+            $session_id
+        ));
     
         if ($existing_cart) {
-            // Update the existing abandoned cart record
+            // Update existing abandoned cart record
             $wpdb->update(
                 $table_name,
                 [
-                    'customer_email'         => $customer_email,
-                    'customer_name'          => $customer_name,
-                    'customer_phone'         => $customer_phone,
-                    'cart_contents'          => $serialized_cart_contents,
-                    'total_value'            => $total_value,
-                    'billing_address'        => $billing_address,
-                    'shipping_address'       => $shipping_address,
-                    'is_repeat_customer'     => $is_repeat_customer,
-                    'updated_at'             => current_time('mysql'),
+                    'customer_email' => $customer_email,
+                    'customer_name' => $customer_name,
+                    'customer_phone' => $customer_phone,
+                    'cart_contents' => $serialized_cart_contents,
+                    'total_value' => $total_value,
+                    'billing_address' => $billing_address,
+                    'shipping_address' => $shipping_address,
+                    'updated_at' => current_time('mysql'),
                 ],
                 ['id' => $existing_cart],
-                ['%s', '%s', '%s', '%s', '%f', '%s', '%s', '%d', '%s'],
+                ['%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s'],
                 ['%d']
             );
         } else {
-            // Insert a new abandoned cart record
+            // Insert new abandoned cart record
             $wpdb->insert(
                 $table_name,
                 [
-                    'session_id'             => $session_id,
-                    'customer_email'         => $customer_email,
-                    'customer_name'          => $customer_name,
-                    'customer_phone'         => $customer_phone,
-                    'cart_contents'          => $serialized_cart_contents,
-                    'total_value'            => $total_value,
-                    'billing_address'        => $billing_address,
-                    'shipping_address'       => $shipping_address,
-                    'is_repeat_customer'     => $is_repeat_customer,
-                    'abandoned_at'           => null, // Explicitly set as NULL
-                    'status'                 => 'active', // Mark cart as active initially
-                    'created_at'             => current_time('mysql'),
-                    'updated_at'             => current_time('mysql'),
+                    'session_id' => $session_id,
+                    'customer_email' => $customer_email,
+                    'customer_name' => $customer_name,
+                    'customer_phone' => $customer_phone,
+                    'cart_contents' => $serialized_cart_contents,
+                    'total_value' => $total_value,
+                    'billing_address' => $billing_address,
+                    'shipping_address' => $shipping_address,
+                    'abandoned_at' => null,
+                    'status' => 'active',
+                    'created_at' => current_time('mysql'),
+                    'updated_at' => current_time('mysql'),
                 ],
-                [
-                    '%s', // session_id
-                    '%s', // customer_email
-                    '%s', // customer_name
-                    '%s', // customer_phone
-                    '%s', // cart_contents
-                    '%f', // total_value
-                    '%s', // billing_address
-                    '%s', // shipping_address
-                    '%d', // is_repeat_customer
-                    '%s', // abandoned_at (NULL is safely handled with %s)
-                    '%s', // status
-                    '%s', // created_at
-                    '%s', // updated_at
-                ]
+                ['%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s']
             );
         }
     }
 
+    private function delete_cart_by_session_id($session_id, $table_name) {
+        global $wpdb;
+    
+        $wpdb->delete($table_name, ['session_id' => $session_id, 'status' => 'active'], ['%s', '%s']);
+    }    
+    
 
     private function get_selected_payment_method() {
         // Get chosen payment method ID
