@@ -46,6 +46,7 @@ if (!class_exists('WooEasyLife')) :
         public function __construct()
         {
             // Initialize WooCommerce session if available.
+            add_filter( 'http_request_timeout', [$this, 'increase_http_request_timeout'] );
             add_action('woocommerce_init', [$this, 'initialize_wc_session']);
             add_filter('admin_footer_text', [$this, 'custom_modify_admin_footer']);
             add_filter('update_footer', [$this, 'custom_modify_footer_version'], 9999);
@@ -57,7 +58,10 @@ if (!class_exists('WooEasyLife')) :
             // Initialize various components of the plugin.
             $this->initialize_components();
         }
-
+        public function increase_http_request_timeout( $timeout ) {
+            return 60; // Set to 60 seconds
+        }
+        
         public function custom_modify_admin_footer() {
             echo '<span style="color: #f97315; margin-left: 16px">Thank you for using WooEasyLife</span>'; // Change this text
         }

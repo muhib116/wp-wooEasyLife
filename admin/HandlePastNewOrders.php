@@ -20,7 +20,7 @@ class HandlePastNewOrders {
             'method'      => 'POST',
             'body'        => json_encode($data['remote_api_data']),
             'headers'     => $headers,
-            'timeout'     => 45,
+            'timeout'     => 145,
             'sslverify'   => false,
         ]);
 
@@ -51,7 +51,7 @@ class HandlePastNewOrders {
             'method'      => 'POST',
             'body'        => json_encode($data['remote_api_data']),
             'headers'     => $headers,
-            'timeout'     => 45,
+            'timeout'     => 145,
             'sslverify'   => false,
         ]);
 
@@ -189,7 +189,7 @@ class HandlePastNewOrders {
     private function get_past_new_orders() {
         $args = [
             'status'    => ['wc-processing'],
-            'limit'     => -1,
+            'limit'     => 30,
             'type'      => 'shop_order',
             'meta_query' => [
                 'relation' => 'AND',
@@ -207,7 +207,7 @@ class HandlePastNewOrders {
     private function get_missing_new_orders() {
         $args = [
             'status'    => ['wc-processing'],
-            'limit'     => -1,
+            'limit'     => 30,
             'type'      => 'shop_order',
             'meta_query' => [
                 'relation' => 'AND',

@@ -73,7 +73,7 @@ class Remote_UsePackageHistory {
             'method'      => 'POST',
             'body'        => $data,
             'headers'     => $headers,
-            'timeout'     => 45,
+            'timeout'     => 145,
             'sslverify'   => false,
         ]);
 

@@ -70,6 +70,9 @@ Dashboard:
 
 
 --------heigh priority task------------
+👉🏻 product er total price dekhate hobe
+👉🏻 phone number er shurute majhe majhe 0 thakena eita handle korte hobe
+
 👉🏻 missing order theke real order a niwar bebosta korte hobe
 👉🏻 status er color niye kaj korte hobe
 👉🏻 *** Curier cod edit er option dite hobe
