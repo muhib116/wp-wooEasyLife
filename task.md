@@ -74,6 +74,11 @@ Dashboard:
 
 
 --------heigh priority task------------
+👉🏻 missing order issue
+👉🏻 courier entry aro simple korte hobe
+👉🏻 status button er moto dekha jay 
+👉🏻 license add kora thaklew notun device a somossa kore
+
 👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 

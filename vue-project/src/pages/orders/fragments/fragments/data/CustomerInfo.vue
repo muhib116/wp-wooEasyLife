@@ -53,8 +53,8 @@
             </a>
             <a 
                 target="_blank"
-                :href="`https://wa.me/88${order.billing_address.phone}`" 
-                class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
+                :href="`https://api.whatsapp.com/send/?phone=${order.billing_address.phone}&text&type=phone_number&app_absent=0`" 
+                class="items-center size-6 rounded-sm shadow grid place-content-center border border-[currentColor] bg-green-500 text-white hover:text-green-500 hover:bg-white active:text-green-500"
             >
                 <Icon
                     name="PhWhatsappLogo"

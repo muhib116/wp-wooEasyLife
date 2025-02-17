@@ -55,6 +55,10 @@ class StatusChangeAction {
             }
         }
     }
+    
+    public function check_missing_order_for_existing_order() {
+        
+    }
 
     private function replace_placeholder_variables_in_message($message, $variables) {
 

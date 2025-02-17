@@ -1,7 +1,7 @@
 <template>
-  <div class="flex">
-    <ul class="flex items-center">
-      <li class="flex gap-2">
+  <div class="flex items-center">
+    <ul class="flex items-center [&>li]:mb-0">
+      <li class="flex items-center gap-2">
         <Balance />
       </li>
       <li>

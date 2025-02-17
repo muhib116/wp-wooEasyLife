@@ -226,7 +226,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
                 ],
             ], 200);
         }
-    
+ 
         // Deserialize cart_contents for each result
         foreach ($results as &$result) {
             if (isset($result['cart_contents'])) {
