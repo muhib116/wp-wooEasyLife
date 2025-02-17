@@ -71,12 +71,13 @@ Dashboard:
 ✅ status er color niye kaj korte hobe
 ✅ phone number er shurute majhe majhe 0 thakena eita handle korte hobe
 ✅ courier entry aro simple korte hobe
+✅ status button er moto dekha jay 
 
 
 
 --------heigh priority task------------
+👉🏻 multiple order of same product can protect
 👉🏻 missing order issue
-👉🏻 status button er moto dekha jay 
 👉🏻 license add kora thaklew notun device a somossa kore
 
 👉🏻 *** Curier cod edit er option dite hobe

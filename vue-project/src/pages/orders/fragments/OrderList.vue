@@ -10,7 +10,7 @@
             title="Order Details"
         >
             <OrderDetails />
-        </Modal>
+        </Modal>    
 
         <div>
             <TableHeaderForDesktop class="hidden md:block" />

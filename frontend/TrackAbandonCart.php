@@ -22,8 +22,8 @@ class TrackAbandonCart {
         //fire when reload the checkout page
         add_action('woocommerce_checkout_update_order_review', [$this, 'store_abandoned_cart_data']);
 
-        add_action('woocommerce_thankyou', [$this, 'deleteAbandonedOrderIfOrderProcessedSuccessfully'], 10, 1);
-        // add_action('woocommerce_order_status_changed', [$this, 'mark_abandoned_cart_as_recovered'], 10, 3);
+        // add_action('woocommerce_thankyou', [$this, 'deleteAbandonedOrderIfOrderProcessedSuccessfully'], 10, 1);
+        add_action('woocommerce_order_status_changed', [$this, 'deleteAbandonedOrderIfOrderProcessedSuccessfully'], 10, 3);
 
         // abandoned marked from abandonedOrderAPI.php
     }
@@ -365,7 +365,12 @@ class TrackAbandonCart {
         return count($orders ?? []) > 0;
     }
 
-    public function deleteAbandonedOrderIfOrderProcessedSuccessfully($order_id) {
+    public function deleteAbandonedOrderIfOrderProcessedSuccessfully($order_id, $old_status, $new_status)
+    {
+        if ($old_status !== 'processing' && $new_status !== 'processing') {
+            return;
+        }           
+
         global $wpdb;
     
         // Get the WooCommerce order by ID
