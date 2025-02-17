@@ -316,7 +316,22 @@ function normalize_phone_number($phone) {
         $normalized = '0' . substr($normalized, 3); // Remove '880' and prepend '0'
     }
 
-    return $normalized;
+
+
+    return validateAndFormatPhoneNumber($normalized);
+}
+
+function validateAndFormatPhoneNumber($phone) {
+    // Remove any non-numeric characters
+    $phone = preg_replace('/\D/', '', $phone);
+
+    // Check if the number has exactly 10 digits and starts with '1'
+    if (preg_match('/^1\d{9}$/', $phone)) {
+        // Prepend '0' to make it a valid 11-digit Bangladeshi phone number
+        return '0' . $phone;
+    }
+
+    return $phone;
 }
 
 function validate_BD_phoneNumber($phoneNumber) {

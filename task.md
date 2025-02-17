@@ -66,15 +66,14 @@ Dashboard:
 ✅ The table "customer_data" was not created. Please deactivate and reactivate the "WooEasyLife" plugin.
 ✅ Missing order a paginatioon add korte hobe
 ✅ billing and shipping phone validatio checkout page
+✅ product er total price dekhate hobe
+✅ missing order theke real order a niwar bebosta korte hobe
+✅ status er color niye kaj korte hobe
+✅ phone number er shurute majhe majhe 0 thakena eita handle korte hobe
 
 
 
 --------heigh priority task------------
-👉🏻 product er total price dekhate hobe
-👉🏻 phone number er shurute majhe majhe 0 thakena eita handle korte hobe
-
-👉🏻 missing order theke real order a niwar bebosta korte hobe
-👉🏻 status er color niye kaj korte hobe
 👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
