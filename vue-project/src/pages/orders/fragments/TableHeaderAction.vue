@@ -25,13 +25,7 @@
                             backgroundColor: item.bg,
                             color: item.color   
                         }"
-                        @onClick="async (btn) => {
-                            item?.isCourier 
-                                        ? toggleCourierDropdown = !toggleCourierDropdown 
-                                        : 
-                                        await item.method(btn)
-                            }
-                        "
+                        @onClick="item.method"
                     >
                         <Icon
                             :name="item.icon"
@@ -39,50 +33,12 @@
                         />
                         {{ item.title }}
                     </Button.Native>
-                    <div
-                        v-if="item?.isCourier && toggleCourierDropdown"
-                        class="absolute top-full left-0 min-w-[120px] border border-[#693d84] overflow-hidden bg-white [&>button+button]:border-t shadow rounded-b-sm z-50 grid"
-                    >
-                        <template
-                            v-for="_item in courierCompanyNames"
-                            :key="_item.slug"
-                        >
-                            <Button.Native 
-                                v-if="courierConfigs[_item.slug]?.is_active"
-                                class="text-left text-xl px-2 py-2 text-gray-700 hover:scale-110 origin-left duration-300"
-                                @onClick="async (btn) => {
-                                    await item.method(_item.slug, btn)
-                                    $emit('close')
-                                }"
-                            >
-                                <img
-                                    v-if="courierConfigs[_item.slug]?.logo"
-                                    :src="courierConfigs[_item.slug]?.logo"
-                                    class="w-20 object-contain"
-                                />
-                                <span v-else>{{ _item.title }}</span>
-                            </Button.Native>
-                        </template>
-                    </div>
                 </div>
             </template>
 
-            <Button.Native
-                v-if="configData.courier_automation"
-                class="opacity-100 w-fit text-white bg-sky-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
-                title="Refresh CourierData"
-                @onClick="async (btn) => {
-                    await refreshBulkCourierData(btn)
-                    $emit('close')
-                }"
-            >
-                <Icon
-                    name="PhArrowsClockwise"
-                    size="16"
-                    weight="bold"
-                />
-                Courier Refresh
-            </Button.Native>
+            <CourierEntry
+                @close="$emit('close')"
+            />
 
             <Button.Native
                 v-if="orders[0]?.total_new_orders_not_handled_by_wel_plugin && userData?.remaining_order > 0"
@@ -145,7 +101,8 @@
     import {
         Button,
         Icon,
-        Modal
+        Modal,
+        CourierEntry
     } from '@components'
 
     defineOptions({
@@ -154,10 +111,6 @@
     
     const toggleCourierDropdown = ref(false)
     const {configData} = inject('configData')
-    const {
-        courierCompanyNames,
-        courierConfigs
-    } = inject('useCourierConfig')
     const { userData } = inject('useServiceProvider')
 
 
@@ -228,15 +181,6 @@
             bg: '#F14A00',
             color: '#fff',
             method: handleFraudCheck
-        },
-        {
-            icon: 'PhTruck',
-            title: 'Courier Entry',
-            isCourier: true,
-            bg: '#553555',
-            color: '#fff',
-            active: configData.value.courier_automation,
-            method: handleCourierEntry
-        },
+        }
     ])
 </script>

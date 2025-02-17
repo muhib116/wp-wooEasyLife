@@ -70,9 +70,13 @@ export const useOrders = () => {
     if (selectAll.value) {
       selectedOrders.value = new Set(orders.value);
     } else {
-      selectedOrders.value.clear();
+      clearSelectedOrders()
     }
-  };
+  }
+
+  const clearSelectedOrders = () => {
+    selectedOrders.value.clear();
+  }
   
   const handleFraudCheck = async (button) => {
     if (![...selectedOrders.value].length) {
@@ -325,6 +329,7 @@ export const useOrders = () => {
     try {
       btn.isLoading = true;
       await manageCourier(selectedOrders, courierPartner, async () => {
+        await loadOrderStatusList();
         await getOrders();
         showNotification({
           type: "success",
@@ -651,7 +656,6 @@ export const useOrders = () => {
     orderStatusWithCounts,
     getOrders,
     markAsDone,
-    handleUpdateOrder,
     handleFilter,
     handleIPBlock,
     setActiveOrder,
@@ -659,10 +663,12 @@ export const useOrders = () => {
     toggleSelectAll,
     handleFraudCheck,
     handleEmailBlock,
+    handleUpdateOrder,
     handleStatusChange,
     debouncedGetOrders,
     handleCourierEntry,
     loadOrderStatusList,
+    clearSelectedOrders,
     handlePhoneNumberBlock,
     refreshBulkCourierData,
     getDeliveryProbability,

@@ -1,19 +1,20 @@
 <template>
     <span 
         title="Delivery success probability"
-        class="font-semibold w-fit flex gap-3 mb-3 items-center bg-sky-500 px-3 py-1 rounded-sm"
+        class="font-semibold flex gap-1 mb-3 items-center px-1 py-1 rounded-sm border-l-2"
         :style="{
-            background: +deliveryProbability >=0 ? `hsl(${ (+deliveryProbability / 100) * 120 }deg 75% 35%)` : `red`,
-            color: '#fff'
+            background: +deliveryProbability >=0 ? `hsla(${ (+deliveryProbability / 100) * 120 } 75% 35% / 0.2)` : `#ff000033`,
+            color: `hsl(${ (+deliveryProbability / 100) * 120 } 75% 35%)`,
+            borderLeftColor: `hsl(${ (+deliveryProbability / 100) * 120 } 75% 35%)`
         }"
     >
-        {{ +deliveryProbability >= 0 ? `DSP: ${deliveryProbability}%` : deliveryProbability }}
         <Icon
-            class="text-red-100 cursor-pointer"
+            class="cursor-pointer"
             title="This is just a prediction based on available data. \nWe do not guarantee the accuracy of the outcome, as various external factors may influence the actual results."
             name="PhInfo"
             size="20"
         />
+        {{ +deliveryProbability >= 0 ? `DSP: ${deliveryProbability}%` : deliveryProbability }}
     </span>
 
     <div 
@@ -56,13 +57,18 @@
             />
         </span>
     </div>
-    <div v-else>N/A</div>
+    <div class="flex flex-col gap-3 mt-2">
+        <CourierEntry
+            :order="order"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
     import { Icon } from '@components'
     import { computed, inject } from 'vue'
     import { isEmpty } from 'lodash'
+    import { CourierEntry } from '@/components'
 
     const props = defineProps({
         order: Object

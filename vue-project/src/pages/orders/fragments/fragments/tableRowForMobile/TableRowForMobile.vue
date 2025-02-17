@@ -195,7 +195,12 @@
                 </span>
             </div>
             <hr />
-            <div class="grid gap-2 grid-cols-2">
+            <div class="grid gap-2 grid-cols-2 -ml-[36px]">
+                <div class="col-span-2">
+                    <CourierEntry
+                        :order="order"
+                    />
+                </div>
                 <button
                     class="relative flex flex-col whitespace-nowrap justify-center items-center text-white bg-blue-500 w-full text-center py-1 px-2 rounded-sm pointer-events-auto hover:brightness-95"
                     title="Order details"
@@ -288,6 +293,7 @@
     import BlackListData from './BlackListData.vue'
     import { useTableRowForMobile } from './useTableRowForMobile'
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
+import { CourierEntry } from '@/components';
 
     const props = defineProps<{
         order: {

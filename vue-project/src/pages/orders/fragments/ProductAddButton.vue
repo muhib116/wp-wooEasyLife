@@ -1,6 +1,6 @@
 <template>
     <Button.Outline 
-        class="justify-center"
+        class="justify-center py-1 mr-4 mt-4"
         v-bind="$attrs"
         @click="toggleProductAddModal = true"
     >

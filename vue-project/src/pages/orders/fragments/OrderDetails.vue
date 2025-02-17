@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="activeOrder" class="grid grid-cols-2 gap-6 mb-4">
+        <div v-if="activeOrder" class="grid md:grid-cols-2 gap-6 mb-4">
             <div>
                 <h4>
                     <span class="block">
@@ -45,9 +45,11 @@
             </div>
 
             <div>
-                <DeliveryPartner
-                    :order="activeOrder"
-                />
+                <div class="max-w-[160px] mx-auto md:ml-auto pr-4 whitespace-nowrap">
+                    <DeliveryPartner
+                        :order="activeOrder"
+                    />
+                </div>
             </div>
         </div>
         
