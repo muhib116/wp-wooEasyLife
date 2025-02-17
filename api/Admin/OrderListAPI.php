@@ -453,7 +453,7 @@ class OrderListAPI
             ], getMetaDataOfOrderForArgs());
 
             $orders = wc_get_orders($args);
-            $order_count = count($orders);
+            $order_count = count($orders ?? []);
 
             if ($order_count > 0) {
                 $order_counts[] = [

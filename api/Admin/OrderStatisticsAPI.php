@@ -213,7 +213,7 @@ class OrderStatisticsAPI extends WP_REST_Controller
         $total_sale_amount = 0;
         $total_discount_amount = 0;
         $total_shipping_cost = 0;
-        $total_orders = count($orders);
+        $total_orders = count($orders ?? []);
 
         foreach ($orders as $order) {
             $total_sale_amount += $order->get_total(); // Total amount including shipping and discounts
@@ -891,7 +891,7 @@ class OrderStatisticsAPI extends WP_REST_Controller
             ], getMetaDataOfOrderForArgs());
             $orders = wc_get_orders($args);
 
-            $total_orders = count($orders) ?? 0;
+            $total_orders = count($orders ?? []);
             $total_repeat_orders = 0;
 
     

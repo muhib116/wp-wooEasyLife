@@ -127,7 +127,7 @@ class HandlePastNewOrders {
         return [
             'orders' => $orders,
             "remote_api_data" => [
-                'order_count' => count($orders),
+                'order_count' => count($orders ?? []),
                 'use_details' => $cartContents
             ]
         ];     
@@ -145,7 +145,7 @@ class HandlePastNewOrders {
         return [
             'orders' => $orders,
             "remote_api_data" => [
-                'order_count' => count($orders),
+                'order_count' => count($orders ?? []),
                 'use_details' => $cartContents
             ]
         ];     

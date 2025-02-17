@@ -362,7 +362,7 @@ class TrackAbandonCart {
         $orders = wc_get_orders($args);
 
         // If there are any remaining completed orders, the customer is a repeat customer
-        return count($orders) > 0;
+        return count($orders ?? []) > 0;
     }
 
     public function deleteAbandonedOrderIfOrderProcessedSuccessfully($order_id) {

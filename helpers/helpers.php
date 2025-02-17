@@ -242,7 +242,7 @@ function get_total_orders_by_billing_phone_or_email_and_status($order) {
     } else if(!empty($email)) {
         $orders = get_orders_by_billing_phone_or_email_and_status(null, $email, $order_status);
     }
-    return count($orders); // Total orders matching criteria
+    return count($orders ?? []); // Total orders matching criteria
 }
 
 
