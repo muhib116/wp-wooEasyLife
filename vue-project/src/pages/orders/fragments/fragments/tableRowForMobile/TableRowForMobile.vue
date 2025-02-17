@@ -168,13 +168,13 @@
             </div>
             
             <div class="flex gap-2 items-center">
-                <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">
+                <button class="relative order-status capitalize px-3 py-0 rounded-[18px] text-[13px] pointer-events-auto" :class="`status-${order.status}`">
                     {{ order.status=='processing' ? 'New Order' : order?.status?.replace(/-/g, ' ') }}
     
                     <span 
                         v-if="(order?.total_order_per_customer_for_current_order_status || 0) > 1"
                         title="Multiple order place"
-                        class="cursor-pointer absolute -top-2 right-0 w-5 bg-red-500 aspect-square border-none text-white rounded-full text-[10px] hover:scale-110 shadow duration-300"
+                        class="cursor-pointer absolute -top-2 -right-1 size-4 place-content-center bg-red-500 aspect-square border-none text-white rounded-full text-[10px] hover:scale-110 shadow duration-300"
                         @click="toggleMultiOrderModel = true"
                     >
                         {{ order.total_order_per_customer_for_current_order_status }}
@@ -194,6 +194,7 @@
                     />
                 </span>
             </div>
+
             <hr />
             <div class="grid gap-2 grid-cols-2 -ml-[36px]">
                 <div class="col-span-2">

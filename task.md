@@ -70,12 +70,12 @@ Dashboard:
 ✅ missing order theke real order a niwar bebosta korte hobe
 ✅ status er color niye kaj korte hobe
 ✅ phone number er shurute majhe majhe 0 thakena eita handle korte hobe
+✅ courier entry aro simple korte hobe
 
 
 
 --------heigh priority task------------
 👉🏻 missing order issue
-👉🏻 courier entry aro simple korte hobe
 👉🏻 status button er moto dekha jay 
 👉🏻 license add kora thaklew notun device a somossa kore
 
