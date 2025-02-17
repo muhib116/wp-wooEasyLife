@@ -152,15 +152,20 @@
                 :order="order"
             />
 
-            <a
-                v-if='order?.courier_data?.parcel_tracking_link'
-                class="font-medium text-blue-500" 
-                title="Click to track your parcel"
-                :href="order?.courier_data?.parcel_tracking_link"
-                target="_black"
-            >
-                📍 Track Parcel
-            </a>
+            <div class="flex gap-3 items-center">
+                <a
+                    v-if='order?.courier_data?.parcel_tracking_link'
+                    class="font-medium text-blue-500" 
+                    title="Click to track your parcel"
+                    :href="order?.courier_data?.parcel_tracking_link"
+                    target="_black"
+                >
+                    📍 Track Parcel
+                </a>
+                <span class="font-bold">
+                    Total: {{ order?.product_info?.total_price || 0 }}tk
+                </span>
+            </div>
             
             <div class="flex gap-2 items-center">
                 <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">

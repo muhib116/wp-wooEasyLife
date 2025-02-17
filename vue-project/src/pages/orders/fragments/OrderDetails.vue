@@ -45,7 +45,9 @@
             </div>
 
             <div>
-                <DeliveryPartner />
+                <DeliveryPartner
+                    :order="activeOrder"
+                />
             </div>
         </div>
         

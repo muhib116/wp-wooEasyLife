@@ -8,7 +8,6 @@ export const useNotification = () => {
   const { getOrders, loadOrderStatusList } = inject("useOrders", {});
   const hasNewOrder = ref(false);
 
-  let timeoutId;
   const notificationSound = new Audio(
     import.meta.env.DEV
       ? "/notification-sound.wav"
@@ -24,7 +23,7 @@ export const useNotification = () => {
         showNotification({
           type: 'success',
           message: 'New Order Received 🎉'
-        }, 3000, false, 'top-right')
+        })
 
         if(route.name == 'orders'){
           await loadOrderStatusList();
