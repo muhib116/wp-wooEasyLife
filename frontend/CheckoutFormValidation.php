@@ -15,7 +15,7 @@ class CheckoutFormValidation {
         {
             $admin_phone = $config_data['admin_phone'];
             // validate same product repeat order
-            $last_order_id = $this->validate_same_product_repeat_order($billing_phone, $billing_email);
+            $last_order_id = $this->has_same_product_in_last_order($billing_phone, $billing_email);
             if($last_order_id) 
             {
                 // Customized error message
@@ -59,60 +59,95 @@ class CheckoutFormValidation {
     
         // Validate billing address
         if (!$this->validate_address($billing_address)) {
-            throw new \Exception(__('Your billing address is not valid. Please enter a correct address (in detail).', 'your-text-domain'));
-            $errors->add( 'validation', 'Your billing address is not valid. Please enter a correct address (in detail).' );
+            throw new \Exception(__('আপনার দেওয়া ঠিকানাটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে সম্পূণর্ন ঠিকানাটি সঠিকভাবে লিখুন।', 'your-text-domain'));
+            $errors->add( 'validation', 'আপনার দেওয়া ঠিকানাটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে সম্পূণর্ন ঠিকানাটি সঠিকভাবে লিখুন।' );
             return;
         }
     
         // Validate shipping address (if provided)
         if (!empty($shipping_address_1) && !$this->validate_address($shipping_address)) {
-            throw new \Exception(__('Your shipping address is not valid. Please enter a correct shipping address (in detail).', 'your-text-domain'));
-            $errors->add( 'validation', 'Your shipping address is not valid. Please enter a correct shipping address (in detail).' );
+            throw new \Exception(__('আপনার দেওয়া শিপিং এর ঠিকানাটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে সম্পূণর্ন ঠিকানাটি সঠিকভাবে লিখুন।', 'your-text-domain'));
+            $errors->add( 'validation', 'আপনার দেওয়া শিপিং এর ঠিকানাটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে সম্পূণর্ন ঠিকানাটি সঠিকভাবে লিখুন।' );
             return;
         }
     
         // Validate first name and last name
         if (!$this->validate_name($name)) {
-            throw new \Exception(__('Your name is invalid. Please enter a valid name.', 'your-text-domain'));
-            $errors->add( 'validation', 'Your name is invalid. Please enter a valid name.');
+            throw new \Exception(__('আপনার নামটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে আপনার সঠিক নাম প্রদান করুন।', 'your-text-domain'));
+            $errors->add( 'validation', 'আপনার নামটি সঠিক বলে মনে হচ্ছে না। অনুগ্রহ করে আপনার সঠিক নাম প্রদান করুন।');
             return;
         }
     
         // Validate billing phone number
         if (!validate_BD_phoneNumber(normalize_phone_number($billing_phone))) { // Fixed the logic
-            throw new \Exception(__('Your billing phone number is invalid. Please enter a valid number.', 'your-text-domain'));
-            $errors->add( 'validation', 'Your billing phone number is invalid. Please enter a valid number.');
+            throw new \Exception(__('আপনার বিলিং ফোন নম্বরটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক নম্বর প্রদান করুন।.', 'your-text-domain'));
+            $errors->add( 'validation', 'আপনার বিলিং ফোন নম্বরটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক নম্বর প্রদান করুন।.');
             return;
         }
     
         // Validate shipping phone number (if provided)
         if (!empty($shipping_phone) && !validate_BD_phoneNumber(normalize_phone_number($shipping_phone))) { // Fixed the logic
-            throw new \Exception(__('Your shipping phone number is invalid. Please enter a valid number.', 'your-text-domain'));
-            $errors->add( 'validation', 'Your shipping phone number is invalid. Please enter a valid number.');
+            throw new \Exception(__('আপনার শিপিং ফোন নম্বরটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক নম্বর প্রদান করুন।', 'your-text-domain'));
+            $errors->add( 'validation', 'আপনার শিপিং ফোন নম্বরটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক নম্বর প্রদান করুন।');
             return;
         }
     }
     
-    public function validate_same_product_repeat_order($billing_phone=null, $billing_email=null){
+    public function has_same_product_in_last_order($billing_phone = null, $billing_email = null) {
+        // Get the WooCommerce cart session items
+        $cart = WC()->cart->get_cart();
+        if (empty($cart)) {
+            return false; // No products in cart
+        }
+    
+        // Prepare order query args
         $args = [
             'limit'       => 1, // Get the most recent order
             'orderby'     => 'date',
             'order'       => 'DESC',
-            'status'      => ['wc-processing', 'wc-confirmed', 'wc-on-hold', 'wc-pending'], // Only check orders in progress
+            'status'      => ['wc-processing', 'wc-confirmed', 'wc-on-hold', 'wc-pending'], // Only check active orders
             'type'        => 'shop_order' // Ensure only WooCommerce orders are retrieved
         ];
-        
-        if($billing_phone) {
+    
+        // Check by billing phone or email
+        if ($billing_phone) {
             $args['billing_phone'] = $billing_phone;
-        } else if($billing_email) {
+        } elseif ($billing_email) {
             $args['billing_email'] = $billing_email;
         }
-
+    
+        // Fetch orders
         $orders = wc_get_orders($args);
-        $last_order_id = !empty($orders) ? $orders[0]->get_id() : '';
-
-        return $last_order_id;
+        if (empty($orders)) {
+            return false; // No previous order found
+        }
+    
+        // Get the most recent order
+        $last_order = $orders[0];
+        $last_order_id = $last_order->get_id();
+    
+        // Get products from the last order
+        $ordered_items = $last_order->get_items();
+        $ordered_product_ids = [];
+    
+        foreach ($ordered_items as $item) {
+            $ordered_product_ids[] = $item->get_product_id();
+        }
+    
+        // Get cart product IDs
+        $cart_product_ids = [];
+        foreach ($cart as $cart_item) {
+            $cart_product_ids[] = $cart_item['product_id'];
+        }
+    
+        // Use array_diff() to check if both arrays are identical
+        if (empty(array_diff($cart_product_ids, $ordered_product_ids)) && empty(array_diff($ordered_product_ids, $cart_product_ids))) {
+            return $last_order_id; // All products match
+        }
+    
+        return false; // No exact match found
     }
+    
 
     public function modify_order_phone($order, $data) {
         if (isset($data['billing_phone'])) {
