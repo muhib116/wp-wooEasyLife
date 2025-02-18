@@ -72,6 +72,7 @@ Dashboard:
 ✅ phone number er shurute majhe majhe 0 thakena eita handle korte hobe
 ✅ courier entry aro simple korte hobe
 ✅ status button er moto dekha jay 
+✅ Abandoned to customer order create issue for payment id
 
 
 

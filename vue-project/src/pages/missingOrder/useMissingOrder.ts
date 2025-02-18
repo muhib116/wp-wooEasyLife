@@ -124,7 +124,7 @@ export const useMissingOrder = () => {
                 address,
                 payment_method_id: form?.cart_contents?.payment_method_id || 'cod',
                 shipping_method_id: form?.cart_contents?.shipping_method || '',
-                shipping_cost: form?.cart_contents?.shipping_cost || '',
+                shipping_cost: form?.cart_contents?.shipping_cost || 0,
                 customer_note: form?.cart_contents?.customer_note || '',
                 order_source: 'abandoned',
                 order_status: 'wc-confirmed',

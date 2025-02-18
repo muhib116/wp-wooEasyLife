@@ -13,12 +13,21 @@
         />
         <Input.Primary
             v-else-if="objKey == 'admin_phone'"
-            label="to get sms"
+            label="to get sms or call"
             wrapperClass="w-[220px]"
-            type="text"
+            type="tel"
             v-model="configData[objKey]"
             placeholder="Enter a valid phone number."
         />
+        <div
+            v-else-if="objKey == 'validate_duplicate_order'"
+            @click="handle_config_for_duplicate_order_validation(objKey)"
+        >
+            <Switch
+                v-model="configData[objKey]"
+                disabled
+            />
+        </div>
         <Input.Primary
             v-else-if="objKey == 'invoice_company_name'"
             wrapperClass="w-[220px]"
@@ -57,8 +66,10 @@
 </template>
 
 <script setup lang="ts">
+    import { normalizePhoneNumber, showNotification, validateBDPhoneNumber } from '@/helper';
     import { Table, Input, Switch } from '@components'
     import { inject } from 'vue'
+    import { set, get } from 'lodash'
 
     const {
         configData,
@@ -69,4 +80,21 @@
         index: number,
         objKey: string,
     }>()
+
+    const handle_config_for_duplicate_order_validation = async (objKey: string) => {
+        if(get(configData, `value.${objKey}`) == 0 && !validateBDPhoneNumber(normalizePhoneNumber(configData.value['admin_phone'].trim()))) {
+            showNotification({
+                type: 'danger',
+                message: 'Please add the admin\'s valid phone number to enable this option.'
+            })
+            return
+        }
+
+        if(get(configData, `value.${objKey}`) == 0){
+            set(configData, `value.${objKey}`, 1)
+        }else {
+            set(configData, `value.${objKey}`, 0)
+        }
+        await UpdateConfig()
+    }
 </script>

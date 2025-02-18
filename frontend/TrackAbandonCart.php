@@ -147,6 +147,7 @@ class TrackAbandonCart {
         // **Step 3: Check for an existing order with `wc-processing` status**
         $args = [
             'status' => 'wc-processing',
+            'type'   => 'shop_order',
             'limit'  => 1
         ];
 

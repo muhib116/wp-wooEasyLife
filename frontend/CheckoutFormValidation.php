@@ -10,13 +10,38 @@ class CheckoutFormValidation {
 
     public function form_validation() {
         global $config_data;
+
+        if(!empty($config_data['validate_duplicate_order'])) 
+        {
+            $admin_phone = $config_data['admin_phone'];
+            // validate same product repeat order
+            $last_order_id = $this->validate_same_product_repeat_order($billing_phone, $billing_email);
+            if($last_order_id) 
+            {
+                // Customized error message
+                $error_message = 'আপনি ইতিমধ্যে এই পণ্যটির জন্য একটি অর্ডার করেছেন।';
+                $error_message .= ' আপনার আগের অর্ডার আইডি: ' . '<strong>#' . $last_order_id . '</strong>.';
+                $error_message .= ' যদি আপনি একই পণ্য আবার অর্ডার করতে চান, তাহলে দয়া করে আমাদের সাথে যোগাযোগ করুন: ';
+                $error_message .= '<a href="tel:'.$admin_phone.'">'.$admin_phone.'</a>.';
+
+                // Throw exception
+                throw new \Exception($error_message);
+
+                // Add error to WooCommerce errors
+                $errors->add('validation', $error_message);
+                return;
+            }
+        }
+
         if (empty($config_data['validate_checkout_form'])) {
             return;
         }
+
         // Retrieve and sanitize user inputs
         $billing_address_1 = isset($_POST['billing_address_1']) ? sanitize_text_field($_POST['billing_address_1']) : '';
         $billing_address_2 = isset($_POST['billing_address_2']) ? sanitize_text_field($_POST['billing_address_2']) : '';
-        $billing_phone = isset($_POST['billing_phone']) ? sanitize_text_field($_POST['billing_phone']) : '';
+        $billing_phone     = isset($_POST['billing_phone']) ? normalize_phone_number(sanitize_text_field($_POST['billing_phone'])) : '';
+        $billing_email     = isset($_POST['billing_email']) ? sanitize_text_field($_POST['billing_email']) : '';
     
         $shipping_address_1 = isset($_POST['shipping_address_1']) ? sanitize_text_field($_POST['shipping_address_1']) : '';
         $shipping_address_2 = isset($_POST['shipping_address_2']) ? sanitize_text_field($_POST['shipping_address_2']) : '';
@@ -68,6 +93,26 @@ class CheckoutFormValidation {
         }
     }
     
+    public function validate_same_product_repeat_order($billing_phone=null, $billing_email=null){
+        $args = [
+            'limit'       => 1, // Get the most recent order
+            'orderby'     => 'date',
+            'order'       => 'DESC',
+            'status'      => ['wc-processing', 'wc-confirmed', 'wc-on-hold', 'wc-pending'], // Only check orders in progress
+            'type'        => 'shop_order' // Ensure only WooCommerce orders are retrieved
+        ];
+        
+        if($billing_phone) {
+            $args['billing_phone'] = $billing_phone;
+        } else if($billing_email) {
+            $args['billing_email'] = $billing_email;
+        }
+
+        $orders = wc_get_orders($args);
+        $last_order_id = !empty($orders) ? $orders[0]->get_id() : '';
+
+        return $last_order_id;
+    }
 
     public function modify_order_phone($order, $data) {
         if (isset($data['billing_phone'])) {

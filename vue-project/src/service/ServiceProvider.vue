@@ -35,7 +35,6 @@
             } = getNoticeOfBalanceOver(userData.value.remaining_order || 0)
             
             if(notificationMsg){
-                console.log({notificationMsg})
                 showNotification(notificationMsg, false)
             }
             
