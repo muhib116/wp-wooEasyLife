@@ -38,7 +38,7 @@
 
     <div class="border-r border-gray-200 py-2.5 mr-3"></div>
 
-    <ul class="flex md:gap-2 xl:gap-3">
+    <ul class="flex items-center md:gap-2 xl:gap-3">
       <li>
         <RouterLink
           :to="{
