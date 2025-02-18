@@ -41,7 +41,7 @@
             />
 
             <Button.Native
-                v-if="orders[0]?.total_new_orders_not_handled_by_wel_plugin && userData?.remaining_order > 0"
+                v-if="orders && orders[0]?.total_new_orders_not_handled_by_wel_plugin && userData?.remaining_order > 0"
                 class="opacity-100 w-fit text-white bg-green-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
                 title="Include your previous new orders that are missing from this order list."
                 @onClick="async (btn) => {
@@ -60,7 +60,7 @@
             </Button.Native>
 
             <Button.Native
-                v-if="orders[0]?.total_new_order_handled_by_wel_but_balance_cut_failed && userData?.remaining_order > 0"
+                v-if="orders && orders[0]?.total_new_order_handled_by_wel_but_balance_cut_failed && userData?.remaining_order > 0"
                 class="opacity-100 w-fit text-white bg-teal-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
                 title="Include your new orders that failed to deduct balance."
                 @onClick="async (btn) => {

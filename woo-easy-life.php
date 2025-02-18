@@ -45,6 +45,7 @@ if (!class_exists('WooEasyLife')) :
     {
         public function __construct()
         {
+            add_action('init', [$this, 'custom_set_timezone']);
             // Initialize WooCommerce session if available.
             add_filter( 'http_request_timeout', [$this, 'increase_http_request_timeout'] );
             add_action('woocommerce_init', [$this, 'initialize_wc_session']);
@@ -60,6 +61,11 @@ if (!class_exists('WooEasyLife')) :
         }
         public function increase_http_request_timeout( $timeout ) {
             return 60; // Set to 60 seconds
+        }
+        
+        public function custom_set_timezone() {
+            update_option('timezone_string', 'Asia/Dhaka');
+            date_default_timezone_set('Asia/Dhaka'); // Change to your desired timezone
         }
         
         public function custom_modify_admin_footer() {

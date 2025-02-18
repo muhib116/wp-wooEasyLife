@@ -197,9 +197,9 @@ class TrackAbandonCart {
         $billing_address = WC()->customer->get_billing_address();
         $shipping_address = WC()->customer->get_shipping_address();
         $shipping_data = $this->get_selected_shipping_data();
+        $payment_method_title= $this->get_payment_method_title_from_session();
 
 
-    
         // clean the record if session_id match
         $this->delete_cart_by_session_id($session_id, $table_name);
 
@@ -208,7 +208,8 @@ class TrackAbandonCart {
             'products' => [],
             'coupon_codes' => WC()->session->get('applied_coupons', []),
             'customer_note' => WC()->session->get('customer_note', ''),
-            'payment_method' => WC()->session->get('chosen_payment_method', ''),
+            'payment_method_id' => WC()->session->get('chosen_payment_method', ''),
+            'payment_method' => $payment_method_title,
             'shipping_method_id' => $shipping_data->id,
             'shipping_method' => $shipping_data->method,
             'shipping_method_title' => $shipping_data->title,
@@ -283,6 +284,23 @@ class TrackAbandonCart {
             );
         }
     }
+
+    private function get_payment_method_title_from_session() {
+        if (WC()->session) {
+            $chosen_payment_method = WC()->session->get('chosen_payment_method'); // Get payment method slug
+    
+            if ($chosen_payment_method) {
+                $payment_gateways = WC()->payment_gateways->payment_gateways(); // Get all payment methods
+    
+                if (isset($payment_gateways[$chosen_payment_method])) {
+                    return $payment_gateways[$chosen_payment_method]->get_title(); // Return payment method title
+                }
+            }
+        }
+    
+        return 'No payment method selected';
+    }
+    
 
     private function delete_cart_by_session_id($session_id, $table_name) {
         global $wpdb;
@@ -361,7 +379,6 @@ class TrackAbandonCart {
 
         $orders = wc_get_orders($args);
 
-        // If there are any remaining completed orders, the customer is a repeat customer
         return count($orders ?? []) > 0;
     }
 

@@ -191,7 +191,20 @@ export const normalizePhoneNumber = (phone: string): string => {
         normalized = '0' + normalized.slice(3); // Remove '880' and prepend '0'
     }
 
-    return normalized;
+    return validateAndFormatPhoneNumber(normalized);
+}
+
+export const validateAndFormatPhoneNumber = (phone: string) => {
+    // Remove any non-numeric characters
+    phone = phone.replace(/\D/g, '');
+
+    // Check if the number has exactly 10 digits and starts with '1'
+    if (/^1\d{9}$/.test(phone)) {
+        // Prepend '0' to make it a valid 11-digit Bangladeshi phone number
+        return '0' + phone;
+    }
+
+    return phone;
 }
 
 
