@@ -46,7 +46,7 @@
 
     <div>
         <Button.Native
-            v-if="configData.courier_automation && (order && !isEmpty(order?.courier_data))"
+            v-if="configData.courier_automation && (showRefreshBtn ^ (order && !isEmpty(order?.courier_data)))"
             class="opacity-100 w-full text-white bg-sky-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
             title="Refresh CourierData"
             @onClick="async (btn) => {
@@ -70,6 +70,7 @@
     import { isEmpty } from 'lodash'
 
     const props = defineProps<{
+        showRefreshBtn?: boolean
         hideText?: boolean
         order: {
             courier_data: object

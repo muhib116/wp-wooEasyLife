@@ -38,6 +38,7 @@
 
             <CourierEntry
                 @close="$emit('close')"
+                showRefreshBtn
             />
 
             <Button.Native
