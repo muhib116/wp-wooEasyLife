@@ -74,11 +74,11 @@ Dashboard:
 ✅ status button er moto dekha jay 
 ✅ Abandoned to customer order create issue for payment id
 ✅ multiple order of same product can protect
+✅ abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
 
 
 
 --------heigh priority task------------
-abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
 👉🏻 missing order issue
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 👉🏻 license add kora thaklew notun device a somossa kore
