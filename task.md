@@ -78,6 +78,7 @@ Dashboard:
 
 
 --------heigh priority task------------
+abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
 👉🏻 missing order issue
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 👉🏻 license add kora thaklew notun device a somossa kore
