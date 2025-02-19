@@ -73,13 +73,13 @@ Dashboard:
 ✅ courier entry aro simple korte hobe
 ✅ status button er moto dekha jay 
 ✅ Abandoned to customer order create issue for payment id
+✅ multiple order of same product can protect
 
 
 
 --------heigh priority task------------
-👉🏻 multiple order of same product can protect
-👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 👉🏻 missing order issue
+👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 👉🏻 license add kora thaklew notun device a somossa kore
 
 👉🏻 *** Curier cod edit er option dite hobe

@@ -568,3 +568,25 @@ function get_woo_easy_registered_user() {
 
     return $user_data; // Return user data if successful
 }
+
+
+function human_time_difference($to, $from = null, $only_difference=null) {
+    // If no from is provided, use the current time
+    $from = $from ? (is_numeric($from) ? $from : strtotime($from)) : time();
+    $to = is_numeric($to) ? $to : strtotime($to);
+
+    // Calculate time difference (can be negative)
+    $time_difference = $to - $from;
+    $absolute_difference = abs($time_difference); // Get absolute value for comparison
+
+    // If the difference is more than 24 hours, return formatted date
+    if (!$only_difference && $absolute_difference > 86400) { // 24 hours = 86400 seconds
+        return date('M j, Y \a\t g:i A', $to);
+    }
+
+    // Convert time difference to human-readable format
+    $formatted_time_difference = human_time_diff($to, $from);
+
+    // Determine if it's in the past or future
+    return $formatted_time_difference . ($time_difference < 0 ? " ago" : " later");
+}

@@ -222,7 +222,7 @@ class OrderListAPI
                 'total_new_orders_not_handled_by_wel_plugin' => $total_new_orders_not_handled_by_wel_plugin,
                 'total_new_order_handled_by_wel_but_balance_cut_failed' => $total_new_order_handled_by_wel_but_balance_cut_failed,
                 'total_order_per_customer_for_current_order_status' => $total_order_per_customer_for_current_order_status,
-                'date_created'  => $order->get_date_created() ? $order->get_date_created()->date('M j, Y \a\t g:i A') : null,
+                'date_created'  => $order->get_date_created() ? human_time_difference($order->get_date_created()) : null,
                 'customer_id'   => $order->get_customer_id(),
                 'customer_name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                 'shipping_cost' => $order->get_shipping_total(),

@@ -146,9 +146,11 @@ class TrackAbandonCart {
     
         // **Step 3: Check for an existing order with `wc-processing` status**
         $args = [
-            'status' => 'wc-processing',
+            'status' => ['wc-processing', 'wc-confirmed', 'wc-on-hold', 'wc-pending'],
             'type'   => 'shop_order',
-            'limit'  => 1
+            'limit'  => 1,
+            'orderby'     => 'date',
+            'order'       => 'DESC',
         ];
 
         if(!empty($customer_phone)) {

@@ -9,11 +9,11 @@
           #{{ item.id }}
         </span>
         <span
-          v-if="item.is_repeat_customer"
-          class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
+          v-if="item.last_wc_order_at"
+          class="px-1 bg-red-500 text-white capitalize rounded-sm text"
           title="Repeat customer"
         >
-          Repeat
+          Repeat ({{ item.last_wc_order_at }})
         </span>
       </div>
 
@@ -34,7 +34,7 @@
       </div>
 
       <div class="truncate">
-        📅 {{ printDate(item.created_at) }}
+        📅 {{ item.abandoned_at }}
       </div>
       <div>
         🏠 {{ item.billing_address }}

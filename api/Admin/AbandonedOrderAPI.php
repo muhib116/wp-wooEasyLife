@@ -229,6 +229,11 @@ class AbandonedOrderAPI extends WP_REST_Controller {
  
         // Deserialize cart_contents for each result
         foreach ($results as &$result) {
+            $data = $this->get_wc_order_data_by_abandoned_data($result);
+            $result['last_wc_order_current_status'] = $data['last_wc_order_current_status'];
+            $result['last_wc_order_at'] = $data['last_wc_order_at'];
+            $result['abandoned_at'] = $data['abandoned_at'];
+
             if (isset($result['cart_contents'])) {
                 $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
             }
@@ -246,6 +251,51 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ],
         ], 200);
     }
+    
+    private function get_wc_order_data_by_abandoned_data($abandonedOrder) {
+        $customer_phone = $abandonedOrder['customer_phone'];
+        $customer_email = $abandonedOrder['customer_email'];
+        $abandoned_at   = $abandonedOrder['abandoned_at'];
+    
+        // Get last WooCommerce order by phone or email
+        $args = [
+            'limit'    => 1, // Get the most recent order
+            'orderby'  => 'date',
+            'order'    => 'DESC',
+            'status'   => ['wc-processing', 'wc-confirmed', 'wc-completed', 'wc-on-hold', 'wc-pending'],
+            'type'     => 'shop_order'
+        ];
+    
+        // Check by billing phone or email
+        if ($customer_phone) {
+            $args['billing_phone'] = $customer_phone;
+        } elseif ($customer_email) {
+            $args['billing_email'] = $customer_email;
+        }
+    
+        $wc_orders = wc_get_orders($args);
+        if (!empty($wc_orders)) {
+            $wc_order = $wc_orders[0];
+
+            $wc_order_date = strtotime($wc_order->get_date_created());
+            $order_status = $wc_order->get_status();
+
+            $results = [
+                'last_wc_order_current_status'  => $order_status,
+                'last_wc_order_at'  => human_time_difference($wc_order_date),
+                'abandoned_at' => human_time_difference($abandoned_at),
+            ];
+        } else {
+            $results = [
+                'last_wc_order_current_status'  => '',
+                'last_wc_order_at'  => false,
+                'abandoned_at' => human_time_difference($abandoned_at)
+            ];
+        }
+
+        return $results;
+    }
+    
     
 
     public function get_abandoned_dashboard_data(WP_REST_Request $request) {
