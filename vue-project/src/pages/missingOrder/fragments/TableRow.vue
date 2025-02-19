@@ -9,11 +9,11 @@
           #{{ item.id }}
         </span>
         <span
-          v-if="item.last_wc_order_at"
+          v-if="item?.last_wc_order_at && item?.status == 'abandoned'"
           class="px-1 bg-red-500 text-white capitalize rounded-sm text"
-          title="Repeat customer"
+          :title="`Last order status: ${item.last_wc_order_current_status}`"
         >
-          Repeat ({{ item.last_wc_order_at }})
+          Has order ({{ item.last_wc_order_at }})
         </span>
       </div>
 

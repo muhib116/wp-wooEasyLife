@@ -282,7 +282,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
 
             $results = [
                 'last_wc_order_current_status'  => $order_status,
-                'last_wc_order_at'  => human_time_difference($wc_order_date),
+                'last_wc_order_at'  => human_time_difference($wc_order_date, null, true),
                 'abandoned_at' => human_time_difference($abandoned_at),
             ];
         } else {
