@@ -76,18 +76,18 @@
       </Button.Primary>
 
       <div v-if="item.abandoned_at">
-        <span class="font-semibold text-red-500">
+        <span class="font-semibold text-blue-500">
           Abandoned At: 
         </span>
         <br />
-        {{ printDate(item.abandoned_at) }}
+        {{ item.abandoned_at }}
       </div>
       <div v-if="item.recovered_at">
         <span class="font-semibold text-green-500">
           Recovered At: 
         </span>
         <br />
-        {{ printDate(item.recovered_at) }}
+        {{ item.recovered_at }}
       </div>
     </Table.Td>
 

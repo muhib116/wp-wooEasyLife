@@ -18,7 +18,7 @@
                     <span class="hidden md:inline-block">Back</span>
                 </Button.Primary>
             </div>
-            <div class="grid gap-1 md:grid-cols-[auto_1fr] mb-4">
+            <div class="grid gap-y-2 gap-x-4 md:grid-cols-[auto_1fr] mb-4">
                 <h4>
                     <span style="font-weight: bold;"> Name: </span> 
                     {{ orders[0].billing_address.first_name }} 
