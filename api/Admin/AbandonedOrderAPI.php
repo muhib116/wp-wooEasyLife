@@ -211,7 +211,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ),
             ARRAY_A
         );
-    
+
         // If no results found
         if (empty($results)) {
             return new WP_REST_Response([
@@ -232,7 +232,9 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             $data = $this->get_wc_order_data_by_abandoned_data($result);
             $result['last_wc_order_current_status'] = $data['last_wc_order_current_status'];
             $result['last_wc_order_at'] = $data['last_wc_order_at'];
-            $result['abandoned_at'] = $data['abandoned_at'];
+            $result['created_at'] = human_time_difference($result['created_at']);
+            $result['abandoned_at'] = human_time_difference($result['abandoned_at']);
+            $result['recovered_at'] = human_time_difference($result['recovered_at']);
 
             if (isset($result['cart_contents'])) {
                 $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
@@ -255,8 +257,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     private function get_wc_order_data_by_abandoned_data($abandonedOrder) {
         $customer_phone = $abandonedOrder["customer_phone"];
         $customer_email = $abandonedOrder["customer_email"];
-        $abandoned_at   = $abandonedOrder["abandoned_at"];
-        $recovered_at   = $abandonedOrder["recovered_at"];
 
         // Get last WooCommerce order by phone or email
         $args = [
@@ -275,10 +275,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         }
     
         $wc_orders = wc_get_orders($args);
-        $results = [
-            'abandoned_at' => human_time_difference($abandoned_at),
-            'recovered_at' => human_time_difference($recovered_at)
-        ];
 
 
         if (!empty($wc_orders)) {

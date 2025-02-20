@@ -595,3 +595,27 @@ function human_time_difference($to, $from = null, $only_difference = null) {
     // Determine if it's in the past or future
     return $formatted_time_difference . ($time_difference < 0 ? " ago" : " later");
 }
+
+function get_order_total_weight( $order ) {
+    if ( ! $order instanceof WC_Order ) {
+        return 0; // Return 0 if the order is invalid
+    }
+
+    $total_weight = 0;
+
+    // Loop through order items
+    foreach ( $order->get_items() as $item ) {
+        $product = $item->get_product(); // Get product object
+        if ( $product ) {
+            $weight = $product->get_weight(); // Get product weight
+            $quantity = $item->get_quantity(); // Get quantity in the order
+
+            // Ensure weight is numeric
+            if ( is_numeric( $weight ) ) {
+                $total_weight += (float) $weight * (int) $quantity;
+            }
+        }
+    }
+
+    return $total_weight; // Return total weight in kg
+}

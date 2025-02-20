@@ -45,7 +45,7 @@
             </div>
 
             <div>
-                <div class="max-w-[160px] mx-auto md:ml-auto pr-4 whitespace-nowrap">
+                <div class="max-w-[190px] mx-auto md:ml-auto pr-4 whitespace-nowrap">
                     <DeliveryPartner
                         :order="activeOrder"
                     />

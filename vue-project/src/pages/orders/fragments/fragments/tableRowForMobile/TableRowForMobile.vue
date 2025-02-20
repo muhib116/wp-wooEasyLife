@@ -21,12 +21,21 @@
         </Table.Td>
         <Table.Td class="space-y-2 w-fit">
             <div class="flex justify-between items-center">
-                <span 
-                    class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
-                    title="Order Id"
-                >
-                    #{{ order.id }}
-                </span>
+                <div class="flex items-center gap-2">
+                    <span 
+                        class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
+                        title="Order Id"
+                    >
+                        #{{ order.id }}
+                    </span>
+                    <span 
+                        v-if="order.order_source "
+                        class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
+                        title="Order source"
+                    >
+                        {{ order.order_source }}
+                    </span>
+                </div>
                 
                 <Button.Native
                     class="opacity-30 flex items-center gap-2"
@@ -46,13 +55,6 @@
             <div
                 class="flex flex-wrap items-start gap-2 relative"
             >
-                <span 
-                    v-if="order.order_source "
-                    class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
-                    title="Order source"
-                >
-                    {{ order.order_source }}
-                </span>
                 <span
                     title="Customer fraud score"
                     class="text-red-500"

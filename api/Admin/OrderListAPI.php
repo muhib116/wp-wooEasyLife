@@ -210,11 +210,13 @@ class OrderListAPI
             $courier_data = get_courier_data_from_order($order);
             $is_repeat_customer = is_repeat_customer($order);
             $customer_custom_data = $customerHandler->handle_customer_data(null, $order);
+            $parcel_weight = get_order_total_weight($order);
 
             $data[] = [
                 'id'            => $order->get_id(),
                 'status'        => $order->get_status(),
                 'total'         => $order->get_total(),
+                'parcel_weight'        => $parcel_weight,
                 'is_wel_order_handled' => $order->get_meta('is_wel_order_handled', true),
                 'is_wel_balance_cut'   => $order->get_meta('is_wel_balance_cut', true),
                 'is_done'   => $order->get_meta('woo_easy_is_done', true),
