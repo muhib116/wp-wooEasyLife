@@ -9,13 +9,18 @@
           #{{ item.id }}
         </span>
         <span
-          v-if="item?.last_wc_order_at && item?.status == 'abandoned'"
+          v-if="item?.last_wc_order_at"
           class="px-1 bg-red-500 text-white capitalize rounded-sm text"
-          :title="`Last order status: ${item.last_wc_order_current_status}`"
         >
           Has order ({{ item.last_wc_order_at }})
         </span>
       </div>
+      <span 
+        class="font-medium text-red-500"
+        v-if="item?.last_wc_order_at"
+      >
+        {{ `Last order status: ${item.last_wc_order_current_status}` }}
+      </span>
 
       <div class="flex gap-1 font-semibold" title="Customer name">
         {{ item.customer_name }}
