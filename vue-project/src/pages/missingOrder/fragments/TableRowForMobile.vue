@@ -22,6 +22,7 @@
             >
               {{ `Last order status: ${item.last_wc_order_current_status}` }}
             </span>
+            <br/>
       
             <div class="flex gap-1 font-semibold" title="Customer name">
               {{ item.customer_name }}
