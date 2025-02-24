@@ -25,6 +25,7 @@ export const useOrders = () => {
   const selectedOrders = ref(new Set([]));
   const selectAll = ref(false);
   const isLoading = ref(false);
+  const orderListLoading = ref(false);
   const showInvoices = ref(false);
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
@@ -145,6 +146,7 @@ export const useOrders = () => {
   const getOrders = async (shouldClear: boolean = true) => {
     try {
       isLoading.value = true;
+      orderListLoading.value = true;
       if (orderFilter.value.page == 0) {
         orderFilter.value.page = 1;
       }
@@ -156,6 +158,7 @@ export const useOrders = () => {
       }
     } finally {
       isLoading.value = false;
+      orderListLoading.value = false;
     }
   };
 
@@ -651,6 +654,7 @@ export const useOrders = () => {
     toggleNewOrder,
     selectedStatus,
     selectedOrders,
+    orderListLoading,
     courierStatusInfo,
     wooCommerceStatuses,
     orderStatusWithCounts,
