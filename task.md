@@ -75,13 +75,13 @@ Dashboard:
 ✅ Abandoned to customer order create issue for payment id
 ✅ multiple order of same product can protect
 ✅ abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
+✅ missing order issue
+✅ license add kora thaklew notun device a somossa kore
 
 
 
 --------heigh priority task------------
-👉🏻 missing order issue
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
-👉🏻 license add kora thaklew notun device a somossa kore
 
 👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
