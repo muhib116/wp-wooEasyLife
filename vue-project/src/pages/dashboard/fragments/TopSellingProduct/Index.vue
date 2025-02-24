@@ -52,7 +52,7 @@
                         </Table.Td>
                         <Table.Td>
                             <a 
-                                class="flex gap-2 items-center text-sky-500 underline"
+                                class="flex gap-2 items-center text-sky-500 underline max-w-[200px] line-clamp-2"
                                 :href="`${baseUrl}/wp-admin/post.php?post=${product.product_id}&action=edit`"
                                 target="_blank"
                                 title="Click to update product"
