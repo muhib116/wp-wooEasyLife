@@ -10,8 +10,11 @@ import {
   includePastNewOrdersToWELPlugin,
   includeMissingNewOrdersOfFailedBalanceCut,
   toggleIsDone,
-  updateOrder
+  updateOrder,
+  updateShippingMethod,
+  getShippingMethods
 } from "@/api";
+
 import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
@@ -19,10 +22,13 @@ import { isEmpty } from "lodash";
 
 export const useOrders = () => {
   const orders = ref([]);
+  const shippingMethods = ref(null)
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
   const activeOrder = ref();
   const selectedOrders = ref(new Set([]));
+  const isShippingEditing = ref(false);
+  const isShippingEditable = ref(false);
   const selectAll = ref(false);
   const isLoading = ref(false);
   const orderListLoading = ref(false);
@@ -59,6 +65,7 @@ export const useOrders = () => {
   const setActiveOrder = (item) => {
     activeOrder.value = item;
   };
+
   const setSelectedOrder = (item) => {
     if (!selectedOrders.value.has(item)) {
       selectedOrders.value.add(item);
@@ -77,6 +84,11 @@ export const useOrders = () => {
 
   const clearSelectedOrders = () => {
     selectedOrders.value.clear();
+  }
+
+  const loadShippingMethods = async () => {
+    const { data:_shippingMethods } = await getShippingMethods();
+    shippingMethods.value = _shippingMethods
   }
   
   const handleFraudCheck = async (button) => {
@@ -161,6 +173,26 @@ export const useOrders = () => {
       orderListLoading.value = false;
     }
   };
+
+  const handleUpdateShippingMethod = async (payload: {
+    shipping_instance_id: string | number
+    order_id: string | number
+  }) => {
+    try {
+      isLoading.value = true;
+      isShippingEditing.value = true;
+      await updateShippingMethod(payload)
+      await getOrders()
+      showNotification({
+        type: 'success',
+        message: 'Shipping method updated.'
+      })
+    } finally {
+      isShippingEditing.value = false
+      isShippingEditable.value = false
+      isLoading.value = false;
+    }
+  }
 
   const loadAllStatuses = async () => {
     try {
@@ -635,9 +667,10 @@ export const useOrders = () => {
     }
   );
 
-  onMounted(() => {
+  onMounted(async () => {
     loadOrderStatusList();
     loadAllStatuses();
+    await loadShippingMethods();
     getOrders();
   });
 
@@ -654,8 +687,11 @@ export const useOrders = () => {
     toggleNewOrder,
     selectedStatus,
     selectedOrders,
+    shippingMethods,
     orderListLoading,
     courierStatusInfo,
+    isShippingEditable,
+    isShippingEditing,
     wooCommerceStatuses,
     orderStatusWithCounts,
     getOrders,
@@ -676,7 +712,8 @@ export const useOrders = () => {
     handlePhoneNumberBlock,
     refreshBulkCourierData,
     getDeliveryProbability,
+    handleUpdateShippingMethod,
+    include_balance_cut_failed_new_orders,
     include_past_new_orders_thats_not_handled_by_wel_plugin,
-    include_balance_cut_failed_new_orders
   };
 };

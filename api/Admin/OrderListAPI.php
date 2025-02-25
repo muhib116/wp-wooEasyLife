@@ -50,6 +50,29 @@ class OrderListAPI
 
         register_rest_route(
             __API_NAMESPACE, // Namespace and version.
+            '/update-order-shipping-method',
+            [
+                'methods'             => 'POST', // Use POST for modifying data
+                'callback'            => [$this, 'update_order_shipping_method'],
+                'permission_callback' => api_permission_check(),
+                'args'                => [
+                    'order_id' => [
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'description' => 'The ID of the order to update shipping method.',
+                    ],
+                    'shipping_instance_id' => [
+                        'required'    => true,
+                        'type'        => 'integer',
+                        'description' => 'New shipping instance ID to apply.',
+                    ],
+                ],
+            ]
+        );
+        
+
+        register_rest_route(
+            __API_NAMESPACE, // Namespace and version.
             '/status-with-counts',         // Endpoint: /status-with-counts
             [
                 'methods'             => 'GET',
@@ -344,6 +367,64 @@ class OrderListAPI
         
         return $order_count;        
     }
+
+    public function update_order_shipping_method(\WP_REST_Request $request) {
+        // Get the payload from the request
+        $data = $request->get_json_params();
+        $order_id = $data['order_id'];
+        $new_shipping_instance_id = $data['shipping_instance_id'];
+    
+        // Load the WooCommerce order object
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new WP_Error('invalid_order', 'Invalid order ID.');
+        }
+    
+        // Remove existing shipping items
+        foreach ($order->get_items('shipping') as $item_id => $shipping_item) {
+            $order->remove_item($item_id);
+        }
+    
+        // Get shipping zone for the order
+        $package = [
+            'destination' => [
+                'country'  => $order->get_shipping_country(),
+                'state'    => $order->get_shipping_state(),
+                'postcode' => $order->get_shipping_postcode(),
+                'city'     => $order->get_shipping_city(),
+            ],
+        ];
+        $shipping_zone = wc_get_shipping_zone($package);
+        $chosen_method = null;
+    
+        // Loop through available shipping methods in the zone
+        foreach ($shipping_zone->get_shipping_methods(true) as $method) {
+            if ($method->instance_id == $new_shipping_instance_id) {
+                $chosen_method = $method;
+                break;
+            }
+        }
+    
+        if (!$chosen_method) {
+            return new WP_Error('shipping_not_found', 'Selected shipping method instance is not available.');
+        }
+    
+        // Add new shipping method
+        $shipping_item = new \WC_Order_Item_Shipping();
+        $shipping_item->set_method_title($chosen_method->get_title());
+        $shipping_item->set_method_id($chosen_method->id);
+        $shipping_item->set_instance_id($chosen_method->instance_id); // Ensure unique instance
+        $shipping_item->set_total($chosen_method->cost);
+        $order->add_item($shipping_item);
+    
+        // Recalculate totals
+        $order->calculate_totals();
+        $order->save();
+    
+        return true; // Success
+    }
+
+
     public function update_or_add_product_to_order(\WP_REST_Request $request) {
         // Get the payload from the request
         $data = $request->get_json_params();
@@ -351,102 +432,106 @@ class OrderListAPI
         $product_id = $data['product_id'];
         $quantity = $data['quantity'];
     
-        // Load the WooCommerce order object
+        // Load WooCommerce order object
         $order = wc_get_order($order_id);
-    
         if (!$order) {
             return new WP_Error('invalid_order', 'Invalid order ID.');
         }
     
-        // Check if the product exists in the order
-        $order_items = $order->get_items();
-        $product_exists = false;
-        $item_id_to_remove = null;
+        // Store existing applied coupons
+        $applied_coupons = $order->get_coupon_codes();
     
-        foreach ($order_items as $item_id => $item) {
-            if ($item->get_product_id() == $product_id) {
-                if ($quantity == 0) {
-                    $item_id_to_remove = $item_id;
-                } else {
-                    // Update quantity
-                    $item->set_quantity($quantity);
-                    $product = wc_get_product($product_id);
-    
-                    if ($product) {
-                        $regular_price = $product->get_regular_price();
-                        $sale_price = $product->get_sale_price() ?: $regular_price;
-    
-                        // Apply sequential discounts
-                        $subtotal = $regular_price * $quantity;
-                        $discounted_total = $sale_price * $quantity;
-    
-                        // Apply additional WooCommerce discounts
-                        if (function_exists('WC_Discounts')) {
-                            $discounts = new WC_Discounts($order);
-                            $discounted_total = $discounts->apply_cart_discounts($discounted_total);
-                        }
-    
-                        // Update item prices
-                        $item->set_subtotal($subtotal);
-                        $item->set_total($discounted_total);
-                    }
-    
-                    $order->save();
-                }
-                $product_exists = true;
-                break;
-            }
-        }
-    
-        // Remove item if quantity is 0
-        if ($item_id_to_remove) {
-            $order->remove_item($item_id_to_remove);
-            $order->save(); // Save after removal
-        }
-    
-        // If product is not found and quantity > 0, add as new item
-        if (!$product_exists && $quantity > 0) {
-            $product = wc_get_product($product_id);
-            if (!$product) {
-                return new WP_Error('invalid_product', 'Invalid product ID.');
-            }
-    
-            $regular_price = $product->get_regular_price();
-            $sale_price = $product->get_sale_price() ?: $regular_price;
-    
-            // Apply sequential discounting
-            $subtotal = $regular_price * $quantity;
-            $discounted_total = $sale_price * $quantity;
-    
-            // Apply WooCommerce cart discounts
-            if (function_exists('WC_Discounts')) {
-                $discounts = new WC_Discounts($order);
-                $discounted_total = $discounts->apply_cart_discounts($discounted_total);
-            }
-    
-            
-            // Create and set new item data
-            $item = new \WC_Order_Item_Product();
-            $item->set_product_id($product_id);
-            $item->set_quantity($quantity);
-            $item->set_subtotal($subtotal);
-            $item->set_total($discounted_total);
-            
-            // Add item to order
-            $order->add_item($item);
-        }
+        // Check if product exists and update/remove accordingly
+        $product_exists = $this->update_existing_product($order, $product_id, $quantity);
         
-        // Recalculate order totals
-        $order->calculate_totals();
-        $order->save();
+        // If product not found, add new product
+        if (!$product_exists && $quantity > 0) {
+            $this->add_new_product_to_order($order, $product_id, $quantity);
+        }
+    
+        // Apply coupons after updating the order
+        $this->reapply_coupons($order, $applied_coupons);
         
         // Fetch updated product list
         $updated_items = getProductInfo($order);
         
-        return $updated_items; // Return updated product list
+        return $updated_items;
     }
     
+    /**
+     * Updates existing product in order or removes it if quantity is 0.
+     */
+    private function update_existing_product($order, $product_id, $quantity) {
+        foreach ($order->get_items() as $item_id => $item) {
+            if ($item->get_product_id() == $product_id) {
+                if ($quantity == 0) {
+                    $order->remove_item($item_id);
+                } else {
+                    $product = wc_get_product($product_id);
+                    if ($product) {
+                        $regular_price = $product->get_regular_price();
+                        $sale_price = $product->get_sale_price() ?: $regular_price;
+                        $subtotal = $regular_price * $quantity;
+                        $discounted_total = $sale_price * $quantity;
+                        
+                        // Update item
+                        $item->set_quantity($quantity);
+                        $item->set_subtotal($subtotal);
+                        $item->set_total($discounted_total);
+                        $item->save();
+                    }
+                }
+                return true; // Product found and updated
+            }
+        }
+        return false; // Product not found in order
+    }
     
+    /**
+     * Adds a new product to the order if it does not exist.
+     */
+    private function add_new_product_to_order($order, $product_id, $quantity) {
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            return new WP_Error('invalid_product', 'Invalid product ID.');
+        }
+    
+        $regular_price = $product->get_regular_price();
+        $sale_price = $product->get_sale_price() ?: $regular_price;
+        $subtotal = $regular_price * $quantity;
+        $discounted_total = $sale_price * $quantity;
+        
+        // Create new order item
+        $item = new \WC_Order_Item_Product();
+        $item->set_product_id($product_id);
+        $item->set_quantity($quantity);
+        $item->set_subtotal($subtotal);
+        $item->set_total($discounted_total);
+        $item->save();
+    
+        // Add item to order
+        $order->add_item($item);
+    }
+    
+    private function reapply_coupons($order, $applied_coupons) {
+        // Remove all existing coupons
+        foreach ($order->get_items('coupon') as $coupon_item_id => $coupon_item) {
+            $order->remove_item($coupon_item_id);
+        }
+    
+        // Recalculate totals before applying coupon
+        $order->calculate_totals();
+    
+        // Apply coupons BEFORE adding shipping
+        foreach ($applied_coupons as $coupon_code) {
+            $order->apply_coupon($coupon_code);
+        }
+    
+        // Recalculate totals again after applying the coupon
+        $order->calculate_totals();
+        $order->save();
+    }
+
     public function get_order_status_with_counts()
     {
         $statuses = wc_get_order_statuses(); // Retrieve all order statuses
@@ -790,12 +875,12 @@ function get_order_shipping_methods($order) {
 
     // Get the shipping methods for the order
     $shipping_methods = $order->get_shipping_methods();
-
+    
     foreach ($shipping_methods as $shipping_method) {
         $shipping_methods_data[] = $shipping_method->get_method_title();
     }
 
-    return $shipping_methods_data;
+    return $shipping_methods_data; // Return all shipping methods, not just the first one
 }
 
 /**

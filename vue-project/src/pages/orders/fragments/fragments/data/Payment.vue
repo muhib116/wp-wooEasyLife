@@ -1,9 +1,11 @@
 <template>
-    <div class="grid text-right mb-2">
+    <div class="grid text-right mb-2 w-fit">
         <span class="truncate">
             Price: <span v-html="order.product_price+order.currency_symbol"></span>
         </span>
-        <span>
+        <span
+            v-if="order?.applied_coupons.length"
+        >
             Discount: -<span v-html="order.discount_total+order.currency_symbol"></span>
         </span>
         <span class="truncate">
@@ -14,7 +16,10 @@
             Total: <span v-html="order.total+order.currency_symbol"></span>
         </span>
     </div>
-    <div class="whitespace-nowrap text-right">
+    <div 
+        v-if="order?.applied_coupons.length"
+        class="whitespace-nowrap text-right w-fit"
+    >
         🎟️ Coupons: {{ order?.applied_coupons?.join(', ') || 'N/A' }}
     </div>
 </template>

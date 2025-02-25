@@ -65,22 +65,6 @@
         <MobileOrderedProductDetails 
             class="block lg:hidden"
         />
-
-        <div class="grid text-right my-2">
-            <span class="truncate">
-                Price: <span v-html="activeOrder.product_price+activeOrder.currency_symbol"></span>
-            </span>
-            <span>
-                Discount: -<span v-html="activeOrder.discount_total+activeOrder.currency_symbol"></span>
-            </span>
-            <span class="truncate">
-                Shipping: <span v-html="activeOrder.shipping_cost+activeOrder.currency_symbol"></span>
-            </span>
-            <hr class="border-b-0 opacity-50 my-2" />
-            <span class="truncate text-orange-500">
-                Total: <span v-html="activeOrder.total+activeOrder.currency_symbol"></span>
-            </span>
-        </div>
     </div>
 </template>
 
@@ -89,6 +73,7 @@
     import DesktopOrderedProductDetails from './DesktopOrderedProductDetails.vue'
     import MobileOrderedProductDetails from './MobileOrderedProductDetails.vue'
     import DeliveryPartner from '@/pages/orders/fragments/fragments/data/DeliveryPartner.vue'
+    import Payment from '@/pages/orders/fragments/fragments/data/Payment.vue'
 
     const {
         activeOrder

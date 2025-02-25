@@ -29,21 +29,21 @@
 <script setup lang="ts">
     import { Select } from '@components'
     import { ref, onMounted, inject } from 'vue'
-    import { getPaymentMethods, getShippingMethods } from '@/api'
+    import { getPaymentMethods } from '@/api'
     
-    const shippingMethods = ref(null)
     const paymentMethods  = ref(null)
     
     const {
         form
     } = inject('useCustomOrder')
+    
+    const {
+        shippingMethods
+    } = inject('useOrders')
 
     onMounted(async () => {
-        const { data:_shippingMethods } = await getShippingMethods();
-        shippingMethods.value = _shippingMethods
-
-        if(_shippingMethods.length === 1) {
-            form.value.shippingMethod = _shippingMethods[0]
+        if(shippingMethods.value?.length === 1) {
+            form.value.shippingMethod = shippingMethods.value[0]
         }
         
         const { data:_paymentMethods } = await getPaymentMethods();
