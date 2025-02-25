@@ -51,6 +51,9 @@ if (!class_exists('WooEasyLife')) :
             add_action('woocommerce_init', [$this, 'initialize_wc_session']);
             add_filter('admin_footer_text', [$this, 'custom_modify_admin_footer']);
             add_filter('update_footer', [$this, 'custom_modify_footer_version'], 9999);
+            add_filter('woocommerce_order_is_editable', function($editable, $order) {
+                return true; // Force all orders to be editable
+            }, 10, 2);
 
             // Load license key and configuration data.
             $this->load_license_key();
@@ -62,7 +65,6 @@ if (!class_exists('WooEasyLife')) :
         public function increase_http_request_timeout( $timeout ) {
             return 60; // Set to 60 seconds
         }
-        
         public function custom_set_timezone() {
             update_option('timezone_string', 'Asia/Dhaka');
             date_default_timezone_set('Asia/Dhaka'); // Change to your desired timezone

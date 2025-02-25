@@ -81,6 +81,9 @@ Dashboard:
 
 
 --------heigh priority task------------
+👉🏻 shipping method editable korte hobe
+👉🏻 order er product editable issue
+
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 
 👉🏻 *** Curier cod edit er option dite hobe
