@@ -215,7 +215,13 @@ class OrderListAPI
             $data[] = [
                 'id'            => $order->get_id(),
                 'status'        => $order->get_status(),
-                'total'         => $order->get_total(),
+                'sub_total'     => $order->get_subtotal(),
+                'total'         => $order->get_total(), //after cutting discount
+                // 👉 get_total() কী কী অন্তর্ভুক্ত করে?
+                // ✅ পণ্যের মূল্য (Product Price)
+                // ✅ শিপিং চার্জ (Shipping Cost)
+                // ✅ ট্যাক্স (Tax) - যদি থাকে
+                // ✅ ডিসকাউন্ট বাদ দিয়ে (After Discount) চূড়ান্ত মূল্য
                 'parcel_weight'        => $parcel_weight,
                 'is_wel_order_handled' => $order->get_meta('is_wel_order_handled', true),
                 'is_wel_balance_cut'   => $order->get_meta('is_wel_balance_cut', true),
@@ -245,7 +251,7 @@ class OrderListAPI
                 'payment_method' => $order->get_payment_method(),
                 'payment_method_title' => $order->get_payment_method_title(),
                 'transaction_id' => $order->get_transaction_id() ?: '',
-                'product_price' => wc_price($product_info['total_price']),
+                'product_price' => $product_info['total_price'],
                 'product_info' => $product_info,
                 'billing_address' => [
                     'type' => 'billing',
@@ -706,6 +712,7 @@ function getProductInfo($order)
 {
     $productInfo = [
         'total_price' => 0,
+        'total_price_after_cut_discount' => 0,
         'product_info' => []
     ];
     if ($order) {
@@ -716,12 +723,13 @@ function getProductInfo($order)
 
             if ($product) {
                 $product_total = $item->get_total(); // Total for the line item (quantity * price)
-                $productInfo["total_price"] = (int)$productInfo["total_price"] += (int)$product_total;
+                $productInfo["total_price"] = (int)$productInfo["total_price"] += (int)($product->get_price() * $item->get_quantity());
+                $productInfo["total_price_after_cut_discount"] = (int)$productInfo["total_price_after_cut_discount"] += (int)$product_total;
                 $productInfo["product_info"][] = [
                     'id' => $product->get_id(),
                     'product_name' => $product->get_name(),
                     'product_price' => $product->get_price(),
-                    'product_total' => $product_total,
+                    'product_total' => ($product->get_price() * $item->get_quantity()),
                     'product_quantity' => $item->get_quantity(),
                     'product_image' => $product_image_url
                 ];

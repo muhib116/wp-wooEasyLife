@@ -33,6 +33,12 @@
                         </span> 
                         {{ activeOrder.billing_address?.email }}
                     </h4>
+                    <h4 class="capitalize">
+                        <span style="font-weight: bold;">
+                            Order Status:
+                        </span> 
+                        {{ activeOrder.status == 'processing' ? 'New order' : activeOrder.status }}
+                    </h4>
                 </div>
 
                 <h4>
@@ -45,7 +51,7 @@
             </div>
 
             <div>
-                <div class="max-w-[190px] mx-auto md:ml-auto pr-4 whitespace-nowrap">
+                <div class="max-w-[190px] md:ml-auto pr-4 whitespace-nowrap">
                     <DeliveryPartner
                         :order="activeOrder"
                     />
@@ -59,6 +65,22 @@
         <MobileOrderedProductDetails 
             class="block lg:hidden"
         />
+
+        <div class="grid text-right my-2">
+            <span class="truncate">
+                Price: <span v-html="activeOrder.product_price+activeOrder.currency_symbol"></span>
+            </span>
+            <span>
+                Discount: -<span v-html="activeOrder.discount_total+activeOrder.currency_symbol"></span>
+            </span>
+            <span class="truncate">
+                Shipping: <span v-html="activeOrder.shipping_cost+activeOrder.currency_symbol"></span>
+            </span>
+            <hr class="border-b-0 opacity-50 my-2" />
+            <span class="truncate text-orange-500">
+                Total: <span v-html="activeOrder.total+activeOrder.currency_symbol"></span>
+            </span>
+        </div>
     </div>
 </template>
 

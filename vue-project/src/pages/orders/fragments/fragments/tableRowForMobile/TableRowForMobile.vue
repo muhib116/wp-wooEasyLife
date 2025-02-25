@@ -165,7 +165,7 @@
                     📍 Track Parcel
                 </a>
                 <span class="font-bold">
-                    Total: {{ order?.product_info?.total_price || 0 }}tk
+                    Total: <span v-html="(order.total||0)+order.currency_symbol"></span>
                 </span>
             </div>
             

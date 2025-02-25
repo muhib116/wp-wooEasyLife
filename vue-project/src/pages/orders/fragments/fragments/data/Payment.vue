@@ -1,10 +1,20 @@
 <template>
-    <span class="truncate">
-        💵 Price: <span v-html="order.product_price"></span>
-    </span>
-    <div class="whitespace-nowrap">
-        💰 Discount: {{ order.discount_total }}
-        <br/>
+    <div class="grid text-right mb-2">
+        <span class="truncate">
+            Price: <span v-html="order.product_price+order.currency_symbol"></span>
+        </span>
+        <span>
+            Discount: -<span v-html="order.discount_total+order.currency_symbol"></span>
+        </span>
+        <span class="truncate">
+            Shipping: <span v-html="order.shipping_cost+order.currency_symbol"></span>
+        </span>
+        <hr class="border-b-0 opacity-50 my-2" />
+        <span class="truncate text-orange-500">
+            Total: <span v-html="order.total+order.currency_symbol"></span>
+        </span>
+    </div>
+    <div class="whitespace-nowrap text-right">
         🎟️ Coupons: {{ order?.applied_coupons?.join(', ') || 'N/A' }}
     </div>
 </template>
