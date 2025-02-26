@@ -7,7 +7,7 @@
         <Pagination />
     </div>
 
-    <div class="hidden md:table-cell">
+    <div class="hidden w-full md:block">
         <Table.Table>
             <Table.THead>
                 <Table.Th class="truncate">Customer Info</Table.Th>

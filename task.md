@@ -77,12 +77,17 @@ Dashboard:
 ✅ abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
 ✅ missing order issue
 ✅ license add kora thaklew notun device a somossa kore
+✅ shipping method editable korte hobe
 
 
 
 --------heigh priority task------------
-👉🏻 shipping method editable korte hobe
-👉🏻 order er product editable issue
+👉🏻 ordered product editable issue
+👉🏻 ashraful mal er ei khane order details a giye product edit hoy kina check dite hobe.
+👉🏻 customer order create and abandoned to order create er somoy shipping method niye kaj korte hobe.
+👉🏻 shipping method change korar pore COD thik thak moto jay kina dekhte hobe
+
+
 
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 
@@ -104,14 +109,6 @@ Dashboard:
 👉🏻 Message and comment theke order api diye ane ai diye filter kore plugins a ante hobe
 👉🏻 Centralize data base a black list er data rekhe plugins er fake order komate hobe
 👉🏻 abandont, comment and message er lead gulu fb er ad cost er 50% price sale korte hobe.
-
-
-👉🏻 
-👉🏻 
-👉🏻 
-
-
-
 
 
 
