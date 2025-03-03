@@ -46,13 +46,13 @@
       </div>
     </Table.Td>
 
-    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
+    <Table.Td class="space-y-2 truncate">
       <h3>💵 Price: {{ item.total_value || 0 }}৳</h3>
       <h3>💰 Discount: {{ item?.cart_contents?.total_discount || 0 }}৳</h3>
       <h3>🎟️ Coupons: {{ item?.cart_contents?.coupon_codes?.length ? item.cart_contents.coupon_codes.join(', ') : 'N/A' }}</h3>
     </Table.Td>
 
-    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
+    <Table.Td class="space-y-2 truncate">
       <h3 title="Payment method">
         🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
       </h3>
@@ -64,7 +64,7 @@
       </h3>
     </Table.Td>
     
-    <Table.Td class="capitalize min-w-[160px] text-center lg:text-left space-y-2">
+    <Table.Td class="capitalize min-w-[160px] space-y-2">
       <span
         :style="{
           color: selectedOption.color
@@ -87,7 +87,7 @@
         <br />
         {{ item.abandoned_at }}
       </div>
-      <div v-if="item.recovered_at">
+      <div v-if="item.status == 'confirmed'">
         <span class="font-semibold text-green-500">
           Recovered At: 
         </span>

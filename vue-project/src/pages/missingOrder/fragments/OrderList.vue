@@ -33,7 +33,7 @@
         </Table.Table>
     </div>
 
-    <div class="table-cell md:hidden">
+    <div class="block md:hidden">
         <Table.Table>
             <Table.THead>
                 <Table.Th class="truncate">Customer Info</Table.Th>

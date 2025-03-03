@@ -21,6 +21,14 @@
                 class="absolute inset-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
                 :active="orderListLoading"
             />
+
+            <MessageBox
+                v-if="!orders?.length && !orderListLoading && !isLoading"
+                title="No record found!"
+                type="info"
+                class="mx-4"
+            />
+
             <div 
                 class="min-h-[300px] overflow-auto w-full"
             >
@@ -67,13 +75,6 @@
                     </div>
                 </template>
             </div>
-
-            <MessageBox
-                v-if="!orders?.length && !orderListLoading"
-                title="No record found!"
-                type="info"
-                class="mx-4"
-            />
 
             <div class="px-4 hidden md:flex justify-between gap-4 mt-4">
                 <SearchBox />

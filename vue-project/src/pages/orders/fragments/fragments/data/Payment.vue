@@ -1,5 +1,5 @@
 <template>
-    <div class="grid text-right mb-2 w-fit">
+    <div class="grid text-right mb-2 min-w-[170px]">
         <span class="truncate">
             Price: <span v-html="order.product_price+order.currency_symbol"></span>
         </span>

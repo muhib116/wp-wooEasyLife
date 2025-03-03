@@ -48,22 +48,24 @@
             </div>
         </div>
 
-        <div>
-            <h3>💵 Price: {{ item.total_value || 0 }}৳</h3>
-            <h3>💰 Discount: {{ item?.cart_contents?.total_discount || 0 }}৳</h3>
-            <h3>🎟️ Coupons: {{ item?.cart_contents?.coupon_codes?.length ? item.cart_contents.coupon_codes.join(', ') : 'N/A' }}</h3>
-        </div>
-
-        <div>
-            <h3 title="Payment method">
-                🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
-            </h3>
-            <h3 title="Shipping method">
-                📍 {{ item.cart_contents?.shipping_method_title || 'n/a' }}
-            </h3>
-            <h3 title="Shipping cost">
-                💰 Cost: {{ item.cart_contents?.shipping_cost || 'n/a' }}
-            </h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+              <h3>💵 Price: {{ item.total_value || 0 }}৳</h3>
+              <h3>💰 Discount: {{ item?.cart_contents?.total_discount || 0 }}৳</h3>
+              <h3>🎟️ Coupons: {{ item?.cart_contents?.coupon_codes?.length ? item.cart_contents.coupon_codes.join(', ') : 'N/A' }}</h3>
+          </div>
+  
+          <div>
+              <h3 title="Payment method">
+                  🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
+              </h3>
+              <h3 title="Shipping method">
+                  📍 {{ item.cart_contents?.shipping_method_title || 'n/a' }}
+              </h3>
+              <h3 title="Shipping cost">
+                  💰 Cost: {{ item.cart_contents?.shipping_cost || 'n/a' }}
+              </h3>
+          </div>
         </div>
 
         <div>
@@ -112,7 +114,7 @@
                 class="!bg-green-500 justify-center"
                 @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
                 >
-                Apply now
+                  Apply now
                 </Button.Primary>
             </div>
             <div v-else>

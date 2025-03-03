@@ -377,7 +377,7 @@ class OrderListAPI
         // Load the WooCommerce order object
         $order = wc_get_order($order_id);
         if (!$order) {
-            return new WP_Error('invalid_order', 'Invalid order ID.');
+            return new \WP_Error('invalid_order', 'Invalid order ID.');
         }
     
         // Remove existing shipping items
@@ -406,7 +406,7 @@ class OrderListAPI
         }
     
         if (!$chosen_method) {
-            return new WP_Error('shipping_not_found', 'Selected shipping method instance is not available.');
+            return new \WP_Error('shipping_not_found', 'Selected shipping method instance is not available.');
         }
     
         // Add new shipping method
@@ -435,7 +435,7 @@ class OrderListAPI
         // Load WooCommerce order object
         $order = wc_get_order($order_id);
         if (!$order) {
-            return new WP_Error('invalid_order', 'Invalid order ID.');
+            return new \WP_Error('invalid_order', 'Invalid order ID.');
         }
     
         // Store existing applied coupons
@@ -493,7 +493,7 @@ class OrderListAPI
     private function add_new_product_to_order($order, $product_id, $quantity) {
         $product = wc_get_product($product_id);
         if (!$product) {
-            return new WP_Error('invalid_product', 'Invalid product ID.');
+            return new \WP_Error('invalid_product', 'Invalid product ID.');
         }
     
         $regular_price = $product->get_regular_price();

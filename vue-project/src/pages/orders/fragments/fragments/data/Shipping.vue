@@ -11,8 +11,8 @@
             :title="`Shipping methods: ${order?.shipping_methods.method_title || 'N/A'}`"
         >
             📍 {{ order.shipping_methods.join(', ') || 'N/A' }}
-            <Button.Outline
-                class="p-1"
+            <Button.Native
+                class="mr-2"
                 :class="isShippingEditable ? 'opacity-100' : 'opacity-40'"
                 @click="isShippingEditable = !isShippingEditable"
             >
@@ -20,7 +20,7 @@
                     name="PhPencilSimpleLine"
                     size="20"
                 />
-            </Button.Outline>
+            </Button.Native>
         </span>
         <div 
             v-if="isShippingEditable"

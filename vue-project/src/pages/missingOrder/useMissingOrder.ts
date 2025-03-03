@@ -54,6 +54,13 @@ export const useMissingOrder = () => {
     const selectedOption = ref(options.value[0])
 
     const updateStatus = async (item, selectedStatus: string, btn) => {
+        if(!selectedStatus) {
+            showNotification({
+                type: 'danger',
+                message: 'Please select an item from dropdown.'
+            })
+            return
+        }
         try {
             isLoading.value = true
             btn.isLoading = true
