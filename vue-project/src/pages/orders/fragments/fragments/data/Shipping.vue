@@ -7,7 +7,7 @@
             🚚 {{ order.payment_method_title || 'N/A' }}
         </span>
         <span
-            class="truncate flex items-center gap-1"
+            class="min-w-[200px] flex items-center justify-between gap-1"
             :title="`Shipping methods: ${order?.shipping_methods.method_title || 'N/A'}`"
         >
             📍 {{ order.shipping_methods.join(', ') || 'N/A' }}

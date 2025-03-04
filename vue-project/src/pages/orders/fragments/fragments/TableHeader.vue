@@ -15,7 +15,7 @@
         <Table.Th>Delivery History</Table.Th>
         <Table.Th>Delivery Partner</Table.Th>
         <Table.Th>Shipping</Table.Th>
-        <Table.Th>Payment</Table.Th>
+        <Table.Th class="text-right">Payment</Table.Th>
         <Table.Th>Status</Table.Th>
         <Table.Th class="text-center">Action</Table.Th>
     </Table.THead>

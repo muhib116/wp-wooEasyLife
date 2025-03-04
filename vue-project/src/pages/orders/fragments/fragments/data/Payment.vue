@@ -18,7 +18,7 @@
     </div>
     <div 
         v-if="order?.applied_coupons.length"
-        class="whitespace-nowrap text-right w-fit"
+        class="whitespace-nowrap text-right"
     >
         🎟️ Coupons: {{ order?.applied_coupons?.join(', ') || 'N/A' }}
     </div>
