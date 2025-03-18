@@ -569,7 +569,6 @@ function get_woo_easy_registered_user() {
     return $user_data; // Return user data if successful
 }
 
-
 function human_time_difference($to, $from = null, $only_difference = null) {
     // Ensure `$from` is set to the current time if not provided
     $from = $from ? (is_numeric($from) ? (int) $from : strtotime($from)) : time();
@@ -580,21 +579,23 @@ function human_time_difference($to, $from = null, $only_difference = null) {
         return "Invalid date";
     }
 
-    // Calculate time difference (can be negative)
+    // Calculate time difference in seconds
     $time_difference = $to - $from;
-    $absolute_difference = abs($time_difference); // Absolute value for comparison
+    $absolute_difference = abs($time_difference);
 
-    // If the difference is more than 24 hours, return formatted date
+    // If $only_difference is false and the difference is greater than 24 hours (86400 seconds)
     if (!$only_difference && $absolute_difference > 86400) { // 24 hours = 86400 seconds
+        // Return formatted date when difference is greater than 24 hours
         return date('M j, Y \a\t g:i A', $to);
     }
 
-    // Convert time difference to human-readable format using WordPress `human_time_diff()`
+    // Use WordPress's human_time_diff for small differences
     $formatted_time_difference = human_time_diff(min($to, $from), max($to, $from));
 
-    // Determine if it's in the past or future
+    // Determine if it's in the past or future based on $time_difference
     return $formatted_time_difference . ($time_difference < 0 ? " ago" : " later");
 }
+
 
 function get_order_total_weight( $order ) {
     if ( ! $order instanceof WC_Order ) {

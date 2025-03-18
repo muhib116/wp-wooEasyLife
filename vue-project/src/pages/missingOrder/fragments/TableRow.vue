@@ -39,7 +39,7 @@
       </div>
 
       <div class="truncate">
-        📅 {{ item.abandoned_at }}
+        📅 {{ item.created_at }}
       </div>
       <div>
         🏠 {{ item.billing_address }}
