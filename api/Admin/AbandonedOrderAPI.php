@@ -333,19 +333,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         ));
         $stats['lost_amount'] = $stats['lost_amount'] ?: 0;
     
-        // Total Recovered Orders
-        $stats['total_recovered_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
-            'recovered', $start_date, $end_date
-        ));
-    
-        // Total Recovered Amount
-        $stats['recovered_amount'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
-            'recovered', $start_date, $end_date
-        ));
-        $stats['recovered_amount'] = $stats['recovered_amount'] ?: 0;
-    
         // Total Active Carts (Not yet abandoned)
         $stats['total_active_carts'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
@@ -357,6 +344,14 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
             'confirmed', $start_date, $end_date
         ));
+
+        // Total Confirmed Amount (Sum of total_value where confirmed)
+        $stats['confirmed_amount'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND abandoned_at BETWEEN %s AND %s",
+            'confirmed', $start_date, $end_date
+        ));
+        $stats['confirmed_amount'] = $stats['confirmed_amount'] ?: 0;
+
     
         // Total call not received Orders (if applicable)
         $stats['total_call_not_received_orders'] = $wpdb->get_var($wpdb->prepare(

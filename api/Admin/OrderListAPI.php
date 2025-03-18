@@ -191,8 +191,28 @@ class OrderListAPI
     
         // Add search conditions
         if (!empty($search)) {
+            // First, attempt to search using WooCommerce's default order search functionality
             $args['s'] = $search;
+            $query = wc_get_orders($args);
+        
+            // If no matching orders are found, attempt a meta query search in '_courier_data'
+            if (empty($query->orders)) {
+                $args = array_merge($args, [
+                    's' => '', // Reset the default search to prevent conflicts
+                    'meta_query' => [
+                        [
+                            'key'     => '_courier_data', // Search within the '_courier_data' meta field
+                            'value'   => $search, // The user-provided search term
+                            'compare' => 'LIKE' // Match any part of the field value
+                        ]
+                    ]
+                ]);
+        
+                // Run the query again with the updated parameters
+                $query = wc_get_orders($args);
+            }
         }
+               
     
         $query = wc_get_orders($args);
         if (empty($query->orders)) {
