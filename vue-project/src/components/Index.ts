@@ -19,8 +19,10 @@ import Invoice from './invoice/Index'
 import Chart from './chart'
 import ProductListWithSearch from './ProductListWithSearch.vue'
 import CourierEntry from './courierEntry/Index.vue'
+import Whatsapp from './Whatsapp.vue'
 
 export {
+    Whatsapp,
     ProductListWithSearch,
     Icon,
     Navigation,

@@ -254,12 +254,14 @@ class OrderListAPI
             $is_repeat_customer = is_repeat_customer($order);
             $customer_custom_data = $customerHandler->handle_customer_data(null, $order);
             $parcel_weight = get_order_total_weight($order);
+            $referrer_url = get_post_meta($order_id, '_referrer_url', true);
 
             $data[] = [
                 'id'            => $order->get_id(),
                 'status'        => $order->get_status(),
                 'sub_total'     => $order->get_subtotal(),
                 'total'         => $order->get_total(), //after cutting discount
+                'referrer_url'    => $referrer_url,
                 // 👉 get_total() কী কী অন্তর্ভুক্ত করে?
                 // ✅ পণ্যের মূল্য (Product Price)
                 // ✅ শিপিং চার্জ (Shipping Cost)

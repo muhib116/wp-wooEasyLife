@@ -27,10 +27,16 @@
       </div>
 
       <div>
-        <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
-          <span class="font-semibold"> 📞 Phone: </span>
-          {{ item.customer_phone }}
-        </a>
+        <div class="flex gap-2">
+          <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
+            <span class="font-semibold"> 📞 Phone: </span>
+            {{ item.customer_phone }}
+          </a>
+          
+          <Whatsapp
+            :phone_number="item.customer_phone"
+          />
+        </div>
 
         <div v-if="item.customer_email" class="truncate">
           <span class="font-semibold"> 📨 Email: </span>
@@ -133,9 +139,8 @@
 </template>
 
 <script setup lang="ts">
-import { printDate } from "@/helper";
-import { Table, Button, Modal, Icon, Select } from "@components";
-import { inject, onMounted, ref } from "vue";
+import { Table, Button, Modal, Select, Whatsapp } from "@components";
+import { inject, ref } from "vue";
 import CartDetails from "./CartDetails.vue";
 
 const props = defineProps<{

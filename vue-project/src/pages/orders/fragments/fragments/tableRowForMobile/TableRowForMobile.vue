@@ -91,7 +91,7 @@
                     class="text-green-500 tex-sm"
                     title="Repeat customer"
                 >
-                    (Repeat)
+                    (R)
                 </span>
             </div>
             <div 
@@ -127,16 +127,9 @@
                 >
                     📞 {{ order.billing_address.phone }}
                 </a>
-                <a 
-                    :href="`https://wa.me/${order.billing_address.phone}`" 
-                    class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
-                >
-                    <Icon
-                        name="PhWhatsappLogo"
-                        size="20"
-                        weight="fill"
-                    />
-                </a>
+                <Whatsapp
+                    :phone_number="order.billing_address.phone"
+                />
             </div>
 
             <div
@@ -289,14 +282,13 @@
     import { Table, Icon, Modal, Button } from '@components'
     import { inject, ref, computed } from 'vue'
     import Address from '../address/Index.vue'
-    import { baseUrl } from '@/api'
     import FraudHistory from '../FraudHistory.vue'
     import MultipleOrders from '../MultipleOrders.vue'
     import Notes from '../notes/Index.vue'
     import BlackListData from './BlackListData.vue'
     import { useTableRowForMobile } from './useTableRowForMobile'
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
-import { CourierEntry } from '@/components';
+    import { Whatsapp, CourierEntry } from '@/components';
 
     const props = defineProps<{
         order: {

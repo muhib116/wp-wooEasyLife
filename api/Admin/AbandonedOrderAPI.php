@@ -93,15 +93,17 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $balance_cut_data = [];
         if (!empty($records)) {
             foreach ($records as $record) {
+                $now = current_time('mysql'); // Get the current time in MySQL format
                 $update_query = $wpdb->prepare(
                     "UPDATE {$this->table_name} 
                     SET 
                         status = 'abandoned', 
-                        abandoned_at = NOW(), 
-                        updated_at = NOW() 
+                        abandoned_at = %s, 
+                        updated_at = %s 
                     WHERE id = %d",
-                    $record->id
+                    $now, $now, $record->id
                 );
+
     
                 $wpdb->query($update_query);
     
@@ -470,7 +472,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $total_value    = floatval($request->get_param('total_value'));
         $status         = sanitize_text_field($request->get_param('status')); // Get status from request
         $updated_at     = current_time('mysql');
-        $recovered_at   = ($status === 'recovered') ? current_time('mysql') : null; // Set recovered_at for "recovered" status
+        $recovered_at   = ($status === 'confirmed') ? current_time('mysql') : null; // Set recovered_at for "recovered" status
     
         $updated = $wpdb->update(
             $this->table_name,

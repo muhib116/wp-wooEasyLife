@@ -3,7 +3,7 @@
  * Plugin Name: Woo Easy Life
  * Plugin URI: https://api.wpsalehub.com/get-metadata
  * Description: "Woo Easy Life" is a custom plugin designed to enhance WooCommerce functionality with features like bulk SMS, fraud detection, OTP validation, and much more.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Muhibbullah Ansary
  * Author URI: https://wpsalehub.com
  * Text Domain: woo-easy-life
@@ -147,7 +147,7 @@ if (!class_exists('WooEasyLife')) :
     function update_woocommerce_order_status_wc_function() {
         // Get all orders with 'wc-complete' status
         $args = array(
-            'status' => 'wc-confirmed',
+            'status' => 'wc-complete',
             'limit'  => -1, // Get all matching orders
             'type'   => 'shop_order',
         );
