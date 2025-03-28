@@ -54,20 +54,32 @@
             />
         </Table.Td>
         <Table.Td>
-            <Button.Native
-                class="opacity-30 flex items-center gap-2 mb-2 ml-auto -mt-2"
-                :class="{
-                    '!opacity-100 text-green-500' : order.is_done == 1
-                }"
-                @onClick="btn => markAsDone(order, btn)"
-            >
-                <Icon
-                    name="PhChecks"
-                    size="25"
-                    weight="bold"
-                />
-                {{ order.is_done == 1 ? 'done' : '' }}
-            </Button.Native>
+            <div class="flex gap-4 items-center justify-end -mt-2 mb-2">
+                <Button.Native
+                    v-if="order?.courier_data?.consignment_id"
+                    class="opacity-50 flex items-center hover:opacity-100"
+                    @onClick="btn => printProductDetails(order, () => markAsDone(order, btn))"
+                    title="Print Tag"
+                >
+                    <Icon
+                        name="PhPrinter"
+                        size="25"
+                    />
+                </Button.Native>
+                <Button.Native
+                    class="opacity-50 flex items-center gap-2"
+                    :class="{
+                        '!opacity-100 text-green-500' : order.is_done == 1
+                    }"
+                    @onClick="btn => markAsDone(order, btn)"
+                >
+                    <Icon
+                        name="PhChecks"
+                        size="25"
+                    />
+                    {{ order.is_done == 1 ? 'done' : '' }}
+                </Button.Native>
+            </div>
             <Action
                 :order="order"
             />
@@ -88,6 +100,7 @@
     import Payment	 from '@/pages/orders/fragments/fragments/data/Payment.vue'
     import Status	 from '@/pages/orders/fragments/fragments/data/Status.vue'
     import Action	 from '@/pages/orders/fragments/fragments/data/Action.vue'
+    import { printProductDetails } from '@/helper'
 
     defineProps<{
         order: {

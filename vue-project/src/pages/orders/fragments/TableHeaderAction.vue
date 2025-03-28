@@ -1,5 +1,5 @@
 <template>
-    <div class="flex justify-between text-[10px] px-4 my-4">
+    <div class="print:hidden flex justify-between text-[10px] px-4 my-4">
         <div 
             v-bind="$attrs"
             class="flex justify-center md:justify-start flex-wrap gap-2 items-center relative"

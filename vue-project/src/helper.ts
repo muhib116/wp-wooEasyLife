@@ -244,3 +244,49 @@ export const  detectInternetState = (callback) => {
         navigator.connection.addEventListener("change", updateStatus);
     }
 }
+
+
+export const handlePrint = () => {
+    window.print();
+}
+
+export const printProductDetails = (order, cb) => {
+    const qrData = order?.courier_data?.parcel_tracking_link
+    const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
+
+    const printWindow = window.open("", "");
+    printWindow.document.write(`
+        <div style="
+            width: 250px; 
+            height: 85px; 
+            padding: 10px; 
+            border: 1px solid;
+            font-family: poppins, sans-serif;
+            font-size: 14px;
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+        ">
+            <div style="display: grid; gap: 4px;">
+                <h2 style="margin: 0 0 4px; font-size: 16px; font-weight: semibold;">Consignment</h2>
+                <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
+                <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
+                <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
+            </div>
+            <div>
+                <img src="${qrUrl}" alt="QR Code" style="width: 100px; height: 100px;margin-right: -8px;margin-top: -8px;margin-bottom: -8px;" />
+            </div>
+        </div>
+    `);
+    
+    printWindow.document.close();
+    // Wait for the print job to complete before closing and calling the callback
+    printWindow.onafterprint = () => {
+        printWindow.close();
+        if (typeof cb === "function") {
+            cb();
+        }
+    };
+
+    printWindow.print();
+};

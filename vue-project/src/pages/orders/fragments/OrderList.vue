@@ -1,5 +1,5 @@
 <template>
-    <div class="relative">
+    <div class="relative print:hidden">
         <Loader
             class="absolute top-[30vh] left-1/2 -translate-x-1/2 z-30"
             :active="isLoading && !orderListLoading"
@@ -26,7 +26,7 @@
                 v-if="!orders?.length && !orderListLoading && !isLoading"
                 title="No record found!"
                 type="info"
-                class="mx-4"
+                class="print:hidden mx-4"
             />
 
             <div 

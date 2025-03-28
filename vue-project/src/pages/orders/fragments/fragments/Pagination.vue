@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between whitespace-nowrap">
+    <div class="print:hidden flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between whitespace-nowrap">
         <div v-if="$slots.leftSide" class="sm:flex gap-2 md:gap-4">
             <slot name="leftSide"></slot>
         </div>

@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="flex gap-1"
+        class="print:hidden flex gap-1"
     >
         <Input.Native
             placeholder="Search customer"
