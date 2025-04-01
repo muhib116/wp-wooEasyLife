@@ -245,15 +245,25 @@ export const  detectInternetState = (callback) => {
     }
 }
 
+export const checkImageLoad = (imgUrl: string, callback: (isLoaded: boolean) => void) => {
+    let img = new Image();
+    img.onload = function () {
+        callback(true); // Image loaded successfully
+    };
+    img.onerror = function () {
+        callback(false); // Image failed to load
+    };
+    img.src = imgUrl;
+}
 
 export const handlePrint = () => {
     window.print();
 }
 
 export const printProductDetails = (order, cb) => {
-    const qrData = order?.courier_data?.parcel_tracking_link
+    const qrData = order.courier_data.consignment_id
     const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
-
+    
     const printWindow = window.open("", "");
     printWindow.document.write(`
         <div style="
@@ -288,5 +298,11 @@ export const printProductDetails = (order, cb) => {
         }
     };
 
-    printWindow.print();
-};
+    checkImageLoad(qrUrl, (isLoaded) => {
+        if (isLoaded) {
+            setTimeout(() => {
+                printWindow.print();
+            }, 100); // Delay to ensure the image is loaded
+        }
+    })
+}

@@ -22,7 +22,7 @@
             </Table.THead>
             <Table.TBody>
                 <TableRow
-                    v-for="(item, index) in messages"
+                    v-for="(item, index) in messages || []"
                     :key="index"
                     :index="index"
                     :item="item"

@@ -119,6 +119,7 @@ export const useSms = () => {
         try {
             isLoading.value = true
             const { data } = await getOrderList({
+                per_page: 500,
                 status: status
             })
 
