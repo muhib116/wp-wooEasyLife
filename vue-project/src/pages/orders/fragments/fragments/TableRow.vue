@@ -58,7 +58,7 @@
                 <Button.Native
                     v-if="order?.courier_data?.consignment_id"
                     class="opacity-50 flex items-center hover:opacity-100"
-                    @onClick="btn => printProductDetails(order, () => markAsDone(order, btn))"
+                    @onClick="btn => printProductDetails(order, () => markAsDone(order, btn), configData.invoice_logo)"
                     title="Print Tag"
                 >
                     <Icon
@@ -91,7 +91,6 @@
 <script setup lang="ts">
     import { Table, Button, Icon } from '@components'
     import { inject } from 'vue'
-
     import CustomerInfo from '@/pages/orders/fragments/fragments/data/CustomerInfo.vue'
     import CustomerBehavior from '@/pages/orders/fragments/fragments/data/CustomerBehavior.vue'
     import DeliveryHistory from '@/pages/orders/fragments/fragments/data/DeliveryHistory.vue'
@@ -135,4 +134,6 @@
         selectedOrders,
         markAsDone
     } = inject('useOrders')
+
+    const {configData} = inject('configData')
 </script>

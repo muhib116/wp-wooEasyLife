@@ -620,3 +620,11 @@ function get_order_total_weight( $order ) {
 
     return $total_weight; // Return total weight in kg
 }
+
+function get_site_logo_url() {
+    $custom_logo_id = get_theme_mod('custom_logo');
+    if ($custom_logo_id) {
+        return wp_get_attachment_image_url($custom_logo_id, 'full');
+    }
+    return get_site_url() . '/wp-content/uploads/default-logo.png'; // Optional fallback
+}

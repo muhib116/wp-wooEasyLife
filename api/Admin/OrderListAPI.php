@@ -255,7 +255,7 @@ class OrderListAPI
             $customer_custom_data = $customerHandler->handle_customer_data(null, $order);
             $parcel_weight = get_order_total_weight($order);
             $referrer_url = get_post_meta($order_id, '_referrer_url', true);
-
+            
             $data[] = [
                 'id'            => $order->get_id(),
                 'status'        => $order->get_status(),
@@ -268,6 +268,7 @@ class OrderListAPI
                 // ✅ ট্যাক্স (Tax) - যদি থাকে
                 // ✅ ডিসকাউন্ট বাদ দিয়ে (After Discount) চূড়ান্ত মূল্য
                 'parcel_weight'        => $parcel_weight,
+                'site_logo' => get_site_logo_url(),
                 'is_wel_order_handled' => $order->get_meta('is_wel_order_handled', true),
                 'is_wel_balance_cut'   => $order->get_meta('is_wel_balance_cut', true),
                 'is_done'   => $order->get_meta('woo_easy_is_done', true),
