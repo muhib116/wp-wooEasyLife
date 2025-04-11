@@ -13,7 +13,7 @@ export const useNotification = () => {
       ? "/notification-sound.wav"
       : window?.wooEasyLife?.dist_url + "/notification-sound.wav"
   );
-  
+
   const checkNewOrderStatus = async () => {
     try {
       const { data } = await checkHasNewOrder();
@@ -25,24 +25,24 @@ export const useNotification = () => {
           message: 'New Order Received 🎉'
         })
 
-        if(route.name == 'orders'){
-          await loadOrderStatusList();
-          await getOrders(false);
+        if (route.name == 'orders') {
+          // await loadOrderStatusList();
+          // await getOrders(false);
         }
       }
     } catch (error) {
       console.error("Error checking new order status:", error)
     }
   }
-  
+
   // Start tracking orders
   let intervalId: any = null;
   onMounted(() => {
-    detectInternetState((data: {type: "success" | "info" | "warning" | "danger", message: string}) => {
+    detectInternetState((data: { type: "success" | "info" | "warning" | "danger", message: string }) => {
       showNotification(data)
     })
 
-    intervalId = setInterval(checkNewOrderStatus, 15000)
+    intervalId = setInterval(checkNewOrderStatus, 25000)
   })
 
   onBeforeUnmount(() => {
