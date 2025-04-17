@@ -26,7 +26,7 @@ export const useNotification = () => {
         })
 
         if (route.name == 'orders') {
-          // await loadOrderStatusList();
+          await loadOrderStatusList();
           // await getOrders(false);
         }
       }
