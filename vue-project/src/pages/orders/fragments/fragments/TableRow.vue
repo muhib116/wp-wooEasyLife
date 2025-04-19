@@ -54,32 +54,10 @@
             />
         </Table.Td>
         <Table.Td>
-            <div class="flex gap-4 items-center justify-end -mt-2 mb-2">
-                <Button.Native
-                    v-if="order?.courier_data?.consignment_id"
-                    class="opacity-50 flex items-center hover:opacity-100"
-                    @onClick="btn => printProductDetails(order, () => markAsDone(order, btn), configData.invoice_logo)"
-                    title="Print Tag"
-                >
-                    <Icon
-                        name="PhPrinter"
-                        size="25"
-                    />
-                </Button.Native>
-                <Button.Native
-                    class="opacity-50 flex items-center gap-2"
-                    :class="{
-                        '!opacity-100 text-green-500' : order.is_done == 1
-                    }"
-                    @onClick="btn => markAsDone(order, btn)"
-                >
-                    <Icon
-                        name="PhChecks"
-                        size="25"
-                    />
-                    {{ order.is_done == 1 ? 'done' : '' }}
-                </Button.Native>
-            </div>
+            <PrintStickerAndMark
+                class="-mt-2 mb-2"
+                :order="order"
+            />
             <Action
                 :order="order"
             />
@@ -89,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Button, Icon } from '@components'
+    import { Table } from '@components'
     import { inject } from 'vue'
     import CustomerInfo from '@/pages/orders/fragments/fragments/data/CustomerInfo.vue'
     import CustomerBehavior from '@/pages/orders/fragments/fragments/data/CustomerBehavior.vue'
@@ -99,7 +77,7 @@
     import Payment	 from '@/pages/orders/fragments/fragments/data/Payment.vue'
     import Status	 from '@/pages/orders/fragments/fragments/data/Status.vue'
     import Action	 from '@/pages/orders/fragments/fragments/data/Action.vue'
-    import { printProductDetails } from '@/helper'
+    import PrintStickerAndMark from '../PrintStickerAndMark.vue';
 
     defineProps<{
         order: {
@@ -132,8 +110,5 @@
     const {
         setSelectedOrder,
         selectedOrders,
-        markAsDone
     } = inject('useOrders')
-
-    const {configData} = inject('configData')
 </script>

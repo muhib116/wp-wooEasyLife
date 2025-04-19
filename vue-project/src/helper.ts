@@ -298,10 +298,10 @@ export const printProductDetails = (order, cb, invoice_logo) => {
                     justify-content: space-between;
                 ">
                     <div style="display: grid; gap: 4px;">
-                        <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="width: 110px; margin-bottom: 4px;" />
-                        <h2 style="margin: 0 0 4px; font-size: 16px; font-weight: semibold;">Consignment</h2>
+                        <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 38px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
                         <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
                         <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
+                        <p style="margin:0;"><strong>Name:</strong> ${order.customer_name}</p>
                         <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
                     </div>
                     <div>
@@ -312,20 +312,20 @@ export const printProductDetails = (order, cb, invoice_logo) => {
             </html>
     `);
     
-    printWindow.document.close();
-    // Wait for the print job to complete before closing and calling the callback
-    printWindow.onafterprint = () => {
-        printWindow.close();
-        if (typeof cb === "function") {
-            cb();
-        }
-    };
+    // printWindow.document.close();
+    // // Wait for the print job to complete before closing and calling the callback
+    // printWindow.onafterprint = () => {
+    //     printWindow.close();
+    //     if (typeof cb === "function") {
+    //         cb();
+    //     }
+    // };
 
-    checkImageLoad(qrUrl, (isLoaded) => {
-        if (isLoaded) {
-            setTimeout(() => {
-                printWindow.print();
-            }, 100); // Delay to ensure the image is loaded
-        }
-    })
+    // checkImageLoad(qrUrl, (isLoaded) => {
+    //     if (isLoaded) {
+    //         setTimeout(() => {
+    //             printWindow.print();
+    //         }, 100); // Delay to ensure the image is loaded
+    //     }
+    // })
 }
