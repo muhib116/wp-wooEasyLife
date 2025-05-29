@@ -83,7 +83,7 @@ export default {
         icon: {
           render() {
             return (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary-600">
+              <svg viewBox="0 0 24 24\" fill="none\" stroke="currentColor\" stroke-width="2\" class="text-primary-600">
                 <path d="M17 6.1H3M21 12.1H3M21 18.1H3"></path>
               </svg>
             );
