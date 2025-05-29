@@ -9,7 +9,11 @@
   },
   "dependencies": {
     "vue": "^3.3.4",
-    "@phosphor-icons/vue": "^2.1.6"
+    "@phosphor-icons/vue": "^2.1.6",
+    "@tiptap/vue-3": "^2.1.8",
+    "@tiptap/pm": "^2.1.8",
+    "@tiptap/starter-kit": "^2.1.8",
+    "@tiptap/extension-placeholder": "^2.1.8"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
