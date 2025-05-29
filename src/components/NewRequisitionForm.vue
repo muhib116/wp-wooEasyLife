@@ -4,7 +4,7 @@
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-900">New Requisition</h2>
         <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
-          <X :size="24" weight="bold" />
+          <PhX :size="24" weight="bold" />
         </button>
       </div>
 
@@ -27,7 +27,7 @@
                   : 'border-gray-200 hover:bg-gray-50'
               ]"
             >
-              <CheckCircle
+              <PhCheckCircle
                 v-if="selectedUserType === type.value"
                 :size="20"
                 class="mr-2 text-emerald-500"
@@ -53,7 +53,7 @@
                 {{ cat }}
               </option>
             </select>
-            <CaretDown
+            <PhCaretDown
               :size="16"
               class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
             />
@@ -103,7 +103,7 @@
                 @click="showVariableForm = true"
                 class="inline-flex items-center px-2 py-1 text-emerald-600 hover:bg-emerald-50 rounded text-sm"
               >
-                <Plus :size="16" class="mr-1" />
+                <PhPlus :size="16" class="mr-1" />
                 New Variable
               </button>
             </div>
@@ -147,14 +147,14 @@
 <script setup>
 import { ref } from 'vue'
 import {
-  X,
-  CheckCircle,
-  CaretDown,
-  TextT,
-  NumberCircle,
-  Calendar,
-  EnvelopeSimple,
-  Plus
+  PhX,
+  PhCheckCircle,
+  PhCaretDown,
+  PhTextT,
+  PhNumberCircle,
+  PhCalendar,
+  PhEnvelopeSimple,
+  PhPlus
 } from '@phosphor-icons/vue'
 
 const userTypes = [
@@ -184,11 +184,11 @@ const showVariableForm = ref(false)
 
 const getVariableIcon = (type) => {
   switch (type) {
-    case 'text': return TextT
-    case 'number': return NumberCircle
-    case 'date': return Calendar
-    case 'email': return EnvelopeSimple
-    default: return TextT
+    case 'text': return PhTextT
+    case 'number': return PhNumberCircle
+    case 'date': return PhCalendar
+    case 'email': return PhEnvelopeSimple
+    default: return PhTextT
   }
 }
 
