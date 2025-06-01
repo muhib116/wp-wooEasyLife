@@ -347,3 +347,22 @@ export const includeMissingNewOrdersOfFailedBalanceCut = async () => {
   const { data } = await axios.put(`${localApiBaseURL}/include-missing-new-orders-for-balance-cut-failed?nocache=${timestamp}`);
   return data;
 };
+
+
+export const fetchPixelSettings = async () => {
+  const timestamp = new Date().getTime();
+  const { data } = await axios.get(
+    `${localApiBaseURL}/pixel-settings?nocache=${timestamp}`
+  );
+  return data;
+};
+
+
+export const savePixelSettings = async (payload) => {
+  const timestamp = new Date().getTime();
+  const { data } = await axios.post(
+    `${localApiBaseURL}/pixel-settings?nocache=${timestamp}`,
+    payload
+  );
+  return data;
+};

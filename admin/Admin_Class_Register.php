@@ -8,5 +8,6 @@ class Admin_Class_Register{
         new AddCustomColumnInOrderList();
         new StatusChangeAction();
         new StoreStatusChangeHistory();
+        PixelHooks::init();
     }
 }

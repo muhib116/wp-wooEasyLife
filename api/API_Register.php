@@ -78,5 +78,6 @@ class API_Register {
         new \WooEasyLife\API\Admin\NewOrderNotificationAPI();
         new \WooEasyLife\API\Admin\AbandonedOrderAPI();
         new \WooEasyLife\API\Admin\HandleUsersAPI();
+        new \WooEasyLife\API\Admin\PixelManagerAPI();
     }
 }
