@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="print:hidden">
         <h3 
             class="md:text-xl leading-[20px] md:leading-[26px] font-semibold text-gray-900"
             :class="titleClass"

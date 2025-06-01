@@ -54,20 +54,10 @@
             />
         </Table.Td>
         <Table.Td>
-            <Button.Native
-                class="opacity-30 flex items-center gap-2 mb-2 ml-auto -mt-2"
-                :class="{
-                    '!opacity-100 text-green-500' : order.is_done == 1
-                }"
-                @onClick="btn => markAsDone(order, btn)"
-            >
-                <Icon
-                    name="PhChecks"
-                    size="25"
-                    weight="bold"
-                />
-                {{ order.is_done == 1 ? 'done' : '' }}
-            </Button.Native>
+            <PrintStickerAndMark
+                class="-mt-2 mb-2"
+                :order="order"
+            />
             <Action
                 :order="order"
             />
@@ -77,9 +67,8 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Button, Icon } from '@components'
+    import { Table } from '@components'
     import { inject } from 'vue'
-
     import CustomerInfo from '@/pages/orders/fragments/fragments/data/CustomerInfo.vue'
     import CustomerBehavior from '@/pages/orders/fragments/fragments/data/CustomerBehavior.vue'
     import DeliveryHistory from '@/pages/orders/fragments/fragments/data/DeliveryHistory.vue'
@@ -88,6 +77,7 @@
     import Payment	 from '@/pages/orders/fragments/fragments/data/Payment.vue'
     import Status	 from '@/pages/orders/fragments/fragments/data/Status.vue'
     import Action	 from '@/pages/orders/fragments/fragments/data/Action.vue'
+    import PrintStickerAndMark from '../PrintStickerAndMark.vue';
 
     defineProps<{
         order: {
@@ -120,6 +110,5 @@
     const {
         setSelectedOrder,
         selectedOrders,
-        markAsDone
     } = inject('useOrders')
 </script>

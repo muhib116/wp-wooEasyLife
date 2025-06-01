@@ -93,15 +93,17 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $balance_cut_data = [];
         if (!empty($records)) {
             foreach ($records as $record) {
+                $now = current_time('mysql'); // Get the current time in MySQL format
                 $update_query = $wpdb->prepare(
                     "UPDATE {$this->table_name} 
                     SET 
                         status = 'abandoned', 
-                        abandoned_at = NOW(), 
-                        updated_at = NOW() 
+                        abandoned_at = %s, 
+                        updated_at = %s 
                     WHERE id = %d",
-                    $record->id
+                    $now, $now, $record->id
                 );
+
     
                 $wpdb->query($update_query);
     
@@ -211,7 +213,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ),
             ARRAY_A
         );
-    
+
         // If no results found
         if (empty($results)) {
             return new WP_REST_Response([
@@ -226,9 +228,16 @@ class AbandonedOrderAPI extends WP_REST_Controller {
                 ],
             ], 200);
         }
-    
+ 
         // Deserialize cart_contents for each result
         foreach ($results as &$result) {
+            $data = $this->get_wc_order_data_by_abandoned_data($result);
+            $result['last_wc_order_current_status'] = $data['last_wc_order_current_status'];
+            $result['last_wc_order_at'] = $data['last_wc_order_at'];
+            $result['created_at'] = human_time_difference($result['created_at']);
+            $result['abandoned_at'] = human_time_difference($result['abandoned_at']);
+            $result['recovered_at'] = human_time_difference($result['recovered_at']);
+
             if (isset($result['cart_contents'])) {
                 $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
             }
@@ -246,6 +255,48 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             ],
         ], 200);
     }
+    
+    private function get_wc_order_data_by_abandoned_data($abandonedOrder) {
+        $customer_phone = $abandonedOrder["customer_phone"];
+        $customer_email = $abandonedOrder["customer_email"];
+
+        // Get last WooCommerce order by phone or email
+        $args = [
+            'limit'    => 1, // Get the most recent order
+            'orderby'  => 'date',
+            'order'    => 'DESC',
+            'status'   => ['wc-processing', 'wc-confirmed', 'wc-completed', 'wc-on-hold', 'wc-pending'],
+            'type'     => 'shop_order'
+        ];
+    
+        // Check by billing phone or email
+        if ($customer_phone) {
+            $args['billing_phone'] = $customer_phone;
+        } elseif ($customer_email) {
+            $args['billing_email'] = $customer_email;
+        }
+    
+        $wc_orders = wc_get_orders($args);
+
+
+        if (!empty($wc_orders)) {
+            $wc_order = $wc_orders[0];
+
+            $wc_order_date = $wc_order->get_date_created();
+            $order_status = $wc_order->get_status();
+
+            $results['last_wc_order_current_status']  = $order_status;
+            $results['last_wc_order_at']  = human_time_difference($wc_order_date, null, true);
+        } else {
+            $results = [
+                'last_wc_order_current_status'  => '',
+                'last_wc_order_at'  => false
+            ];
+        }
+
+        return $results;
+    }
+    
     
 
     public function get_abandoned_dashboard_data(WP_REST_Request $request) {
@@ -284,19 +335,6 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         ));
         $stats['lost_amount'] = $stats['lost_amount'] ?: 0;
     
-        // Total Recovered Orders
-        $stats['total_recovered_orders'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
-            'recovered', $start_date, $end_date
-        ));
-    
-        // Total Recovered Amount
-        $stats['recovered_amount'] = $wpdb->get_var($wpdb->prepare(
-            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND recovered_at BETWEEN %s AND %s",
-            'recovered', $start_date, $end_date
-        ));
-        $stats['recovered_amount'] = $stats['recovered_amount'] ?: 0;
-    
         // Total Active Carts (Not yet abandoned)
         $stats['total_active_carts'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
@@ -308,6 +346,14 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             "SELECT COUNT(*) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND created_at BETWEEN %s AND %s",
             'confirmed', $start_date, $end_date
         ));
+
+        // Total Confirmed Amount (Sum of total_value where confirmed)
+        $stats['confirmed_amount'] = $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(total_value) FROM $this->table_name WHERE LOWER(status) = LOWER(%s) AND abandoned_at BETWEEN %s AND %s",
+            'confirmed', $start_date, $end_date
+        ));
+        $stats['confirmed_amount'] = $stats['confirmed_amount'] ?: 0;
+
     
         // Total call not received Orders (if applicable)
         $stats['total_call_not_received_orders'] = $wpdb->get_var($wpdb->prepare(
@@ -426,7 +472,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
         $total_value    = floatval($request->get_param('total_value'));
         $status         = sanitize_text_field($request->get_param('status')); // Get status from request
         $updated_at     = current_time('mysql');
-        $recovered_at   = ($status === 'recovered') ? current_time('mysql') : null; // Set recovered_at for "recovered" status
+        $recovered_at   = ($status === 'confirmed') ? current_time('mysql') : null; // Set recovered_at for "recovered" status
     
         $updated = $wpdb->update(
             $this->table_name,

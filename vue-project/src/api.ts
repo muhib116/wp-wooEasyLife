@@ -24,6 +24,8 @@ export const validateCoupon = async (payload: { coupon_code: string }) => {
   );
   return data;
 };
+
+
 export const getOrderList = async (payload: {
   status?: string;
   per_page?: number;
@@ -35,6 +37,17 @@ export const getOrderList = async (payload: {
   });
   return data;
 };
+
+
+export const updateShippingMethod = async (payload: {
+  shipping_instance_id: string | number
+  order_id: string | number
+}) => {
+  const { data } = await axios.post(`${localApiBaseURL}/update-order-shipping-method`, payload);
+  return data;
+};
+
+
 export const getOrderStatusListWithCounts = async () => {
   const { data } = await axios.get(`${localApiBaseURL}/status-with-counts`);
   return data;

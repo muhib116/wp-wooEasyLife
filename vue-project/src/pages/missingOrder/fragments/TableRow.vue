@@ -9,23 +9,34 @@
           #{{ item.id }}
         </span>
         <span
-          v-if="item.is_repeat_customer"
-          class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
-          title="Repeat customer"
+          v-if="item?.last_wc_order_at"
+          class="px-1 bg-red-500 text-white capitalize rounded-sm text"
         >
-          Repeat
+          Has order ({{ item.last_wc_order_at }})
         </span>
       </div>
+      <span 
+        class="font-medium text-red-500"
+        v-if="item?.last_wc_order_at"
+      >
+        {{ `Last order status: ${item.last_wc_order_current_status}` }}
+      </span>
 
       <div class="flex gap-1 font-semibold" title="Customer name">
         {{ item.customer_name }}
       </div>
 
       <div>
-        <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
-          <span class="font-semibold"> 📞 Phone: </span>
-          {{ item.customer_phone }}
-        </a>
+        <div class="flex gap-2">
+          <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
+            <span class="font-semibold"> 📞 Phone: </span>
+            {{ item.customer_phone }}
+          </a>
+          
+          <Whatsapp
+            :phone_number="item.customer_phone"
+          />
+        </div>
 
         <div v-if="item.customer_email" class="truncate">
           <span class="font-semibold"> 📨 Email: </span>
@@ -34,20 +45,20 @@
       </div>
 
       <div class="truncate">
-        📅 {{ printDate(item.created_at) }}
+        📅 {{ item.created_at }}
       </div>
       <div>
         🏠 {{ item.billing_address }}
       </div>
     </Table.Td>
 
-    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
+    <Table.Td class="space-y-2 truncate">
       <h3>💵 Price: {{ item.total_value || 0 }}৳</h3>
       <h3>💰 Discount: {{ item?.cart_contents?.total_discount || 0 }}৳</h3>
       <h3>🎟️ Coupons: {{ item?.cart_contents?.coupon_codes?.length ? item.cart_contents.coupon_codes.join(', ') : 'N/A' }}</h3>
     </Table.Td>
 
-    <Table.Td class="space-y-2 min-w-[300px] hidden lg:table-cell">
+    <Table.Td class="space-y-2 truncate">
       <h3 title="Payment method">
         🚚 {{ item.cart_contents?.payment_method || 'n/a' }}
       </h3>
@@ -59,7 +70,7 @@
       </h3>
     </Table.Td>
     
-    <Table.Td class="capitalize min-w-[160px] text-center lg:text-left space-y-2">
+    <Table.Td class="capitalize min-w-[160px] space-y-2">
       <span
         :style="{
           color: selectedOption.color
@@ -76,18 +87,18 @@
       </Button.Primary>
 
       <div v-if="item.abandoned_at">
-        <span class="font-semibold text-red-500">
+        <span class="font-semibold text-blue-500">
           Abandoned At: 
         </span>
         <br />
-        {{ printDate(item.abandoned_at) }}
+        {{ item.abandoned_at }}
       </div>
-      <div v-if="item.recovered_at">
+      <div v-if="item.status == 'confirmed'">
         <span class="font-semibold text-green-500">
           Recovered At: 
         </span>
         <br />
-        {{ printDate(item.recovered_at) }}
+        {{ item.recovered_at }}
       </div>
     </Table.Td>
 
@@ -128,9 +139,8 @@
 </template>
 
 <script setup lang="ts">
-import { printDate } from "@/helper";
-import { Table, Button, Modal, Icon, Select } from "@components";
-import { inject, onMounted, ref } from "vue";
+import { Table, Button, Modal, Select, Whatsapp } from "@components";
+import { inject, ref } from "vue";
 import CartDetails from "./CartDetails.vue";
 
 const props = defineProps<{

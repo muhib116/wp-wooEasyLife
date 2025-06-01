@@ -3,6 +3,7 @@
         class="inline-flex items-center cursor-pointer select-none"
     >
         <input 
+            v-bind="$attrs"
             type="checkbox"
             class="sr-only peer"
             :checked="+modelValue"
@@ -14,6 +15,9 @@
 
 <script setup lang="ts">
     const modelValue = defineModel()
+    defineOptions({
+        inheritAttrs: false
+    })
 
     const emit = defineEmits(['onInput'])
     const handleChange = (value: boolean) => {

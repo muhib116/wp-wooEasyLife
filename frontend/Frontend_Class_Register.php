@@ -12,5 +12,6 @@ class Frontend_Class_Register{
         new CheckoutFormValidation();
         new CustomerHandler();
         new Remote_UsePackageHistory();
+        new StoreCheckoutUrl();
     }
 }

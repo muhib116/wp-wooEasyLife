@@ -242,7 +242,7 @@ function get_total_orders_by_billing_phone_or_email_and_status($order) {
     } else if(!empty($email)) {
         $orders = get_orders_by_billing_phone_or_email_and_status(null, $email, $order_status);
     }
-    return count($orders); // Total orders matching criteria
+    return count($orders ?? []); // Total orders matching criteria
 }
 
 
@@ -316,7 +316,22 @@ function normalize_phone_number($phone) {
         $normalized = '0' . substr($normalized, 3); // Remove '880' and prepend '0'
     }
 
-    return $normalized;
+
+
+    return validateAndFormatPhoneNumber($normalized);
+}
+
+function validateAndFormatPhoneNumber($phone) {
+    // Remove any non-numeric characters
+    $phone = preg_replace('/\D/', '', $phone);
+
+    // Check if the number has exactly 10 digits and starts with '1'
+    if (preg_match('/^1\d{9}$/', $phone)) {
+        // Prepend '0' to make it a valid 11-digit Bangladeshi phone number
+        return '0' . $phone;
+    }
+
+    return $phone;
 }
 
 function validate_BD_phoneNumber($phoneNumber) {
@@ -552,4 +567,64 @@ function get_woo_easy_registered_user() {
     }
 
     return $user_data; // Return user data if successful
+}
+
+function human_time_difference($to, $from = null, $only_difference = null) {
+    // Ensure `$from` is set to the current time if not provided
+    $from = $from ? (is_numeric($from) ? (int) $from : strtotime($from)) : time();
+    $to = is_numeric($to) ? (int) $to : strtotime($to);
+
+    // Validate timestamps
+    if (!$to || !$from) {
+        return "Invalid date";
+    }
+
+    // Calculate time difference in seconds
+    $time_difference = $to - $from;
+    $absolute_difference = abs($time_difference);
+
+    // If $only_difference is false and the difference is greater than 24 hours (86400 seconds)
+    if (!$only_difference && $absolute_difference > 86400) { // 24 hours = 86400 seconds
+        // Return formatted date when difference is greater than 24 hours
+        return date('M j, Y \a\t g:i A', $to);
+    }
+
+    // Use WordPress's human_time_diff for small differences
+    $formatted_time_difference = human_time_diff(min($to, $from), max($to, $from));
+
+    // Determine if it's in the past or future based on $time_difference
+    return $formatted_time_difference . ($time_difference < 0 ? " ago" : " later");
+}
+
+
+function get_order_total_weight( $order ) {
+    if ( ! $order instanceof WC_Order ) {
+        return 0; // Return 0 if the order is invalid
+    }
+
+    $total_weight = 0;
+
+    // Loop through order items
+    foreach ( $order->get_items() as $item ) {
+        $product = $item->get_product(); // Get product object
+        if ( $product ) {
+            $weight = $product->get_weight(); // Get product weight
+            $quantity = $item->get_quantity(); // Get quantity in the order
+
+            // Ensure weight is numeric
+            if ( is_numeric( $weight ) ) {
+                $total_weight += (float) $weight * (int) $quantity;
+            }
+        }
+    }
+
+    return $total_weight; // Return total weight in kg
+}
+
+function get_site_logo_url() {
+    $custom_logo_id = get_theme_mod('custom_logo');
+    if ($custom_logo_id) {
+        return wp_get_attachment_image_url($custom_logo_id, 'full');
+    }
+    return get_site_url() . '/wp-content/uploads/default-logo.png'; // Optional fallback
 }

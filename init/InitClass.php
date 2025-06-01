@@ -135,14 +135,16 @@ class InitClass {
         // New default configuration (only new fields will be added)
         $new_config = [
             "admin_phone" => '',
+            "validate_duplicate_order" => false,
+            "validate_checkout_form" => false,
+            "place_order_otp_verification" => false,
+            
             "invoice_company_name" => $site_title,
             "invoice_logo" => $logo_url,
             "invoice_email" => '',
             "invoice_phone" => '',
             "invoice_print" => false,
             "clear_data_when_deactivate_plugin" => false,
-            "validate_checkout_form" => false,
-            "place_order_otp_verification" => false,
             "ip_block" => true,
             "phone_number_block" => true,
             "email_block" => true,

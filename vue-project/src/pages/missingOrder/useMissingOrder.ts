@@ -54,6 +54,13 @@ export const useMissingOrder = () => {
     const selectedOption = ref(options.value[0])
 
     const updateStatus = async (item, selectedStatus: string, btn) => {
+        if(!selectedStatus) {
+            showNotification({
+                type: 'danger',
+                message: 'Please select an item from dropdown.'
+            })
+            return
+        }
         try {
             isLoading.value = true
             btn.isLoading = true
@@ -65,7 +72,7 @@ export const useMissingOrder = () => {
             if(selectedStatus == 'confirmed'){
                 await createOrderFromAbandonedData(item, btn)
             }
-
+            
             const { message, status } = await updateAbandonedOrderStatus(item.id, payload)
             showNotification({
                 type: 'success',
@@ -115,28 +122,35 @@ export const useMissingOrder = () => {
                 { last_name: '' },
                 { address_1: form.billing_address },
                 { address_2: '' },
-                { phone: form.customer_phone }
+                { phone: form.customer_phone },
+                { email: form.customer_email }
             ]
-
-            // const coupon_codes = form.coupons.map(item => item.coupon_code)
 
             const payload = {
                 products: products,
                 address,
-                payment_method_id: form?.cart_contents?.payment_method_id || '',
+                payment_method_id: form?.cart_contents?.payment_method_id || 'cod',
                 shipping_method_id: form?.cart_contents?.shipping_method || '',
-                shipping_cost: form?.cart_contents?.shipping_cost || '',
+                shipping_cost: form?.cart_contents?.shipping_cost || 0,
                 customer_note: form?.cart_contents?.customer_note || '',
                 order_source: 'abandoned',
                 order_status: 'wc-confirmed',
                 coupon_codes: form?.cart_contents?.coupon_codes || ''
             }
 
-            const { data } = await createOrder(payload)
-            if (data.order_id) {
+            try {
+                const { data } = await createOrder(payload)
+                if (data.order_id) {
+                    showNotification({
+                        type: 'success',
+                        message: 'Order created successfully!'
+                    })
+                }
+            } catch(err) {
+                console.error(err)
                 showNotification({
-                    type: 'success',
-                    message: 'Order created successfully!'
+                    type: 'danger',
+                    message: 'Order not created!'
                 })
             }
         } catch (err) {

@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
     import { Icon, Loader } from '@components'
-    import { ref, computed } from 'vue'
+    import { ref, computed, onMounted } from 'vue'
     import { twMerge } from 'tailwind-merge'
     import { HTMLAttributes } from 'vue'
 
@@ -72,7 +72,7 @@
         iconClass: 'w-4 h-4',
     })
 
-    const emit = defineEmits(['onClick'])
+    const emit = defineEmits(['onClick', 'onLoad'])
 
     const localLabel = ref('')
     const localClass: string =
@@ -122,4 +122,8 @@
             emit('onClick', button.value)
         }
     }
+
+    onMounted(() => {
+        emit('onLoad', button.value)
+    })
 </script>

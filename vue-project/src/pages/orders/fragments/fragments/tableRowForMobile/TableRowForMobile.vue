@@ -21,12 +21,21 @@
         </Table.Td>
         <Table.Td class="space-y-2 w-fit">
             <div class="flex justify-between items-center">
-                <span 
-                    class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
-                    title="Order Id"
-                >
-                    #{{ order.id }}
-                </span>
+                <div class="flex items-center gap-2">
+                    <span 
+                        class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
+                        title="Order Id"
+                    >
+                        #{{ order.id }}
+                    </span>
+                    <span 
+                        v-if="order.order_source "
+                        class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
+                        title="Order source"
+                    >
+                        {{ order.order_source }}
+                    </span>
+                </div>
                 
                 <Button.Native
                     class="opacity-30 flex items-center gap-2"
@@ -46,13 +55,6 @@
             <div
                 class="flex flex-wrap items-start gap-2 relative"
             >
-                <span 
-                    v-if="order.order_source "
-                    class="px-1 bg-sky-500 text-white capitalize rounded-sm text"
-                    title="Order source"
-                >
-                    {{ order.order_source }}
-                </span>
                 <span
                     title="Customer fraud score"
                     class="text-red-500"
@@ -89,7 +91,7 @@
                     class="text-green-500 tex-sm"
                     title="Repeat customer"
                 >
-                    (Repeat)
+                    (R)
                 </span>
             </div>
             <div 
@@ -125,16 +127,9 @@
                 >
                     📞 {{ order.billing_address.phone }}
                 </a>
-                <a 
-                    :href="`https://wa.me/${order.billing_address.phone}`" 
-                    class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
-                >
-                    <Icon
-                        name="PhWhatsappLogo"
-                        size="20"
-                        weight="fill"
-                    />
-                </a>
+                <Whatsapp
+                    :phone_number="order.billing_address.phone"
+                />
             </div>
 
             <div
@@ -152,24 +147,29 @@
                 :order="order"
             />
 
-            <a
-                v-if='order?.courier_data?.parcel_tracking_link'
-                class="font-medium text-blue-500" 
-                title="Click to track your parcel"
-                :href="order?.courier_data?.parcel_tracking_link"
-                target="_black"
-            >
-                📍 Track Parcel
-            </a>
+            <div class="flex gap-3 items-center">
+                <a
+                    v-if='order?.courier_data?.parcel_tracking_link'
+                    class="font-medium text-blue-500" 
+                    title="Click to track your parcel"
+                    :href="order?.courier_data?.parcel_tracking_link"
+                    target="_black"
+                >
+                    📍 Track Parcel
+                </a>
+                <span class="font-bold">
+                    Total: <span v-html="(order.total||0)+order.currency_symbol"></span>
+                </span>
+            </div>
             
             <div class="flex gap-2 items-center">
-                <button class="relative order-status capitalize px-3 py-1 pointer-events-auto" :class="`status-${order.status}`">
+                <button class="relative order-status capitalize px-3 py-0 rounded-[18px] text-[13px] pointer-events-auto" :class="`status-${order.status}`">
                     {{ order.status=='processing' ? 'New Order' : order?.status?.replace(/-/g, ' ') }}
     
                     <span 
                         v-if="(order?.total_order_per_customer_for_current_order_status || 0) > 1"
                         title="Multiple order place"
-                        class="cursor-pointer absolute -top-2 right-0 w-5 bg-red-500 aspect-square border-none text-white rounded-full text-[10px] hover:scale-110 shadow duration-300"
+                        class="cursor-pointer absolute -top-2 -right-1 size-4 place-content-center bg-red-500 aspect-square border-none text-white rounded-full text-[10px] hover:scale-110 shadow duration-300"
                         @click="toggleMultiOrderModel = true"
                     >
                         {{ order.total_order_per_customer_for_current_order_status }}
@@ -189,8 +189,14 @@
                     />
                 </span>
             </div>
+
             <hr />
-            <div class="grid gap-2 grid-cols-2">
+            <div class="grid gap-2 grid-cols-2 -ml-[36px]">
+                <div class="col-span-2">
+                    <CourierEntry
+                        :order="order"
+                    />
+                </div>
                 <button
                     class="relative flex flex-col whitespace-nowrap justify-center items-center text-white bg-blue-500 w-full text-center py-1 px-2 rounded-sm pointer-events-auto hover:brightness-95"
                     title="Order details"
@@ -276,13 +282,13 @@
     import { Table, Icon, Modal, Button } from '@components'
     import { inject, ref, computed } from 'vue'
     import Address from '../address/Index.vue'
-    import { baseUrl } from '@/api'
     import FraudHistory from '../FraudHistory.vue'
     import MultipleOrders from '../MultipleOrders.vue'
     import Notes from '../notes/Index.vue'
     import BlackListData from './BlackListData.vue'
     import { useTableRowForMobile } from './useTableRowForMobile'
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
+    import { Whatsapp, CourierEntry } from '@/components';
 
     const props = defineProps<{
         order: {

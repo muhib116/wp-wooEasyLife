@@ -10,8 +10,11 @@ import {
   includePastNewOrdersToWELPlugin,
   includeMissingNewOrdersOfFailedBalanceCut,
   toggleIsDone,
-  updateOrder
+  updateOrder,
+  updateShippingMethod,
+  getShippingMethods
 } from "@/api";
+
 import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
@@ -19,12 +22,16 @@ import { isEmpty } from "lodash";
 
 export const useOrders = () => {
   const orders = ref([]);
+  const shippingMethods = ref(null)
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
   const activeOrder = ref();
   const selectedOrders = ref(new Set([]));
+  const isShippingEditing = ref(false);
+  const isShippingEditable = ref(false);
   const selectAll = ref(false);
   const isLoading = ref(false);
+  const orderListLoading = ref(false);
   const showInvoices = ref(false);
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
@@ -58,6 +65,7 @@ export const useOrders = () => {
   const setActiveOrder = (item) => {
     activeOrder.value = item;
   };
+
   const setSelectedOrder = (item) => {
     if (!selectedOrders.value.has(item)) {
       selectedOrders.value.add(item);
@@ -70,10 +78,19 @@ export const useOrders = () => {
     if (selectAll.value) {
       selectedOrders.value = new Set(orders.value);
     } else {
-      selectedOrders.value.clear();
+      clearSelectedOrders()
     }
-  };
-  
+  }
+
+  const clearSelectedOrders = () => {
+    selectedOrders.value.clear();
+  }
+
+  const loadShippingMethods = async () => {
+    const { data: _shippingMethods } = await getShippingMethods();
+    shippingMethods.value = _shippingMethods
+  }
+
   const handleFraudCheck = async (button) => {
     if (![...selectedOrders.value].length) {
       alert("Please select at least one item.");
@@ -141,6 +158,7 @@ export const useOrders = () => {
   const getOrders = async (shouldClear: boolean = true) => {
     try {
       isLoading.value = true;
+      orderListLoading.value = true;
       if (orderFilter.value.page == 0) {
         orderFilter.value.page = 1;
       }
@@ -152,8 +170,29 @@ export const useOrders = () => {
       }
     } finally {
       isLoading.value = false;
+      orderListLoading.value = false;
     }
   };
+
+  const handleUpdateShippingMethod = async (payload: {
+    shipping_instance_id: string | number
+    order_id: string | number
+  }) => {
+    try {
+      isLoading.value = true;
+      isShippingEditing.value = true;
+      await updateShippingMethod(payload)
+      await getOrders()
+      showNotification({
+        type: 'success',
+        message: 'Shipping method updated.'
+      })
+    } finally {
+      isShippingEditing.value = false
+      isShippingEditable.value = false
+      isLoading.value = false;
+    }
+  }
 
   const loadAllStatuses = async () => {
     try {
@@ -177,7 +216,7 @@ export const useOrders = () => {
     let successRate = order?.customer_report?.success_rate;
 
     if (isNaN(parseFloat(successRate))) {
-        successRate = '0'; // Default to 0% if it's an invalid value
+      successRate = '0'; // Default to 0% if it's an invalid value
     }
 
     // Remove '%' if present and parse it as a float
@@ -191,26 +230,26 @@ export const useOrders = () => {
 
     // Adjust probability based on fraud score
     if (systemFraudScore > 80) {
-        probability *= 0.5; // High fraud risk, reduce probability significantly
+      probability *= 0.5; // High fraud risk, reduce probability significantly
     } else if (systemFraudScore > 50) {
-        probability *= 0.7; // Medium fraud risk, moderate reduction
+      probability *= 0.7; // Medium fraud risk, moderate reduction
     } else if (systemFraudScore > 20) {
-        probability *= 0.9; // Low fraud risk, slight reduction
+      probability *= 0.9; // Low fraud risk, slight reduction
     }
 
     // Ensure probability stays within 0-100%
     probability = Math.max(0, Math.min(probability * 100, 100));
 
     return Math.round(probability) || 'Unpredicted'; // Return probability as a rounded percentage
-}
+  }
 
   const handleFilter = async (status: string, btn) => {
     try {
-        btn.isLoading = true
-        orderFilter.value.status = status
-        await getOrders()
+      btn.isLoading = true
+      orderFilter.value.status = status
+      await getOrders()
     } finally {
-        btn.isLoading = false
+      btn.isLoading = false
     }
   }
 
@@ -325,6 +364,7 @@ export const useOrders = () => {
     try {
       btn.isLoading = true;
       await manageCourier(selectedOrders, courierPartner, async () => {
+        await loadOrderStatusList();
         await getOrders();
         showNotification({
           type: "success",
@@ -359,7 +399,7 @@ export const useOrders = () => {
         consignment_ids: consignment_ids,
       };
 
-      if(!consignment_ids?.length) {
+      if (!consignment_ids?.length) {
         showNotification({
           type: "warning",
           message: "There is no data available to refresh."
@@ -388,8 +428,8 @@ export const useOrders = () => {
               order_id: order.id,
               new_status: statusName,
             }]);
-  
-            order.status =  statusName.replace('wc-', '')
+
+            order.status = statusName.replace('wc-', '')
           } catch (err) {
             console.error(err)
           }
@@ -436,24 +476,23 @@ export const useOrders = () => {
       cancelled: "wc-returned",
       unknown: "wc-unknown",
       delivered_approval_pending: "wc-pending",
-      delivered: "wc-complete",
+      delivered: "wc-completed",
       hold: "wc-on-hold",
     };
     return statuses[courier_status];
   }
 
-  const markAsDone = async (order, btn: { isLoading: boolean }) => 
-  {
+  const markAsDone = async (order, btn: { isLoading: boolean }) => {
     const isDone = Number(!Number(order.is_done));
-    if(!isDone && !confirm('Are sure to make this undone?')) return
+    if (!isDone && !confirm('Are sure to make this undone?')) return
     btn.isLoading = true;
-  
+
     const payload = { order_id: order.id, is_done: isDone };
-  
+
     try {
       await toggleIsDone(payload);
       order.is_done = isDone;
-  
+
       showNotification({
         type: isDone ? 'success' : 'warning',
         message: `Marked as ${isDone ? 'done!' : 'undone'}`,
@@ -465,7 +504,7 @@ export const useOrders = () => {
       btn.isLoading = false;
     }
   }
-  
+
   const handleUpdateOrder = async (product, btn) => {
     const payload: {
       order_id: number | string
@@ -476,17 +515,17 @@ export const useOrders = () => {
       product_id: product.id,
       quantity: product.product_quantity
     }
-    
+
     try {
       btn.isLoading = true
 
-      if(product.from == 'new-product'){
-        payload.quantity ++
+      if (product.from == 'new-product') {
+        payload.quantity++
         product.product_quantity = payload.quantity
       }
-      
+
       const response = await updateOrder(payload)
-      if(response) {
+      if (response) {
         /**
          * if user set quantity to 0, then remove the item from product list,
          * after removing this product from order in DB
@@ -505,7 +544,7 @@ export const useOrders = () => {
 
   let timeoutId: any;
   const totalPages = computed(() =>
-      orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
+    orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
   )
   const debouncedGetOrders = (btn) => {
     orderFilter.value.page = orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
@@ -521,11 +560,10 @@ export const useOrders = () => {
     orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
   )
 
-  const include_past_new_orders_thats_not_handled_by_wel_plugin = async (totalNewOrders: number, btn: { isLoading: boolean }) => 
-  {
+  const include_past_new_orders_thats_not_handled_by_wel_plugin = async (totalNewOrders: number, btn: { isLoading: boolean }) => {
     let alertMsg = `Are you sure you want to include your past new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
-    if(!confirm(alertMsg)) return
-    if(totalNewOrders > userData.value.remaining_order) {
+    if (!confirm(alertMsg)) return
+    if (totalNewOrders > userData.value.remaining_order) {
       showNotification({
         type: 'info',
         message: `
@@ -551,28 +589,28 @@ export const useOrders = () => {
         type: 'success',
         message: data.message,
       })
-      
+
       await loadUserData();
       loadOrderStatusList();
       await getOrders();
 
     } catch (err) {
       console.error("Error including past new orders:", err);
-      
+
       showNotification({
         type: 'danger',
         message: "Failed to update orders. Please try again.",
-      }) 
-    } 
+      })
+    }
     finally {
       btn.isLoading = false;
     }
   }
 
-  const include_balance_cut_failed_new_orders = async (totalNewOrders: Number, btn: { isLoading: boolean}) => {
+  const include_balance_cut_failed_new_orders = async (totalNewOrders: Number, btn: { isLoading: boolean }) => {
     let alertMsg = `Are you sure you want to include your missing new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
-    if(!confirm(alertMsg)) return
-    if(totalNewOrders > userData.value.remaining_order) {
+    if (!confirm(alertMsg)) return
+    if (totalNewOrders > userData.value.remaining_order) {
       showNotification({
         type: 'info',
         message: `
@@ -594,24 +632,24 @@ export const useOrders = () => {
     try {
       btn.isLoading = true;
       const data = await includeMissingNewOrdersOfFailedBalanceCut();
-      
+
       showNotification({
         type: 'success',
         message: data.message,
       })
-      
+
       await loadUserData();
       loadOrderStatusList();
       await getOrders();
 
     } catch (err) {
       console.error("Error including missing new orders:", err);
-      
+
       showNotification({
         type: 'danger',
         message: "Failed to update orders. Please try again.",
       })
-    } 
+    }
     finally {
       btn.isLoading = false;
     }
@@ -627,9 +665,10 @@ export const useOrders = () => {
     }
   );
 
-  onMounted(() => {
+  onMounted(async () => {
     loadOrderStatusList();
     loadAllStatuses();
+    await loadShippingMethods();
     getOrders();
   });
 
@@ -646,12 +685,15 @@ export const useOrders = () => {
     toggleNewOrder,
     selectedStatus,
     selectedOrders,
+    shippingMethods,
+    orderListLoading,
     courierStatusInfo,
+    isShippingEditable,
+    isShippingEditing,
     wooCommerceStatuses,
     orderStatusWithCounts,
     getOrders,
     markAsDone,
-    handleUpdateOrder,
     handleFilter,
     handleIPBlock,
     setActiveOrder,
@@ -659,14 +701,17 @@ export const useOrders = () => {
     toggleSelectAll,
     handleFraudCheck,
     handleEmailBlock,
+    handleUpdateOrder,
     handleStatusChange,
     debouncedGetOrders,
     handleCourierEntry,
     loadOrderStatusList,
+    clearSelectedOrders,
     handlePhoneNumberBlock,
     refreshBulkCourierData,
     getDeliveryProbability,
+    handleUpdateShippingMethod,
+    include_balance_cut_failed_new_orders,
     include_past_new_orders_thats_not_handled_by_wel_plugin,
-    include_balance_cut_failed_new_orders
   };
 };

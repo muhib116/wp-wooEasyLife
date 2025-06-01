@@ -3,7 +3,7 @@
         v-model="localValue"
         wrapperClass="block"
         labelClass="mb-1"
-        inputClass="placeholder:text-inherit placeholder:opacity-60 border border-secondary-five rounded-sm px-4 py-2 block w-full disabled:bg-gray-100 disabled:opacity-60 flex items-center justify-between"
+        inputClass="placeholder:text-inherit placeholder:opacity-60 border border-secondary-five rounded-sm pl-3 pr-7 py-2 block w-full disabled:bg-gray-100 disabled:opacity-60 flex items-center justify-between"
         iconClass=""
         :iconSource="iconSource"
         :iconName="iconName"

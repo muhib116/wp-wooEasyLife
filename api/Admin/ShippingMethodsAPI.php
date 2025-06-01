@@ -41,6 +41,7 @@ class ShippingMethodsAPI
                     $methods[] = [
                         'zone_name'     => $zone_obj->get_zone_name(),
                         'method_id'     => $method->id,
+                        'instance_id'   => $method->get_instance_id(),
                         'method_title'  => $method->get_title(),
                         'settings'      => $method->settings,
                         'shipping_cost' => $shipping_cost, // Format the cost

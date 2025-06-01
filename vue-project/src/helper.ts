@@ -191,7 +191,20 @@ export const normalizePhoneNumber = (phone: string): string => {
         normalized = '0' + normalized.slice(3); // Remove '880' and prepend '0'
     }
 
-    return normalized;
+    return validateAndFormatPhoneNumber(normalized);
+}
+
+export const validateAndFormatPhoneNumber = (phone: string) => {
+    // Remove any non-numeric characters
+    phone = phone.replace(/\D/g, '');
+
+    // Check if the number has exactly 10 digits and starts with '1'
+    if (/^1\d{9}$/.test(phone)) {
+        // Prepend '0' to make it a valid 11-digit Bangladeshi phone number
+        return '0' + phone;
+    }
+
+    return phone;
 }
 
 
@@ -230,4 +243,89 @@ export const  detectInternetState = (callback) => {
     if ('connection' in navigator) {
         navigator.connection.addEventListener("change", updateStatus);
     }
+}
+
+export const checkImageLoad = (imgUrl: string, callback: (isLoaded: boolean) => void) => {
+    let img = new Image();
+    img.onload = function () {
+        callback(true); // Image loaded successfully
+    };
+    img.onerror = function () {
+        callback(false); // Image failed to load
+    };
+    img.src = imgUrl;
+}
+
+export const handlePrint = () => {
+    window.print();
+}
+
+export const printProductDetails = (order, cb, invoice_logo) => {
+    const qrData = order.courier_data.consignment_id
+    const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
+    
+    const printWindow = window.open("", "");
+    printWindow.document.write(`
+        <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Document</title>
+                <style>
+                    *, ::before, ::after {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    @page {
+                        size: 3in 2in landscape;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div style="
+                    width: 2.78in; 
+                    height: 1.8in; 
+                    padding: 4px 4px; 
+                    border-radius: 4px;
+                    border: 1px solid;
+                    font-family: poppins, sans-serif;
+                    font-size: 14px;
+                    display: flex; 
+                    align-items: center;
+                    justify-content: space-between;
+                ">
+                    <div style="display: grid; gap: 4px;">
+                        <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 38px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                        <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
+                        <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
+                        <p style="margin:0;"><strong>Name:</strong> ${order.customer_name}</p>
+                        <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
+                    </div>
+                    <div>
+                        <img src="${qrUrl}" alt="QR Code" style="width: 100px; height: 100px;margin-right: -8px;margin-top: -8px;margin-bottom: -8px;" />
+                    </div>
+                </div>
+            </body>
+            </html>
+    `);
+    
+    // printWindow.document.close();
+    // // Wait for the print job to complete before closing and calling the callback
+    // printWindow.onafterprint = () => {
+    //     printWindow.close();
+    //     if (typeof cb === "function") {
+    //         cb();
+    //     }
+    // };
+
+    // checkImageLoad(qrUrl, (isLoaded) => {
+    //     if (isLoaded) {
+    //         setTimeout(() => {
+    //             printWindow.print();
+    //         }, 100); // Delay to ensure the image is loaded
+    //     }
+    // })
 }

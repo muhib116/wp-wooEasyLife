@@ -5,7 +5,11 @@
             {{ item.status.replace('wc-', '').replaceAll('-', ' ') }}
         </Table.Td>
         <Table.Td>
-            {{ item.phone_number || 'n/a' }}
+            <div 
+                class="w-[140px] max-h-[100px] overflow-auto"
+                v-html="item?.phone_number?.replaceAll(',', '<br/>') || 'n/a'"
+            >
+            </div>
         </Table.Td>
         <Table.Td>
             {{ item.message }}

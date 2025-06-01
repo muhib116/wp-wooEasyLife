@@ -29,13 +29,13 @@
                 iconName="PhTrendDown"
             />
             <Card.Stylist
-                :title="dashboardData.total_recovered_orders"
+                :title="dashboardData.total_confirmed_orders"
                 subtitle="Total Recovered Order"
                 class="!bg-sky-500"
                 iconName="PhClockCounterClockwise"
             />
             <Card.Stylist
-                :title="`${dashboardData.recovered_amount}tk`"
+                :title="`${dashboardData.confirmed_amount}tk`"
                 subtitle="Recovered Amount"
                 class="!bg-green-500"
                 iconName="PhTrendUp"

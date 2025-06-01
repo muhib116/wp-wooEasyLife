@@ -20,7 +20,7 @@
                 <span style="font-weight: bold">
                     Date: 
                 </span>
-                {{ order.created_at }}
+                {{ order.abandoned_at }}
             </span>
         </h4>
         <h4>

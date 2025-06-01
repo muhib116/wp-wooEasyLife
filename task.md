@@ -66,12 +66,35 @@ Dashboard:
 ✅ The table "customer_data" was not created. Please deactivate and reactivate the "WooEasyLife" plugin.
 ✅ Missing order a paginatioon add korte hobe
 ✅ billing and shipping phone validatio checkout page
+✅ product er total price dekhate hobe
+✅ missing order theke real order a niwar bebosta korte hobe
+✅ status er color niye kaj korte hobe
+✅ phone number er shurute majhe majhe 0 thakena eita handle korte hobe
+✅ courier entry aro simple korte hobe
+✅ status button er moto dekha jay 
+✅ Abandoned to customer order create issue for payment id
+✅ multiple order of same product can protect
+✅ abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
+✅ missing order issue
+✅ license add kora thaklew notun device a somossa kore
+✅ shipping method editable korte hobe
 
 
 
 --------heigh priority task------------
-👉🏻 missing order theke real order a niwar bebosta korte hobe
-👉🏻 status er color niye kaj korte hobe
+👉🏻 multiple courier config
+👉🏻 kuno karone courier data DB te save na hole seita solve korar bebosta korte hobe
+👉🏻 ordered product editable issue
+👉🏻 ashraful mal er ei khane order details a giye product edit hoy kina check dite hobe.
+👉🏻 customer order create and abandoned to order create er somoy shipping method niye kaj korte hobe.
+👉🏻 shipping method change korar pore COD thik thak moto jay kina dekhte hobe
+👉🏻 task assign for employ
+
+
+
+
+👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
+
 👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
@@ -90,17 +113,6 @@ Dashboard:
 👉🏻 Message and comment theke order api diye ane ai diye filter kore plugins a ante hobe
 👉🏻 Centralize data base a black list er data rekhe plugins er fake order komate hobe
 👉🏻 abandont, comment and message er lead gulu fb er ad cost er 50% price sale korte hobe.
-
-
-👉🏻 
-👉🏻 
-👉🏻 
-
-
-
-
-
-
 
 
 => courier config a error handle korte hobe

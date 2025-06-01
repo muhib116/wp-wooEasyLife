@@ -32,7 +32,7 @@
             </a>
         </div>
         <div
-            class="flex gap-1 font-medium truncate"
+            class="flex gap-1 font-medium max-w-[225px]"
         >
             {{ order.billing_address.first_name }}
             {{ order.billing_address.last_name }}
@@ -41,33 +41,34 @@
                 class="text-green-500 tex-sm"
                 title="Repeat customer"
             >
-                (Repeat)
+                (R)
             </span>
         </div>
-        <div class="flex gap-1 items-center">
-            📅 {{ order.date_created }}
+        <div class="flex gap-1 items-center whitespace-nowrap justify-between">
+            <span>📅 {{ order.date_created }}</span>
+            <a 
+                v-if="order?.referrer_url"
+                :href="order.referrer_url"
+                target="_blank"
+                class="bg-red-500 ml-1 px-1 inline-block font-medium text-white rounded shadow"
+                title="Referrer URL"
+            >
+                URL
+            </a>
         </div>
         <div class="flex items-center gap-2 truncate">
             <a :href="`tel:${order.billing_address.phone}`" class="flex gap-1 items-center text-orange-500 underline">
                 📞 {{ order.billing_address.phone }}
             </a>
-            <a 
-                target="_blank"
-                :href="`https://wa.me/88${order.billing_address.phone}`" 
-                class="items-center size-6 rounded-sm shadow grid place-content-center bg-green-500 text-white"
-            >
-                <Icon
-                    name="PhWhatsappLogo"
-                    size="20"
-                    weight="fill"
-                />
-            </a>
+            <Whatsapp
+                :phone_number="order.billing_address.phone"
+            />
         </div>
         <div
             class="flex gap-1 items-center"
             :title="`${order.billing_address.address_1}, ${order.billing_address.address_2}`"
         >
-            <div class="max-w-[240px]">
+            <div class="max-w-[240px] break-all">
                 🏠 
                 {{ order.billing_address.address_1 }},
                 {{ order.billing_address.address_2 }}
@@ -110,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Icon } from '@components'
+    import { Icon, Whatsapp } from '@components'
     import { baseUrl } from '@/api'
 
     defineProps({

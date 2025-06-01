@@ -55,6 +55,7 @@ class StatusChangeAction {
             }
         }
     }
+    
 
     private function replace_placeholder_variables_in_message($message, $variables) {
 

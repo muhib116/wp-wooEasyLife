@@ -1,7 +1,7 @@
 <template>
   <Container class="bg-white border-gray-200 border-b sticky z-[999] md:z-[30] ">
-    <nav class="w-full flex justify-between">
-      <div class="flex -mb-[2px] relative">
+    <nav class="w-full flex justify-between items-center">
+      <div class="flex items-center -mb-[2px] relative">
         <a href="#" class="hidden xl:flex items-center">
           <img
             class="w-auto max-w-[120px]"

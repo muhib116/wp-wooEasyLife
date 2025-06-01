@@ -1,6 +1,12 @@
 <template>
-    <div>
-        <div v-if="activeOrder" class="grid grid-cols-2 gap-6 mb-4">
+    <div class="relative select-none">
+        <div
+            v-if="isLoading"
+            class="absolute inset-0 z-50 flex justify-center pt-[90px] backdrop-blur-sm"
+        >
+            <Loader />
+        </div>
+        <div v-if="activeOrder" class="grid md:grid-cols-2 gap-6 mb-4">
             <div>
                 <h4>
                     <span class="block">
@@ -33,6 +39,12 @@
                         </span> 
                         {{ activeOrder.billing_address?.email }}
                     </h4>
+                    <h4 class="capitalize">
+                        <span style="font-weight: bold;">
+                            Order Status:
+                        </span> 
+                        {{ activeOrder.status == 'processing' ? 'New order' : activeOrder.status }}
+                    </h4>
                 </div>
 
                 <h4>
@@ -45,7 +57,15 @@
             </div>
 
             <div>
-                <DeliveryPartner />
+                <div class="max-w-[190px] md:ml-auto pr-4 whitespace-nowrap">
+                    <DeliveryPartner
+                        :order="activeOrder"
+                    />
+                    <PrintStickerAndMark
+                        class="mt-4"
+                        :order="activeOrder"
+                    />
+                </div>
             </div>
         </div>
         
@@ -59,12 +79,37 @@
 </template>
 
 <script setup lang="ts">
-    import { inject } from 'vue'
+    import { Loader } from '@/components'
     import DesktopOrderedProductDetails from './DesktopOrderedProductDetails.vue'
     import MobileOrderedProductDetails from './MobileOrderedProductDetails.vue'
     import DeliveryPartner from '@/pages/orders/fragments/fragments/data/DeliveryPartner.vue'
+    import PrintStickerAndMark from './PrintStickerAndMark.vue'
+    import { onMounted, onBeforeUnmount, inject, ref } from 'vue'
+    import { printProductDetails } from '@/helper'
 
     const {
-        activeOrder
+        activeOrder,
+        markAsDone
     } = inject('useOrders')
+    const { configData } = inject('configData')
+
+    const isLoading = ref(false)
+
+    const printHandler = () => {
+        printProductDetails(activeOrder.value, () => markAsDone(activeOrder.value, isLoading), configData.invoice_logo)
+    }
+    
+    const onKeyUp = (event: KeyboardEvent) => {
+        if (event.code === 'Space' || event.key === ' ') {
+            printHandler()
+        }
+    }
+
+    onMounted(() => {
+        window.addEventListener('keyup', onKeyUp)
+    })
+
+    onBeforeUnmount(() => {
+        window.removeEventListener('keyup', onKeyUp)
+    })
 </script>

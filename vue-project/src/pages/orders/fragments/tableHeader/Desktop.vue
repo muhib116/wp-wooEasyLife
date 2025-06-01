@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="print:hidden">
         <Heading
             title="Recent Orders"
             class="mb-4 px-6"

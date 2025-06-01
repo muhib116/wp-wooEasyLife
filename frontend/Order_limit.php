@@ -27,7 +27,7 @@ class Order_limit {
             ], getMetaDataOfOrderForArgs());
         
             $orders = wc_get_orders($args);
-            $order_count = count($orders);
+            $order_count = count($orders ?? []);
         
             // Check if the user has exceeded the order limit
             if ($order_count >= $order_limit) {

@@ -35,7 +35,8 @@ class BootClass {
         add_menu_page(
             'WEL',
             'WooEasyLife',
-            'manage_options',
+            // 'manage_options',
+            'manage_woocommerce', // Capability
             'woo-easy-life',
             [$this, 'wel_render_admin_page'],
             '',
@@ -60,7 +61,7 @@ class BootClass {
     public function wel_add_bar_menu($wp_admin_bar) {
         $wp_admin_bar->add_node(array(
             'id'    => 'woo-easy-life-bar-menu',
-            'title' => 'My Plugin', // The text shown in the admin bar
+            'title' => 'Woo easy life', // The text shown in the admin bar
             'title' => '<span style="height: 100%; display: flex; align-items: center; justify-content: center;">' . $this->svg_icon_wel . '<span style="margin-left: 8px;">WEL</span></span>',
             'href'  => admin_url('admin.php?page=woo-easy-life'), // Link to your plugin settings page
             'meta'  => array(
