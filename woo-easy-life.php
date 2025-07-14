@@ -165,32 +165,4 @@ if (!class_exists('WooEasyLife')) :
 
     // Instantiate the main plugin class.
     new WooEasyLife();
-
-
-    /**
-     * plugins has bug, that generating status 'wc-complete', but we need to change
-     * prev all this status to 'wc-completed' so this code.
-     */
-    function update_woocommerce_order_status_wc_function() {
-        // Get all orders with 'wc-complete' status
-        $args = array(
-            'status' => 'wc-complete',
-            'limit'  => -1, // Get all matching orders
-            'type'   => 'shop_order',
-        );
-    
-        $orders = wc_get_orders($args);
-    
-        if (!empty($orders)) {
-            foreach ($orders as $order) {
-                // Update order status to 'wc-completed'
-                $order->update_status('wc-completed', __('Order status updated from complete to completed.', 'woocommerce'));
-            }
-    
-            // return count($orders) . " orders updated successfully!";
-        }
-    }
-    // Hook into WooCommerce Admin
-    add_action('admin_init', 'update_woocommerce_order_status_wc_function');
-    
 endif;
