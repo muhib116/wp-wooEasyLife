@@ -20,6 +20,29 @@
             placeholder="Enter a valid phone number."
         />
         <div
+            v-else-if="objKey == 'whatsapp_phone'"
+            class="grid"
+        >
+            <Input.Primary
+                label="To enabled whatsapp message"
+                wrapperClass="w-[220px]"
+                type="tel"
+                v-model="configData[objKey]"
+                placeholder="ex: +88017xxxxxxxx"
+            />
+            <div class="p-2 mt-1 rounded-md max-w-md font-medium">
+                To get WhatsApp URL, Number use: <code class="bg-green-200 text-green-900 px-2 py-1 rounded">[whatsapp_url]</code> <code class="bg-green-200 text-green-900 px-2 py-1 rounded">[whatsapp_number]</code> shortcode
+            </div>
+        </div>
+        <Input.Primary
+            v-else-if="objKey == 'whatsapp_default_message' && configData['whatsapp_phone']"
+            label="Write a default message"
+            wrapperClass="w-[220px]"
+            type="tel"
+            v-model="configData[objKey]"
+            placeholder="ex: Hi! I’m interested"
+        />
+        <div
             v-else-if="objKey == 'validate_duplicate_order'"
             @click="handle_config_for_duplicate_order_validation(objKey)"
         >

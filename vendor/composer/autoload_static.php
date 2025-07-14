@@ -16,6 +16,7 @@ class ComposerStaticInit4bd325c6d539e219feefd4ea170fecd7
             'WooEasyLife\\Init\\' => 17,
             'WooEasyLife\\Includes\\' => 21,
             'WooEasyLife\\Frontend\\' => 21,
+            'WooEasyLife\\ElementorWidgets\\' => 29,
             'WooEasyLife\\CRUD\\' => 17,
             'WooEasyLife\\Admin\\' => 18,
             'WooEasyLife\\API\\' => 16,
@@ -35,6 +36,10 @@ class ComposerStaticInit4bd325c6d539e219feefd4ea170fecd7
         'WooEasyLife\\Frontend\\' => 
         array (
             0 => __DIR__ . '/../..' . '/frontend',
+        ),
+        'WooEasyLife\\ElementorWidgets\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/elementorWidgets',
         ),
         'WooEasyLife\\CRUD\\' => 
         array (

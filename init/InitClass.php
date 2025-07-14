@@ -135,6 +135,8 @@ class InitClass {
         // New default configuration (only new fields will be added)
         $new_config = [
             "admin_phone" => '',
+            "whatsapp_phone" => '',
+            "whatsapp_default_message" => 'Hi! I’m interested',
             "validate_duplicate_order" => false,
             "validate_checkout_form" => false,
             "place_order_otp_verification" => false,

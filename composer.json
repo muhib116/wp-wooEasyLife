@@ -10,6 +10,7 @@
             "WooEasyLife\\Includes\\": "includes/",
             "WooEasyLife\\API\\": "api/",
             "WooEasyLife\\Init\\": "init/",
+            "WooEasyLife\\ElementorWidgets\\": "elementorWidgets/",
             "WooEasyLife\\CRUD\\": "CRUD/"
         },
         "files": [

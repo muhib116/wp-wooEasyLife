@@ -151,8 +151,6 @@ if (!class_exists('WooEasyLife')) :
         private function initialize_components()
         {
             global $current_version;
-
-            // Initialize core plugin classes.
             new WooEasyLife\Init\BootClass();
             new WooEasyLife\API\API_Register();
             new WooEasyLife\Admin\Admin_Class_Register();

@@ -13,5 +13,6 @@ class Frontend_Class_Register{
         new CustomerHandler();
         new Remote_UsePackageHistory();
         new StoreCheckoutUrl();
+        new WhatsAppButton();
     }
 }
