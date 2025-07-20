@@ -72,6 +72,28 @@
                     🎉 The number has no data! ✅
                 </h3>
             </div>
+
+
+            <div class="px-4 pb-4">
+                <p class="text-gray-500 text-center text-sm mb-4">
+                    The success rate is calculated based on the confirmed and canceled orders.
+                </p>
+
+                <div
+                 class="p-4 bg-red-50 rounded-lg border border-red-400 whitespace-normal grid gap-1"
+                    v-for="(item, index) in data?.report?.frauds || []"
+                    :key="index"
+                >
+                    <h2><strong class="w-[45px] inline-block">Date:</strong> {{ printDate(item.created_at) }}</h2>
+                    <div class="flex items-center gap-4">
+                        <h2><strong class="w-[45px] inline-block">Name:</strong> {{ item.name }}</h2>
+                        <h2><strong class="w-[45px] inline-block">Phone:</strong> {{ item.phone }}</h2>
+                    </div>
+                    <h2 class="text-red-500 flex gap-2">
+                        <strong class="w-[45px] inline-block">Fraud:</strong>
+                        <div>{{ item.details }}</div></h2>
+                </div>
+            </div>
         </Card.Native>
     </div>
 </template>
@@ -80,6 +102,7 @@
     import { Table, Card } from '@components'
     import fraudCheckImg from './fraudCheckImg.vue'
     import FraudProgress from './FraudProgress.vue'
+    import { printDate } from '@/helper'
 
     withDefaults(
         defineProps<{

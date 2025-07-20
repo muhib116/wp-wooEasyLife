@@ -10,6 +10,8 @@ class StatusChangeAction {
     }
 
     public function handle_order_status_change($order_id, $old_status, $new_status) {
+        if($old_status == $new_status) return; // If status is unchanged, do nothing
+
         // Get the order object
         $order = wc_get_order($order_id);
 
