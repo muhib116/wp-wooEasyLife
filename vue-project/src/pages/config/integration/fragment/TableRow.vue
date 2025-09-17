@@ -51,6 +51,29 @@
                 disabled
             />
         </div>
+
+        <Input.Primary
+            v-else-if="objKey == 'pixel_id'"
+            wrapperClass="w-[220px]"
+            type="text"
+            v-model="configData[objKey]"
+            placeholder="Enter FB Pixel ID."
+        />
+        <Input.Primary
+            v-else-if="objKey == 'pixel_access_token'"
+            wrapperClass="w-[220px]"
+            type="text"
+            v-model="configData[objKey]"
+            placeholder="Enter FB Pixel Access Token."
+        />
+        <Input.Primary
+            v-else-if="objKey == 'pixel_test_event_code'"
+            wrapperClass="w-[220px]"
+            type="text"
+            v-model="configData[objKey]"
+            placeholder="Enter FB Pixel Test Event Code."
+        />
+
         <Input.Primary
             v-else-if="objKey == 'invoice_company_name'"
             wrapperClass="w-[220px]"

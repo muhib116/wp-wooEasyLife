@@ -1,4 +1,132 @@
 <?php
+/**
+ * Retrieves the most accurate IP address from the current visitor.
+ *
+ * This function is designed to be more secure against IP spoofing by checking a prioritized
+ * list of server variables and optionally trusting specific proxy IPs. It handles Cloudflare,
+ * common proxy headers, and falls back to REMOTE_ADDR.
+ *
+ * @return string|false The real IP address of the user, or false if it cannot be determined.
+ */
+function get_customer_ip() {
+    // Define a list of trusted proxy IP addresses. 
+    // This is crucial if your site is behind a reverse proxy (e.g., Varnish, Nginx).
+    // For most sites, especially those using Cloudflare, this can be left empty.
+    $trusted_proxies = [
+        // '192.168.1.1', // Example: Add your own proxy IP here if needed.
+    ];
+
+    // The IP address of the machine making the direct request to the server.
+    $remote_addr = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+
+    // 1. Check for Cloudflare's IP header first - this is highly reliable.
+    if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        $ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_CF_CONNECTING_IP']));
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
+    }
+
+    // 2. Check for X-Forwarded-For header.
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $forwarded_ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR']));
+        $ip_chain = array_map('trim', explode(',', $forwarded_ip));
+        
+        // The first IP in the chain is the original client IP.
+        $client_ip = $ip_chain[0];
+
+        // Trust the X-Forwarded-For header ONLY IF:
+        // a) The direct connection is from a trusted proxy, OR
+        // b) We are not configured with any trusted proxies (common scenario for shared hosting).
+        if (filter_var($client_ip, FILTER_VALIDATE_IP) && (empty($trusted_proxies) || in_array($remote_addr, $trusted_proxies, true))) {
+            return $client_ip;
+        }
+    }
+
+    // 3. Check for other common proxy headers.
+    if (isset($_SERVER['HTTP_X_REAL_IP'])) {
+        $ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_REAL_IP']));
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
+    }
+    
+    if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_CLIENT_IP']));
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
+    }
+
+    // 4. If all else fails, fall back to REMOTE_ADDR.
+    // This is the least reliable when behind a proxy but the only option if headers are missing.
+    if (filter_var($remote_addr, FILTER_VALIDATE_IP)) {
+        return $remote_addr;
+    }
+
+    return false; // Return false if no valid IP could be found.
+}
+
+if (!function_exists('is_bangladeshi_ip')) {
+    /**
+     * Checks if a given IP address originates from Bangladesh using a geolocation API.
+     *
+     * This function caches results for 12 hours using WordPress Transients to minimize API calls.
+     * It handles localhost/development environments by treating them as valid.
+     *
+     * @param string|null $ip_address The IP address to check. If null, it automatically detects the current user's IP.
+     * @return bool True if the IP is determined to be from Bangladesh, false otherwise.
+     */
+    function is_bangladeshi_ip($ip_address = null) {
+        // If no IP is provided, get the current user's real IP address.
+        if (null === $ip_address) {
+            $ip_address = get_customer_ip();
+        }
+
+        // If we still don't have a valid IP, we cannot proceed.
+        if (!$ip_address) {
+            return false;
+        }
+
+        // Always allow localhost for development purposes.
+        if (in_array($ip_address, ['127.0.0.1', '::1'])) {
+            return true;
+        }
+
+        // Create a unique cache key for the IP address.
+        $cache_key = 'geo_ip_' . md5($ip_address);
+        
+        // Try to get the country code from the cache first.
+        $country_code = get_transient($cache_key);
+
+        if (false === $country_code) {
+            // If not found in cache, call the geolocation API.
+            $api_url = "http://ip-api.com/json/{$ip_address}";
+            $response = wp_safe_remote_get($api_url);
+
+            if (is_wp_error($response)) {
+                error_log('WooEasyLife GeoIP API Error: ' . $response->get_error_message());
+                return false; // Fail safely if the API is unreachable.
+            }
+
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+
+            // Validate the API response and extract the country code.
+            if (isset($data['status']) && $data['status'] === 'success' && isset($data['countryCode'])) {
+                $country_code = $data['countryCode'];
+                // Store the valid result in the cache for 12 hours.
+                set_transient($cache_key, $country_code, 12 * HOUR_IN_SECONDS);
+            } else {
+                error_log('WooEasyLife GeoIP API Invalid Response for IP ' . $ip_address);
+                return false; // Fail safely on an invalid API response.
+            }
+        }
+
+        // Return true only if the country code is 'BD'.
+        return ($country_code === 'BD');
+    }
+}
+
 function api_permission_check () {
     $server_ip = $_SERVER['SERVER_ADDR'];
     if ($server_ip === '127.0.0.1' || $server_ip === '::1') {
@@ -199,9 +327,14 @@ function getCustomerSuccessRate($billing_phone) {
     if ($fraud_data && isset($fraud_data['report'])) {
         // Decode the JSON report
         $report = json_decode($fraud_data['report'], true);
-        $success_rate = $report[0]['report']['success_rate'];
+        if (
+            is_array($report) &&
+            isset($report[0]['report']['success_rate'])
+        ) {
+            $success_rate = $report[0]['report']['success_rate'];
+            return $success_rate;
+        }
 
-        return $success_rate;
     }
 
     return 'No data found.';
@@ -335,6 +468,7 @@ function validateAndFormatPhoneNumber($phone) {
 }
 
 function validate_BD_phoneNumber($phoneNumber) {
+    if(empty($phoneNumber)) return false;
     // Remove spaces and non-numeric characters except for "+"
     $phoneNumber = preg_replace('/[^\d+]/', '', $phoneNumber);
 

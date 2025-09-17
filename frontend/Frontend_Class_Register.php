@@ -14,5 +14,6 @@ class Frontend_Class_Register{
         new Remote_UsePackageHistory();
         new StoreCheckoutUrl();
         new WhatsAppButton();
+        new CookieOrderLimiter();
     }
 }

@@ -37,12 +37,16 @@ class OrderBlockForBlockedUser {
         $phone_block_listed = get_block_data_by_type($normalized_phone, 'phone_number');
 
         if($phone_block_listed){
-            throw new \Exception(
-                sprintf(
-                    __('Your phone number <strong style=\"font-weight:bold;color: #508ef5;\">%s</strong> is restricted and cannot be used to place an order. Please contact our support team for assistance.', 'your-text-domain'),
-                    esc_html($normalized_phone)
-                )
+            $error_message = sprintf(
+            __('আপনার ফোন নম্বর <strong style="font-weight:bold;color: #508ef5;">%s</strong> ব্লক করা হয়েছে এবং এটি ব্যবহার করে আপনি অর্ডার করতে পারবেন না। সহায়তার জন্য অনুগ্রহ করে আমাদের সাপোর্ট টিমের সাথে যোগাযোগ করুন।', 'your-text-domain'),
+                esc_html($normalized_phone)
             );
+
+            if ($admin_phone) {
+                $error_message .= ' যোগাযোগের জন্য কল করুন: <a href="tel:'.$admin_phone.'">'.$admin_phone.'</a>.';
+            }
+
+            throw new \Exception($error_message);
         }
     }
 
@@ -50,29 +54,40 @@ class OrderBlockForBlockedUser {
         $email_block_listed = get_block_data_by_type($billing_email, 'email');
 
         if($email_block_listed){
-            throw new \Exception(
-                sprintf(
-                    __('Your email address <strong style=\"font-weight:bold;color: #508ef5;\">%s</strong> is restricted and cannot be used to place an order. Please contact our support team for assistance.', 'your-text-domain'),
-                    esc_html($billing_email)
-                )
+            $error_message = sprintf(
+                __('আপনার ইমেইল এড্ড্রেস <strong style="font-weight:bold;color: #508ef5;">%s</strong> ব্লক করা হয়েছে এবং এটি ব্যবহার করে আপনি অর্ডার করতে পারবেন না। সহায়তার জন্য অনুগ্রহ করে আমাদের সাপোর্ট টিমের সাথে যোগাযোগ করুন।', 'your-text-domain'),
+                esc_html($billing_email)
             );
+
+            if ($admin_phone) {
+                $error_message .= ' যোগাযোগের জন্য কল করুন: <a href="tel:'.$admin_phone.'">'.$admin_phone.'</a>.';
+            }
+
+            throw new \Exception($error_message);
         }
     }
     
     private function check_ip_block(){
+        global $config_data;
+        $admin_phone = $config_data['admin_phone'] ?? '';
         // Get the customer's IP address
-        $customer_ip = sanitize_text_field($_SERVER['REMOTE_ADDR']);
-    
+        $customer_ip = get_customer_ip();
+        
         // Check if the IP is block-listed
         $ip_block_listed = get_block_data_by_type($customer_ip, 'ip');
 
         if($ip_block_listed){
-            throw new \Exception(
-                sprintf(
-                    __('Your IP address <strong style=\"font-weight:bold;color: #508ef5;\">%s</strong> is restricted and cannot be used to place an order. Please contact our support team for assistance.', 'your-text-domain'),
-                    esc_html($customer_ip)
-                )
+            $error_message = sprintf(
+            __('আপনার আইপি এড্রেস <strong style="font-weight:bold;color: #508ef5;">%s</strong> ব্লক করা হয়েছে এবং এটি ব্যবহার করে আপনি অর্ডার করতে পারবেন না। সহায়তার জন্য অনুগ্রহ করে আমাদের সাপোর্ট টিমের সাথে যোগাযোগ করুন।', 'your-text-domain'),
+                esc_html($customer_ip)
             );
+
+            if ($admin_phone) {
+                $error_message .= ' যোগাযোগের জন্য কল করুন: <a href="tel:'.$admin_phone.'">'.$admin_phone.'</a>.';
+            }
+
+            throw new \Exception($error_message);
+
         }
     }
 }
