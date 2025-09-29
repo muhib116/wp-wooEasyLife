@@ -11,12 +11,12 @@ export const storeBulkRecordsInToOrdersMeta =  async (payload: {
     recipient_address: string
     cod_amount: number | string
     partner: string
-    consignment_id: string
     status: string
-    tracking_code: string
-    parcel_tracking_link: string | null
-    created_at: string
-    updated_at: string
+    consignment_id?: string
+    tracking_code?: string
+    parcel_tracking_link?: string | null
+    created_at?: string
+    updated_at?: string
 }[]) => {
     const { data } = await axios.post(`${localApiBaseURL}/courier-data/bulk`, payload)
     return data

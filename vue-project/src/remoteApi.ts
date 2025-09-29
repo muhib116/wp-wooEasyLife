@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createSMSHistory } from "./api";
+import { createSMSHistory, updateLicenseStatus } from "./api";
 import { computed } from "vue";
 import { normalizePhoneNumber } from "./helper";
 import {
@@ -220,6 +220,7 @@ export const getUser = async () => {
       headers.value
     );
     isValidLicenseKey.value = true
+    await updateLicenseStatus('valid'); // <-- সফল হলে 'valid' স্ট্যাটাস পাঠান
     return data;
   } catch (err) {
     handleLicenseValidations(err)
@@ -246,18 +247,21 @@ const handleLicenseClean = () => {
   return 
 }
 
-const handleLicenseValidations = (err) => 
+const handleLicenseValidations = async (err) => 
 {
   const msg = err.response?.data?.message.replace('.', '').trim()
+  let statusToStore: 'expired' | 'invalid' | 'unauthenticated' = 'invalid'
 
   if(msg == 'Invalid domain' || msg == 'Invalid Token') {
     handleLicenseClean()
+    statusToStore = 'invalid'
     handleRedirect(err.response.status)
     return 
   }
   
   switch (msg) {
     case 'Expired': 
+      statusToStore = 'expired'
       licenseAlertMessage.value = {
         message: `
           <strong style="font-size: 18px;">Your License Key Has Expired!</strong>
@@ -271,6 +275,7 @@ const handleLicenseValidations = (err) =>
     break;
 
     case 'Invalid Token':
+      statusToStore = 'invalid'
       licenseAlertMessage.value = {
         message: `
           <strong style="font-size: 18px;">Invalid License!</strong>
@@ -285,6 +290,7 @@ const handleLicenseValidations = (err) =>
 
     case 'Unauthenticated':
     case 'Token not found': 
+      statusToStore = 'unauthenticated'
       licenseAlertMessage.value = {
         message: `
           <strong style="font-size: 18px;">License key not found!</strong>
@@ -299,6 +305,7 @@ const handleLicenseValidations = (err) =>
     break;
 
     default:
+      statusToStore = 'invalid'
       // Optional: Handle unexpected cases
       licenseAlertMessage.value = {
         message: `
@@ -313,6 +320,7 @@ const handleLicenseValidations = (err) =>
     break;
   }
 
+  await updateLicenseStatus(statusToStore); // <-- ব্যর্থ হলে স্ট্যাটাস পাঠান
   handleRedirect(err.response.status)
 }
 

@@ -10,6 +10,10 @@ class OTPValidatorForOrderPlace
 
     function __construct()
     {
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }
+
         $this->option_data = get_option(__PREFIX . 'config');
         add_filter('woocommerce_order_button_html', [$this, 'customize_place_order_button'], 30);
         add_filter('woocommerce_checkout_order_button_text', [$this, 'change_order_button_text'], 15);
@@ -68,6 +72,12 @@ class OTPValidatorForOrderPlace
     public function pushPopupTemplateToAfterCheckoutForm()
     {
         global $config_data;
+
+        // Don't run this for non-admins.
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
+        
         // Separate the 'place_order_otp_verification' data
         $place_order_otp_verification = $config_data['place_order_otp_verification'] ?? null;
 

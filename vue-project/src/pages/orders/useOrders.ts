@@ -19,10 +19,11 @@ import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
 import { isEmpty } from "lodash";
+import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
 
 export const useOrders = () => {
   const orders = ref([]);
-  const shippingMethods = ref(null)
+  const shippingMethods = ref(null);
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
   const activeOrder = ref();
@@ -36,17 +37,13 @@ export const useOrders = () => {
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
-  const { userData, loadUserData } = inject('useServiceProvider')
+  const { userData, loadUserData } = inject('useServiceProvider');
   const courierStatusInfo = {
     pending: "Consignment is not delivered or cancelled yet.",
-    delivered_approval_pending:
-      "Consignment is delivered but waiting for admin approval.",
-    partial_delivered_approval_pending:
-      "Consignment is delivered partially and waiting for admin approval.",
-    cancelled_approval_pending:
-      "Consignment is cancelled and waiting for admin approval.",
-    unknown_approval_pending:
-      "Unknown Pending status. Need contact with the support team.",
+    delivered_approval_pending: "Consignment is delivered but waiting for admin approval.",
+    partial_delivered_approval_pending: "Consignment is delivered partially and waiting for admin approval.",
+    cancelled_approval_pending: "Consignment is cancelled and waiting for admin approval.",
+    unknown_approval_pending: "Unknown Pending status. Need contact with the support team.",
     delivered: "Consignment is delivered and balance added.",
     partial_delivered: "Consignment is partially delivered and balance added.",
     cancelled: "Consignment is cancelled and balance updated.",
@@ -61,6 +58,49 @@ export const useOrders = () => {
     status: "",
     search: "",
   });
+
+  // --- START: New code for DSP Filter ---
+  const selectedDspFilter = ref(0); // Default to 'All' (0)
+  const dspFilterOptions = ref([
+    { label: 'All Probabilities', value: 0 },
+    { label: '>= 90%', value: 90 },
+    { label: '>= 80%', value: 80 },
+    { label: '>= 70%', value: 70 },
+    { label: '>= 60%', value: 60 },
+    { label: '>= 50%', value: 50 },
+  ]);
+
+  const getDeliveryProbability = (order) => {
+    let successRate = order?.customer_report?.success_rate;
+    if (isNaN(parseFloat(successRate))) {
+      successRate = '0';
+    }
+    const courierSuccessRate = parseFloat(successRate.replace('%', '')) || 0;
+    const systemFraudScore = parseFloat(order?.customer_custom_data?.fraud_score) || 0;
+    let probability = courierSuccessRate / 100;
+    if (systemFraudScore > 80) probability *= 0.5;
+    else if (systemFraudScore > 50) probability *= 0.7;
+    else if (systemFraudScore > 20) probability *= 0.9;
+    probability = Math.max(0, Math.min(probability * 100, 100));
+    return Math.round(probability) || 'Unpredicted';
+  }
+
+  const filteredOrders = computed(() => {
+    if (selectedDspFilter.value === 0) {
+      return orders.value; // If 'All' is selected, return all orders.
+    }
+    if (!orders.value || orders.value.length === 0) {
+      return [];
+    }
+    return orders.value.filter(order => {
+      const probability = getDeliveryProbability(order);
+      if (typeof probability !== 'number') {
+        return false;
+      }
+      return probability >= selectedDspFilter.value;
+    });
+  });
+  // --- END: New code for DSP Filter ---
 
   const setActiveOrder = (item) => {
     activeOrder.value = item;
@@ -96,60 +136,33 @@ export const useOrders = () => {
       alert("Please select at least one item.");
       return;
     }
-
     const _selectedOrders = [...selectedOrders.value];
-    const chunkSize = 10; // Process 10 orders at a time
+    const chunkSize = 10;
     const orderChunks = [];
-
-    // Step 1: Slice `_selectedOrders` into chunks of 10
     for (let i = 0; i < _selectedOrders.length; i += chunkSize) {
       orderChunks.push(_selectedOrders.slice(i, i + chunkSize));
     }
-
-    // Step 2 & 3: Process each chunk sequentially
     const processChunks = async (index = 0) => {
-      if (index >= orderChunks.length) return; // Stop when all chunks are processed
-
-      // Enable `fraudDataLoading` for orders in this chunk
-      orderChunks[index].forEach((item) => {
-        item.fraudDataLoading = true;
-      });
-
-      const payload = {
-        data: orderChunks[index].map((item) => ({
-          id: item.id, // ID for tracking report data
-          phone: normalizePhoneNumber(item.billing_address.phone),
-        })),
-      };
-
+      if (index >= orderChunks.length) return;
+      orderChunks[index].forEach((item) => { item.fraudDataLoading = true; });
+      const payload = { data: orderChunks[index].map((item) => ({ id: item.id, phone: normalizePhoneNumber(item.billing_address.phone) })) };
       try {
         const { data } = await checkFraudCustomer(payload);
-
         if (data.length) {
           data.forEach((item) => {
-            _selectedOrders.forEach((_item) => {
-              if (item.id === _item.id) {
-                _item.customer_report = item.report;
-              }
-            });
+            _selectedOrders.forEach((_item) => { if (item.id === _item.id) _item.customer_report = item.report; });
           });
         }
       } catch (error) {
         console.error("API Error:", error);
       } finally {
-        // Disable `fraudDataLoading` after API response
-        orderChunks[index].forEach((item) => {
-          item.fraudDataLoading = false;
-        });
+        orderChunks[index].forEach((item) => { item.fraudDataLoading = false; });
       }
-
-      // Process the next chunk
       await processChunks(index + 1);
     };
-
     try {
       button.isLoading = true;
-      await processChunks(); // Start processing the chunks
+      await processChunks();
     } finally {
       button.isLoading = false;
     }
@@ -159,37 +172,27 @@ export const useOrders = () => {
     try {
       isLoading.value = true;
       orderListLoading.value = true;
-      if (orderFilter.value.page == 0) {
-        orderFilter.value.page = 1;
-      }
+      if (orderFilter.value.page == 0) orderFilter.value.page = 1;
       const { data, total } = await getOrderList(orderFilter.value);
       orders.value = data;
       totalRecords.value = total;
-      if (shouldClear) {
-        selectedOrders.value.clear();
-      }
+      if (shouldClear) selectedOrders.value.clear();
     } finally {
       isLoading.value = false;
       orderListLoading.value = false;
     }
   };
 
-  const handleUpdateShippingMethod = async (payload: {
-    shipping_instance_id: string | number
-    order_id: string | number
-  }) => {
+  const handleUpdateShippingMethod = async (payload: { shipping_instance_id: string | number; order_id: string | number; }) => {
     try {
       isLoading.value = true;
       isShippingEditing.value = true;
-      await updateShippingMethod(payload)
-      await getOrders()
-      showNotification({
-        type: 'success',
-        message: 'Shipping method updated.'
-      })
+      await updateShippingMethod(payload);
+      await getOrders();
+      showNotification({ type: 'success', message: 'Shipping method updated.' });
     } finally {
-      isShippingEditing.value = false
-      isShippingEditable.value = false
+      isShippingEditing.value = false;
+      isShippingEditable.value = false;
       isLoading.value = false;
     }
   }
@@ -211,38 +214,6 @@ export const useOrders = () => {
     isLoading.value = false;
   };
 
-  const getDeliveryProbability = (order) => {
-    // Get success rate and ensure it's a valid number
-    let successRate = order?.customer_report?.success_rate;
-
-    if (isNaN(parseFloat(successRate))) {
-      successRate = '0'; // Default to 0% if it's an invalid value
-    }
-
-    // Remove '%' if present and parse it as a float
-    const courierSuccessRate = parseFloat(successRate.replace('%', '')) || 0;
-
-    // Ensure fraud score is a number
-    const systemFraudScore = parseFloat(order?.customer_custom_data?.fraud_score) || 0;
-
-    // Normalize success rate to a 0-1 scale
-    let probability = courierSuccessRate / 100;
-
-    // Adjust probability based on fraud score
-    if (systemFraudScore > 80) {
-      probability *= 0.5; // High fraud risk, reduce probability significantly
-    } else if (systemFraudScore > 50) {
-      probability *= 0.7; // Medium fraud risk, moderate reduction
-    } else if (systemFraudScore > 20) {
-      probability *= 0.9; // Low fraud risk, slight reduction
-    }
-
-    // Ensure probability stays within 0-100%
-    probability = Math.max(0, Math.min(probability * 100, 100));
-
-    return Math.round(probability) || 'Unpredicted'; // Return probability as a rounded percentage
-  }
-
   const handleFilter = async (status: string, btn) => {
     try {
       btn.isLoading = true
@@ -258,16 +229,7 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-
-    const payload: {
-      customer_id: string | number;
-      type: "phone_number";
-      ip_phone_or_email: string;
-    }[] = [...selectedOrders.value].map((item) => ({
-      type: "phone_number",
-      ip_phone_or_email: item?.billing_address?.phone,
-    }));
-
+    const payload = [...selectedOrders.value].map((item) => ({ type: "phone_number", ip_phone_or_email: item?.billing_address?.phone }));
     try {
       btn.isLoading = true;
       await ip_phone_or_email_block_bulk_entry(payload);
@@ -282,16 +244,7 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-
-    const payload: {
-      customer_id: string | number;
-      type: "email";
-      ip_phone_or_email: string;
-    }[] = [...selectedOrders.value].map((item) => ({
-      type: "email",
-      ip_phone_or_email: item?.billing_address?.email,
-    }));
-
+    const payload = [...selectedOrders.value].map((item) => ({ type: "email", ip_phone_or_email: item?.billing_address?.email }));
     try {
       btn.isLoading = true;
       await ip_phone_or_email_block_bulk_entry(payload);
@@ -306,16 +259,7 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-
-    const payload: {
-      customer_id: string | number;
-      type: "ip";
-      ip_phone_or_email: string;
-    }[] = [...selectedOrders.value].map((item) => ({
-      type: "ip",
-      ip_phone_or_email: item?.customer_ip,
-    }));
-
+    const payload = [...selectedOrders.value].map((item) => ({ type: "ip", ip_phone_or_email: item?.customer_ip }));
     try {
       btn.isLoading = true;
       await ip_phone_or_email_block_bulk_entry(payload);
@@ -330,21 +274,12 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-
     if (!selectedStatus.value) {
       alert("Please select status from dropdown.");
     }
-
     try {
       btn.isLoading = true;
-      const payload: {
-        order_id: number;
-        new_status: string;
-      }[] = [...selectedOrders.value].map((item) => ({
-        new_status: selectedStatus.value,
-        order_id: item?.id,
-      }));
-
+      const payload = [...selectedOrders.value].map((item) => ({ new_status: selectedStatus.value, order_id: item?.id }));
       await changeStatus(payload);
       loadOrderStatusList();
       await getOrders();
@@ -361,124 +296,101 @@ export const useOrders = () => {
       return;
     }
 
+    if ([...selectedOrders.value].length > 500 && courierPartner == 'steadfast') {
+      showNotification({
+        type: 'warning',
+        message: 'Maximum 500 items are allowed.'
+      })
+    }
+
     try {
       btn.isLoading = true;
       await manageCourier(selectedOrders, courierPartner, async () => {
         await loadOrderStatusList();
         await getOrders();
-        showNotification({
-          type: "success",
-          message: "Your order information has been submitted to the courier platform.",
-        })
+        showNotification({ type: "success", message: "Your order information has been submitted to the courier platform." });
       });
     } catch ({ response }) {
       const { status, message } = response?.data;
       if (!status) {
-        showNotification({
-          type: "warning",
-          message: message,
-        })
+        showNotification({ type: "warning", message: message });
       }
     } finally {
       btn.isLoading = false;
     }
   };
 
-  const refreshBulkCourierData = async (btn) => {
+  const refreshBulkCourierData = async (btn, courierPartner = 'steadfast') => {
     try {
       btn.isLoading = true;
-      let courierData = selectedOrders.value?.size
-        ? [...selectedOrders.value]
-        : orders.value;
-      courierData = courierData.filter((item) => !isEmpty(item.courier_data));
+      let courierData = selectedOrders.value?.size ? [...selectedOrders.value] : orders.value;
 
-      const consignment_ids = courierData.map(
-        (item) => item.courier_data.consignment_id
-      );
-      const payload = {
-        consignment_ids: consignment_ids,
-      };
-
-      if (!consignment_ids?.length) {
-        showNotification({
-          type: "warning",
-          message: "There is no data available to refresh."
-        })
-        return
+      if (![...selectedOrders.value]?.length) {
+        courierData = courierData.filter((item) => !isEmpty(item.courier_data));
       }
 
-      // status: {consignment_id: string}
+      const ids = courierData.map((item) => {
+        return item.id // order id == steadfast invoice id
+        // return item.courier_data.consignment_id
+      });
+
+      // const payload = { consignment_ids: ids };
+      const payload = { invoice_ids: ids };
+
+      if (!ids?.length) {
+        showNotification({ type: "warning", message: "There is no data available to refresh." });
+        return
+      }
       const { data: statuses } = await steadfastBulkStatusCheck(payload);
 
       orders.value.forEach(async (order) => {
-        let orderConsignmentId = order.courier_data.consignment_id;
-        let courierUpdatedStatus = statuses[orderConsignmentId];
+        let orderId = order.id;
+        let courierUpdatedStatus = statuses[orderId]; // courier invoice id == order id
 
+        // manageCourier
         if (courierUpdatedStatus) {
-          order.courier_data.status = courierUpdatedStatus;
-
-          const { data } = await updateCourierData({
-            order_id: order.id,
-            courier_data: order.courier_data,
-          });
-
-          let statusName = get_status(courierUpdatedStatus)
-          try {
-            await changeStatus([{
+          /**
+           * if by chance any courier entry data missed to save in db then it resolved it
+           */
+          if(!order.courier_data?.consignment_id) 
+          {
+            storeBulkRecordsInToOrdersMeta([{
               order_id: order.id,
-              new_status: statusName,
-            }]);
+              invoice: order.id,
+              recipient_name: order.customer_custom_data.first_name + order.customer_custom_data.last_name,
+              recipient_phone: order.customer_custom_data.phone,
+              recipient_address: order.customer_custom_data.address,
+              cod_amount: order.product_info.total_price_after_cut_discount,
+              partner: courierPartner,
+              status: courierUpdatedStatus
+            }])
+          
+            await loadOrderStatusList();
+            await getOrders();
+            showNotification({ type: "success", message: "Order data synced with courier platform." });
 
-            order.status = statusName.replace('wc-', '')
+            return;
+          }
+
+          order.courier_data.status = courierUpdatedStatus;
+          await updateCourierData({ order_id: order.id, courier_data: order.courier_data });
+          let statusName = get_status(courierUpdatedStatus);
+          try {
+            await changeStatus([{ order_id: order.id, new_status: statusName }]);
+            order.status = statusName.replace('wc-', '');
           } catch (err) {
-            console.error(err)
+            console.error(err);
           }
         }
-      })
-
-      showNotification({
-        type: "success",
-        message: "Courier data refresh done."
-      })
+      });
+      showNotification({ type: "success", message: "Courier data refresh done." });
     } finally {
       btn.isLoading = false;
     }
   };
 
   const get_status = (courier_status: string): string => {
-    /**
-     * Name             Description
-     * --------------------------------------
-     * pending: Consignment is not delivered or cancelled yet.
-     * delivered_approval_pending: Consignment is delivered but waiting for admin approval.
-     * partial_delivered_approval_pending: Consignment is delivered partially and waiting for admin approval.
-     * cancelled_approval_pending: Consignment is cancelled and waiting for admin approval.
-     * unknown_approval_pending: Unknown Pending status. Need contact with the support team.
-     * -delivered: Consignment is delivered and balance added.
-     * -partial_delivered: Consignment is partially delivered and balance added.
-     * -cancelled: Consignment is cancelled and balance updated.
-     * -hold: Consignment is held.
-     * -in_review: Order is placed and waiting to be reviewed.
-     * -unknown: Unknown status. Need contact with the support team.
-     */
-    const statuses: {
-      in_review: string;
-      pending: string;
-      cancelled: string;
-      delivered_approval_pending: string;
-      delivered: string;
-      hold: string;
-      unknown: string;
-      cancelled_approval_pending: string;
-    } = {
-      in_review: "wc-courier-entry",
-      pending: "wc-courier-hand-over",
-      cancelled: "wc-returned",
-      unknown: "wc-unknown",
-      delivered_approval_pending: "wc-pending",
-      delivered: "wc-completed",
-      hold: "wc-on-hold",
-    };
+    const statuses = { in_review: "wc-courier-entry", pending: "wc-courier-hand-over", cancelled: "wc-returned", unknown: "wc-unknown", delivered_approval_pending: "wc-pending", delivered: "wc-completed", hold: "wc-on-hold" };
     return statuses[courier_status];
   }
 
@@ -486,17 +398,11 @@ export const useOrders = () => {
     const isDone = Number(!Number(order.is_done));
     if (!isDone && !confirm('Are sure to make this undone?')) return
     btn.isLoading = true;
-
     const payload = { order_id: order.id, is_done: isDone };
-
     try {
       await toggleIsDone(payload);
       order.is_done = isDone;
-
-      showNotification({
-        type: isDone ? 'success' : 'warning',
-        message: `Marked as ${isDone ? 'done!' : 'undone'}`,
-      });
+      showNotification({ type: isDone ? 'success' : 'warning', message: `Marked as ${isDone ? 'done!' : 'undone'}` });
     } catch (err) {
       console.error(err);
       showNotification({ type: 'danger', message: 'Something went wrong!' });
@@ -506,46 +412,25 @@ export const useOrders = () => {
   }
 
   const handleUpdateOrder = async (product, btn) => {
-    const payload: {
-      order_id: number | string
-      product_id: number | string
-      quantity: number
-    } = {
-      order_id: activeOrder.value.id,
-      product_id: product.id,
-      quantity: product.product_quantity
-    }
-
+    const payload = { order_id: activeOrder.value.id, product_id: product.id, quantity: product.product_quantity };
     try {
       btn.isLoading = true
-
       if (product.from == 'new-product') {
-        payload.quantity++
-        product.product_quantity = payload.quantity
+        payload.quantity++;
+        product.product_quantity = payload.quantity;
       }
-
-      const response = await updateOrder(payload)
-      if (response) {
-        /**
-         * if user set quantity to 0, then remove the item from product list,
-         * after removing this product from order in DB
-         * updateOrder function remove the product from order if quant set to 0
-         */
-        activeOrder.value.product_info = response
-      }
-
-      getOrders()
+      const response = await updateOrder(payload);
+      if (response) activeOrder.value.product_info = response;
+      getOrders();
     } catch (err) {
-      console.error(err)
+      console.error(err);
     } finally {
-      btn.isLoading = false
+      btn.isLoading = false;
     }
   }
 
   let timeoutId: any;
-  const totalPages = computed(() =>
-    orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1
-  )
+  const totalPages = computed(() => orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1);
   const debouncedGetOrders = (btn) => {
     orderFilter.value.page = orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
     clearTimeout(timeoutId)
@@ -555,10 +440,9 @@ export const useOrders = () => {
       btn.isLoading = false
     }, 500)
   }
-  // Pagination logic
-  const currentPage = computed(() =>
-    orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
-  )
+
+  const currentPage = computed(() => orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page);
+
 
   const include_past_new_orders_thats_not_handled_by_wel_plugin = async (totalNewOrders: number, btn: { isLoading: boolean }) => {
     let alertMsg = `Are you sure you want to include your past new orders? \nIf you confirm, a total of ${totalNewOrders} will be deducted from your balance.`;
@@ -655,15 +539,7 @@ export const useOrders = () => {
     }
   }
 
-  watch(
-    () => selectedOrders,
-    (newVal) => {
-      selectAll.value = selectedOrders.value.size === orders.value.length;
-    },
-    {
-      deep: true,
-    }
-  );
+  watch(() => selectedOrders, (newVal) => { selectAll.value = selectedOrders.value.size === orders.value.length; }, { deep: true });
 
   onMounted(async () => {
     loadOrderStatusList();
@@ -673,45 +549,8 @@ export const useOrders = () => {
   });
 
   return {
-    orders,
-    selectAll,
-    isLoading,
-    totalPages,
-    currentPage,
-    activeOrder,
-    orderFilter,
-    showInvoices,
-    totalRecords,
-    toggleNewOrder,
-    selectedStatus,
-    selectedOrders,
-    shippingMethods,
-    orderListLoading,
-    courierStatusInfo,
-    isShippingEditable,
-    isShippingEditing,
-    wooCommerceStatuses,
-    orderStatusWithCounts,
-    getOrders,
-    markAsDone,
-    handleFilter,
-    handleIPBlock,
-    setActiveOrder,
-    setSelectedOrder,
-    toggleSelectAll,
-    handleFraudCheck,
-    handleEmailBlock,
-    handleUpdateOrder,
-    handleStatusChange,
-    debouncedGetOrders,
-    handleCourierEntry,
-    loadOrderStatusList,
-    clearSelectedOrders,
-    handlePhoneNumberBlock,
-    refreshBulkCourierData,
-    getDeliveryProbability,
-    handleUpdateShippingMethod,
-    include_balance_cut_failed_new_orders,
-    include_past_new_orders_thats_not_handled_by_wel_plugin,
+    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditable, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
+    // Export new properties
+    selectedDspFilter, dspFilterOptions, filteredOrders
   };
 };

@@ -20,6 +20,26 @@
             </button>
         </div>
 
+        <!-- START: New DSP Filter for Mobile -->
+        <div class="border px-4 py-2 rounded mb-1">
+            <label class="flex justify-between items-center text-black text-[16px] font-semibold">
+                Filter by Probability
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none text-sm font-light"
+                    v-model="selectedDspFilter"
+                >
+                    <option
+                        v-for="option in dspFilterOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </option>
+                </select>
+            </label>
+        </div>
+        <!-- END: New DSP Filter for Mobile -->
+
         <div class="border px-4 py-2 rounded mb-1">
             <div
                 class="flex justify-between items-center text-black text-[16px] font-semibold"
@@ -66,7 +86,6 @@
                 </template>
             </div>
         </div>
-
         
         <TableHeaderAction
             class="flex-col bg-red-50 w-full [&>*]:w-full [&>*>*]:w-full [&>*]:text-[16px]"
@@ -76,19 +95,18 @@
 </template>
 
 <script setup lang="ts">
-import {
-    Icon,
-} from '@components'
+import { Icon, Loader } from '@components'
 import { inject, ref } from 'vue'
 import TableHeaderAction from '@/pages/orders/fragments/TableHeaderAction.vue'
-import { Loader } from '@/components';
 
 const {
     orderStatusWithCounts,
     orderFilter,
     handleFilter,
     totalRecords,
-    isLoading
+    isLoading,
+    selectedDspFilter,
+    dspFilterOptions,
 } = inject('useOrders')
 
 const toggleStatus = ref(false)

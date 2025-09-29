@@ -12,6 +12,10 @@ class StatusChangeAction {
     public function handle_order_status_change($order_id, $old_status, $new_status) {
         if($old_status == $new_status) return; // If status is unchanged, do nothing
 
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }
+
         // Get the order object
         $order = wc_get_order($order_id);
 

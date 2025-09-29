@@ -50,7 +50,7 @@
             class="opacity-100 w-full text-white bg-sky-500 shadow rounded-sm truncate px-2 md:px-1 py-1"
             title="Refresh CourierData"
             @onClick="async (btn) => {
-                await refreshBulkCourierData(btn)
+                await handleCourierDataRefresh(btn)
                 $emit('close')
             }"
         >
@@ -81,6 +81,7 @@
         handleCourierEntry,
         clearSelectedOrders,
         setSelectedOrder,
+        selectedOrders,
         refreshBulkCourierData
     } = inject('useOrders')
     
@@ -96,6 +97,16 @@
             clearSelectedOrders()
             setSelectedOrder(props.order)
         }
+
        await handleCourierEntry(partnerName, btn)
+    }
+
+    const handleCourierDataRefresh = async (btn) => {
+        if(props.order) {
+            clearSelectedOrders()
+            setSelectedOrder(props.order)
+        }
+        await refreshBulkCourierData(btn)
+        setSelectedOrder(props.order)
     }
 </script>

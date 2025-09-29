@@ -67,6 +67,11 @@ function get_customer_ip() {
     return false; // Return false if no valid IP could be found.
 }
 
+function is_wel_license_valid() {
+    $license_status = get_option('woo_easy_life_license_status', 'invalid');
+    return ($license_status === 'valid');
+}
+
 if (!function_exists('is_bangladeshi_ip')) {
     /**
      * Checks if a given IP address originates from Bangladesh using a geolocation API.

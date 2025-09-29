@@ -19,9 +19,14 @@ class IP_block {
         }
 
         global $config_data;
-    
+
+        
         if ($config_data['only_bangladeshi_ip'] ?? false) 
         {
+            if (!is_wel_license_valid()) {
+                return; // Exit the *current* function if the license is not valid.
+            }
+
             $user_ip = get_customer_ip(); 
             
             if (!$user_ip) {

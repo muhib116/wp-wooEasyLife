@@ -9,6 +9,10 @@ class OrderBlockForBlockedUser {
 
     public function phone_number_block() {
         global $config_data;
+        
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }  
 
         // Retrieve data sent via AJAX
         $billing_phone = isset( $_POST['billing_phone'] ) ? sanitize_text_field( $_POST['billing_phone'] ) : '';

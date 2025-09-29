@@ -23,8 +23,8 @@
             />
 
             <MessageBox
-                v-if="!orders?.length && !orderListLoading && !isLoading"
-                title="No record found!"
+                v-if="!filteredOrders?.length && !orderListLoading && !isLoading"
+                :title="!orders?.length ? 'No orders found!' : 'No orders match your current filters.'"
                 type="info"
                 class="print:hidden mx-4"
             />
@@ -33,14 +33,14 @@
                 class="min-h-[300px] overflow-auto w-full"
             >
                 <template 
-                    v-if="orders?.length"
+                    v-if="filteredOrders?.length"
                 >
                     <div class="hidden md:block">
                         <Table.Table>
                             <TableHeader />
                             <Table.TBody>
                                 <TableRow 
-                                    v-for="(order, index) in orders"
+                                    v-for="(order, index) in filteredOrders"
                                     :key="index"
                                     :order="order"
                                 />
@@ -66,7 +66,7 @@
                             </Table.THead>
                             <Table.TBody>
                                 <TableRowForMobile
-                                    v-for="(order, index) in orders"
+                                    v-for="(order, index) in filteredOrders"
                                     :key="index"
                                     :order="order"
                                 />
@@ -106,6 +106,7 @@
     const {
         activeOrder,
         orders,
+        filteredOrders,
         isLoading,
         selectAll,
         setActiveOrder,

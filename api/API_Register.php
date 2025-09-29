@@ -3,6 +3,7 @@ namespace WooEasyLife\API;
 
 use WooEasyLife\API\Admin\AbandonedOrderAPI;
 use WooEasyLife\API\Admin\NewOrderNotificationAPI;
+use WooEasyLife\API\Admin\LicenseStatusAPI;
 
 class API_Register {
     public function __construct() {
@@ -78,5 +79,6 @@ class API_Register {
         new \WooEasyLife\API\Admin\NewOrderNotificationAPI();
         new \WooEasyLife\API\Admin\AbandonedOrderAPI();
         new \WooEasyLife\API\Admin\HandleUsersAPI();
+        new \WooEasyLife\API\Admin\LicenseStatusAPI();
     }
 }

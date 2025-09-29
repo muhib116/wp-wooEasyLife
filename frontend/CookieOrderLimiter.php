@@ -7,6 +7,10 @@ class CookieOrderLimiter {
     private const COOKIE_NAME = 'wel_daily_order_tracker';
 
     public function __construct() {
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }
+
         // Check the limit before processing the order. Priority 20 to run after other checks.
         add_action('woocommerce_after_checkout_validation', [$this, 'check_order_limit_from_cookie'], 20, 2);
         

@@ -347,3 +347,11 @@ export const includeMissingNewOrdersOfFailedBalanceCut = async () => {
   const { data } = await axios.put(`${localApiBaseURL}/include-missing-new-orders-for-balance-cut-failed?nocache=${timestamp}`);
   return data;
 };
+
+
+export const updateLicenseStatus = async (status: 'valid' | 'invalid' | 'expired' | 'unauthenticated') => {
+  await axios.post(`${localApiBaseURL}/license-status`, { status });
+};
+
+// const status = 'valid' | 'invalid' | 'expired' | 'unauthenticated'
+//await axios.post(`https://domain.com/wp-json/wooeasylife/v1/license-status`, { status });

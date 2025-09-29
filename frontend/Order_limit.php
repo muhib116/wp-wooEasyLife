@@ -17,6 +17,10 @@ class Order_limit {
      */
     public function enforce_order_limit($data, $errors) {
         global $config_data;
+        
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }
 
         // Step 1: Check if the feature is enabled and get the limit.
         $order_limit = isset($config_data["daily_order_place_limit_per_customer"]) ? intval($config_data["daily_order_place_limit_per_customer"]) : 0;

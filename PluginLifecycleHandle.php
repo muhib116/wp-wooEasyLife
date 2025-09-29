@@ -4,42 +4,134 @@ namespace WooEasyLife;
 class PluginLifecycleHandle {
     public $handleDBTable;
     public $initClass;
+    
+    /** @var string The key for storing the plugin's version in the wp_options table. */
+    private const DB_VERSION_OPTION_KEY = __PREFIX . 'plugin_version';
 
     public function __construct() {
-        // Ensure the lifecycle hooks are registered properly
+        // Standard plugin lifecycle hooks.
         register_activation_hook(WEL_PLUGIN_FILE, [__CLASS__, 'woo_easy_life_activation_function']);
         register_deactivation_hook(WEL_PLUGIN_FILE, [__CLASS__, 'woo_easy_life_deactivation_function']);
-        register_uninstall_hook(WEL_PLUGIN_FILE, [__CLASS__, 'woo_easy_life_uninstall_function']);
+        
+        // This hook now handles both plugin updates and our custom migrations.
+        add_action('admin_init', [$this, 'handle_plugin_update_and_migrations']);
 
-        // Hook for runtime updates
-        add_action('init', [$this, 'updatePlugin']);
-
-        // Initialize other classes
-        $this->handleDBTable = new Admin\DBTable\HandleDBTable();
-        $this->initClass = new Init\InitClass();
+        // Initialize other classes.
+        $this->handleDBTable = new \WooEasyLife\Admin\DBTable\HandleDBTable();
+        $this->initClass = new \WooEasyLife\Init\InitClass();
     }
 
     /**
-     * Activation function
+     * This function checks for version changes on every admin page load
+     * and runs necessary migration tasks for updates.
+     */
+    public function handle_plugin_update_and_migrations() {
+        // Don't run this for non-admins.
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
+
+        $current_file_version = self::get_current_plugin_version();
+        $current_db_version = get_option(self::DB_VERSION_OPTION_KEY);
+
+        // If the version in the database is different from the file, it's an update or first install.
+        if (version_compare($current_file_version, $current_db_version, '>')) {
+            
+            // --- Run Migration Tasks Here ---
+            $this->migrate_to_license_status_system($current_db_version);
+            // You can add more migration functions here in the future.
+            
+            // After all migrations are done, update the version in the database.
+            update_option(self::DB_VERSION_OPTION_KEY, $current_file_version);
+        }
+    }
+    
+    /**
+     * One-time migration function to validate the existing license key and store its status.
+     * This prevents features from being disabled for existing users after an update.
+     *
+     * @param string|false $from_version The version the user is updating from.
+     */
+    private function migrate_to_license_status_system($from_version) {
+        // Let's assume the license status system was introduced in version '1.1.0'.
+        // This migration should only run for users updating from a version older than that.
+        // If $from_version is false, it's a new install, so the activation hook handles it.
+        if ($from_version && version_compare($from_version, '1.1.0', '<')) {
+            
+            // Check if a license status is already set. If so, do nothing.
+            if (get_option('woo_easy_life_license_status')) {
+                return;
+            }
+
+            // Get the existing license key.
+            $license_data = get_option(__PREFIX . 'license');
+            $license_key = is_array($license_data) && !empty($license_data['key']) ? $license_data['key'] : '';
+
+            if (empty($license_key)) {
+                update_option('woo_easy_life_license_status', 'unauthenticated');
+                return;
+            }
+
+            // Make a background API call to validate the key.
+            $url = get_api_end_point("get-user");
+            $response = wp_remote_get($url, [
+                'headers'   => [
+                    'Authorization' => 'Bearer ' . $license_key,
+                    'origin'        => site_url()
+                ],
+                'timeout'   => 20,
+                'sslverify' => false,
+            ]);
+
+            if (is_wp_error($response)) {
+                // If API call fails, we can't be sure. Default to 'invalid'.
+                // It will be re-validated the next time the user visits the Vue app.
+                update_option('woo_easy_life_license_status', 'invalid');
+                error_log('WooEasyLife Migration Error: API call to validate license failed. ' . $response->get_error_message());
+                return;
+            }
+
+            $response_code = wp_remote_retrieve_response_code($response);
+            $body = json_decode(wp_remote_retrieve_body($response), true);
+            $message = $body['message'] ?? '';
+
+            if ($response_code === 200) {
+                update_option('woo_easy_life_license_status', 'valid');
+            } elseif (stripos($message, 'Expired') !== false) {
+                update_option('woo_easy_life_license_status', 'expired');
+            } else {
+                update_option('woo_easy_life_license_status', 'invalid');
+            }
+        }
+    }
+
+    /**
+     * Activation function.
      */
     public static function woo_easy_life_activation_function() {
         // Instantiate dependencies
-        $handleDBTable = new Admin\DBTable\HandleDBTable();
-        $initClass = new Init\InitClass();
+        $handleDBTable = new \WooEasyLife\Admin\DBTable\HandleDBTable();
+        $initClass = new \WooEasyLife\Init\InitClass();
 
         // Initialize required options
         if (empty(get_option(__PREFIX . 'license'))) update_option(__PREFIX . 'license', ['key' => ""]);
-        if (empty(get_option(__PREFIX . 'plugin_installed'))) update_option(__PREFIX . 'plugin_installed', true);
-        if (empty(get_option(__PREFIX . '_courier_data'))) update_option(__PREFIX . '_courier_data', true);
-
+        
         // Create required database tables and settings
         $handleDBTable->create();
         $initClass->create_static_statuses();
         $initClass->save_default_config();
+
+        // Store the current plugin version in the database upon activation.
+        update_option(self::DB_VERSION_OPTION_KEY, self::get_current_plugin_version());
+        
+        // Also set a default license status for new installations.
+        if (!get_option('woo_easy_life_license_status')) {
+            update_option('woo_easy_life_license_status', 'unauthenticated');
+        }
     }
 
     /**
-     * Deactivation function
+     * Deactivation function.
      */
     public static function woo_easy_life_deactivation_function() {
         global $config_data;
@@ -48,14 +140,6 @@ class PluginLifecycleHandle {
             $handleDBTable = new Admin\DBTable\HandleDBTable();
             self::cleanPluginData($handleDBTable);
         }
-    }
-
-    /**
-     * Uninstall function
-     */
-    public static function woo_easy_life_uninstall_function() {
-        // $handleDBTable = new Admin\DBTable\HandleDBTable();
-        // self::cleanPluginData($handleDBTable);
     }
 
     /**
@@ -92,26 +176,15 @@ class PluginLifecycleHandle {
     }
 
     /**
-     * Handle plugin updates
-     */
-    public function updatePlugin() {
-        global $license_key;
-        new Init\UpdatePlugin($this->get_current_plugin_version(), $license_key);
-    }
-
-    /**
-     * Get the current plugin version
+     * Get the current plugin version from the plugin's main file.
      *
-     * @return string|null Plugin version
+     * @return string|null Plugin version.
      */
     static function get_current_plugin_version() {
-        $plugin_file = WEL_PLUGIN_FILE;
-
-        if (file_exists($plugin_file)) {
-            $plugin_data = get_file_data($plugin_file, ['Version' => 'Version']);
-            return $plugin_data['Version'] ?? null;
+        if (!function_exists('get_plugin_data')) {
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
         }
-
-        return null;
+        $plugin_data = get_plugin_data(WEL_PLUGIN_FILE);
+        return $plugin_data['Version'] ?? '1.0.0'; // Fallback to 1.0.0
     }
 }

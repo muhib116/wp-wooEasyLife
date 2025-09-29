@@ -19,6 +19,12 @@ class CheckoutFormValidation {
      */
     public function form_validation($data, $errors) {
         global $config_data;
+
+        if (!is_wel_license_valid()) {
+            return; // Exit the *current* function if the license is not valid.
+        }
+
+
         $admin_phone = $config_data['admin_phone'] ?? '';
 
         // // Step 1: Handle Rate Limiting first to prevent abuse.
@@ -84,7 +90,9 @@ class CheckoutFormValidation {
      * A stronger function to check if an identical set of products has been ordered before
      * by a customer identified by phone, email, OR IP address.
      */
-    public function has_identical_product_order($billing_phone = null, $billing_email = null, $customer_ip = null) {
+    public function has_identical_product_order($billing_phone = null, $billing_email = null, $customer_ip = null)
+    {
+
         if (!function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) {
             return false;
         }
@@ -245,10 +253,11 @@ class CheckoutFormValidation {
         'চুদচুদ', 'চুদগু', 'চুদবাজ', 'গুন্ডাচোদ', 'চুদখোর', 'পোলা', 'মাগীর', 'চুদবাজ', 'ভোদাচোদ', 'চুদচুদ', 'চুদগু',
         'চুদবাজ', 'গুন্ডাচোদ', 'চুদখোর', 'পোলা', 'মাগীর', 'চুদবাজ', 'ভোদাচোদ', 'চুদচুদ', 'চুদগু', 'চুদবাজ', 'গুন্ডাচোদ',
         'চুদখোর', 'পোলা', 'মাগীর', 'চুদবাজ', 'ভোদাচোদ', 'চুদচুদ', 'চুদগু', 'চুদবাজ', 'গুন্ডাচোদ', 'চুদখোর', 'পোলা',
-        'মাগীর', 'চুদবাজ', 'ভোদাচোদ', 'চুদচুদ', 'চুদগু', 'চুদবাজ', 'গুন্ডাচোদ', 'চুদখোর', 'পোলা', 'মাগীর', 'চুদবাজ',
+        'মাগীর', 'চুদবাজ', 'ভোদাচোদ', 'চুদচুদ', 'চুদগু', 'চুদবাজ', 'গুন্ডাচোদ', 'চুদখোর', 'পোলা', 'মাগীর', 'চুদবাজ', 'আব্বা', 'খানকীর',
+        'জারজ', '    ',
 
         // Obfuscated Bangla/English hybrids
-        'chod','chud','chuda','chodar','chodon','chudna','chudaa','chudiyo','chodaa','chodina',
+        'chod','chud','chuda','chodar','chodon','chudna','chudaa','chudiyo','chodaa','chodina', 'abba',
         'madarchod','madarchut','madarchudi','madarchuda','madarchod','madarchud',
         'gandu','g@ndu','gaandu','gaand','bhodachoda','bhoda','bhudi','bhodir','voda','bhodachudi',
         'raand','rand','raandi','randee','lau','l0ra','lorar','lund','l0nd','lnd','bokachoda','bokachudi',

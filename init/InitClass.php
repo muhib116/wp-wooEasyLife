@@ -38,14 +38,6 @@ class InitClass {
                 'color'       => '#6C757D',
                 'description' => 'Customer call not received.',
             ],
-            '2nd-call-not-received' => [
-                'title'       => '2nd Call Not Received',
-                'slug'        => '2nd-call-not-received',
-                'is_default'  => true,
-                'not_using'   => false,
-                'color'       => '#f97315',
-                'description' => 'Customer 2nd time call not received.',
-            ],
             'fake' => [
                 'title'       => 'Fake Order',
                 'slug'        => 'fake',
