@@ -12,13 +12,14 @@ import {
   toggleIsDone,
   updateOrder,
   updateShippingMethod,
-  getShippingMethods
+  getShippingMethods,
+  getPaymentMethods
 } from "@/api";
 
 import { manageCourier } from "./useHandleCourierEntry";
 import { normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
-import { isEmpty } from "lodash";
+import { isEmpty, isFunction } from "lodash";
 import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
 
 export const useOrders = () => {
@@ -29,7 +30,6 @@ export const useOrders = () => {
   const activeOrder = ref();
   const selectedOrders = ref(new Set([]));
   const isShippingEditing = ref(false);
-  const isShippingEditable = ref(false);
   const selectAll = ref(false);
   const isLoading = ref(false);
   const orderListLoading = ref(false);
@@ -37,7 +37,9 @@ export const useOrders = () => {
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
+  const paymentMethods = ref([])
   const { userData, loadUserData } = inject('useServiceProvider');
+
   const courierStatusInfo = {
     pending: "Consignment is not delivered or cancelled yet.",
     delivered_approval_pending: "Consignment is delivered but waiting for admin approval.",
@@ -69,6 +71,15 @@ export const useOrders = () => {
     { label: '>= 60%', value: 60 },
     { label: '>= 50%', value: 50 },
   ]);
+
+    const loadPaymentMethods = async () => {
+      try {
+          const { data } = await getPaymentMethods();
+          paymentMethods.value = data;
+      } catch (error) {
+          console.error("Error loading payment methods:", error);
+      }
+  }
 
   const getDeliveryProbability = (order) => {
     let successRate = order?.customer_report?.success_rate;
@@ -186,13 +197,10 @@ export const useOrders = () => {
   const handleUpdateShippingMethod = async (payload: { shipping_instance_id: string | number; order_id: string | number; }) => {
     try {
       isLoading.value = true;
-      isShippingEditing.value = true;
       await updateShippingMethod(payload);
       await getOrders();
       showNotification({ type: 'success', message: 'Shipping method updated.' });
     } finally {
-      isShippingEditing.value = false;
-      isShippingEditable.value = false;
       isLoading.value = false;
     }
   }
@@ -360,7 +368,7 @@ export const useOrders = () => {
               recipient_name: order.customer_custom_data.first_name + order.customer_custom_data.last_name,
               recipient_phone: order.customer_custom_data.phone,
               recipient_address: order.customer_custom_data.address,
-              cod_amount: order.product_info.total_price_after_cut_discount,
+              cod_amount: order.product_info.total,
               partner: courierPartner,
               status: courierUpdatedStatus
             }])
@@ -545,11 +553,14 @@ export const useOrders = () => {
     loadOrderStatusList();
     loadAllStatuses();
     await loadShippingMethods();
+    await loadPaymentMethods();
     getOrders();
   });
 
   return {
-    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditable, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
+    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
+    paymentMethods, 
+    loadPaymentMethods,
     // Export new properties
     selectedDspFilter, dspFilterOptions, filteredOrders
   };

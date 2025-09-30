@@ -87,7 +87,24 @@ class UpdateAddressAPI extends WP_REST_Controller
 
         // Update payment method if provided
         if (!empty($request->get_param('payment_method'))) {
-            $order->set_payment_method($request->get_param('payment_method'));
+            $payment_method_id = $request->get_param('payment_method');
+            if (!empty($payment_method_id)) {
+                $payment_method_id = sanitize_text_field($payment_method_id);
+                
+                // Load all available payment gateways to get the correct Title
+                $payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
+                
+                $order->set_payment_method($payment_method_id);
+
+                if (isset($payment_gateways[$payment_method_id])) {
+                    // Found: Set the correct title from the WooCommerce gateway instance
+                    $order->set_payment_method_title($payment_gateways[$payment_method_id]->get_title());
+                } else {
+                    // Not Found (Fallback): Convert slug to human-readable title
+                    $human_title = ucwords(str_replace('-', ' ', str_replace('wc-', '', $payment_method_id)));
+                    $order->set_payment_method_title($human_title);
+                }
+            }
         }
 
         // Save the order

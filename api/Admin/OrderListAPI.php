@@ -390,61 +390,90 @@ class OrderListAPI
         
         return $order_count;        
     }
-
+    
+    /**
+     * Updates an order's shipping method by looking across all shipping zones.
+     * This handles cases where the intended method instance ID might be in a different zone 
+     * or is a Default Zone method which often lacks a proper instance_id.
+     * 
+     * @param \WP_REST_Request $request
+     * @return bool|\WP_Error
+     */
     public function update_order_shipping_method(\WP_REST_Request $request) {
         // Get the payload from the request
         $data = $request->get_json_params();
         $order_id = $data['order_id'];
         $new_shipping_instance_id = $data['shipping_instance_id'];
-    
+        
         // Load the WooCommerce order object
         $order = wc_get_order($order_id);
         if (!$order) {
             return new \WP_Error('invalid_order', 'Invalid order ID.');
         }
-    
-        // Remove existing shipping items
-        foreach ($order->get_items('shipping') as $item_id => $shipping_item) {
-            $order->remove_item($item_id);
-        }
-    
-        // Get shipping zone for the order
-        $package = [
-            'destination' => [
-                'country'  => $order->get_shipping_country(),
-                'state'    => $order->get_shipping_state(),
-                'postcode' => $order->get_shipping_postcode(),
-                'city'     => $order->get_shipping_city(),
-            ],
-        ];
-        $shipping_zone = wc_get_shipping_zone($package);
+
+        // --- 1. Find the target shipping method across all zones/default zone ---
         $chosen_method = null;
-    
-        // Loop through available shipping methods in the zone
-        foreach ($shipping_zone->get_shipping_methods(true) as $method) {
+        $shipping_methods = [];
+
+        // Get methods from all configured zones
+        $zones = \WC_Shipping_Zones::get_zones();
+        foreach ($zones as $zone) {
+            $zone_obj = new \WC_Shipping_Zone($zone['id']);
+            // The 'get_shipping_methods()' retrieves all methods configured for this zone.
+            $shipping_methods = array_merge($shipping_methods, $zone_obj->get_shipping_methods(false));
+        }
+
+        // Get methods from the "Rest of the World" (Default) zone
+        $default_zone = new \WC_Shipping_Zone(0);
+        $shipping_methods = array_merge($shipping_methods, $default_zone->get_shipping_methods(false));
+        
+        // Find the method that matches the passed instance_id (or method_id if instance_id is missing/0)
+        foreach ($shipping_methods as $method) {
+            // Check for a direct match using instance_id
             if ($method->instance_id == $new_shipping_instance_id) {
                 $chosen_method = $method;
                 break;
             }
+            
+            // Fallback for methods without instance_id (like default free_shipping or local_pickup in Zone 0)
+            // We assume if the passed ID is actually the method ID AND the instance_id is 0/missing, it's the target.
+            // This relies on the client passing the method_id when the instance_id is not available.
+            if (
+                ($method->instance_id === 0 || empty($method->instance_id)) && 
+                ($method->id === (string)$new_shipping_instance_id)
+            ) {
+                 // Use a temporary identifier to ensure this case is handled
+                 $chosen_method = $method;
+                 break;
+            }
         }
-    
+        
         if (!$chosen_method) {
-            return new \WP_Error('shipping_not_found', 'Selected shipping method instance is not available.');
+            return new \WP_Error('shipping_not_found', 'Selected shipping method instance is not available. Check method settings or zone configuration.');
+        }
+
+        // --- 2. Remove existing shipping items ---
+        foreach ($order->get_items('shipping') as $item_id => $shipping_item) {
+            $order->remove_item($item_id);
         }
     
-        // Add new shipping method
+        // --- 3. Add new shipping method ---
         $shipping_item = new \WC_Order_Item_Shipping();
+        
+        // Get the cost: First try to get it from the instance settings, otherwise fallback to method cost property.
+        $method_cost = $chosen_method->instance_settings['cost'] ?? $chosen_method->cost ?? 0;
+
         $shipping_item->set_method_title($chosen_method->get_title());
         $shipping_item->set_method_id($chosen_method->id);
-        $shipping_item->set_instance_id($chosen_method->instance_id); // Ensure unique instance
-        $shipping_item->set_total($chosen_method->cost);
+        $shipping_item->set_instance_id($chosen_method->instance_id);
+        $shipping_item->set_total(floatval($method_cost));
         $order->add_item($shipping_item);
-    
-        // Recalculate totals
+        
+        // --- 4. Recalculate totals and save ---
         $order->calculate_totals();
         $order->save();
     
-        return true; // Success
+        return new \WP_REST_Response(['message' => 'Order shipping method updated successfully'], 200);
     }
 
 

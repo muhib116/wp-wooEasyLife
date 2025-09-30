@@ -31,25 +31,23 @@
     import { ref, onMounted, inject } from 'vue'
     import { getPaymentMethods } from '@/api'
     
-    const paymentMethods  = ref(null)
-    
     const {
         form
     } = inject('useCustomOrder')
     
     const {
-        shippingMethods
+        shippingMethods,
+        paymentMethods // <-- useOrders এ লোড করা পেমেন্ট মেথড
     } = inject('useOrders')
 
-    onMounted(async () => {
-        if(shippingMethods.value?.length === 1) {
-            form.value.shippingMethod = shippingMethods.value[0]
+    onMounted(() => {
+        // Check if only one payment method is available
+        if (paymentMethods.value && paymentMethods.value.length === 1) {
+            form.value.paymentMethod = paymentMethods.value[0];
         }
-        
-        const { data:_paymentMethods } = await getPaymentMethods();
-        if(_paymentMethods.length === 1) {
-            form.value.paymentMethod = _paymentMethods[0]
+        // Check if only one shipping method is available
+        if (shippingMethods.value && shippingMethods.value.length === 1) {
+            form.value.shippingMethod = shippingMethods.value[0];
         }
-        paymentMethods.value = _paymentMethods
-    })
+    });
 </script>
