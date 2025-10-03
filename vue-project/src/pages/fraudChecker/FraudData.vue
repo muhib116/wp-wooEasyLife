@@ -103,11 +103,13 @@
     import fraudCheckImg from './fraudCheckImg.vue'
     import FraudProgress from './FraudProgress.vue'
     import { printDate } from '@/helper'
+    import { onMounted } from 'vue'
 
-    withDefaults(
+    const props = withDefaults(
         defineProps<{
             hideShadow: boolean
-            data: {
+            phone?: string,
+            data?: {
                 report: {
                     total_order: number | string,
                     confirmed: string,
@@ -129,4 +131,9 @@
         }
     )
     
+    onMounted(() => {
+        if(props.phone) {
+            
+        }
+    })
 </script>

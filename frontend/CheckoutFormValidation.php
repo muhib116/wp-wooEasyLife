@@ -342,5 +342,4 @@ class CheckoutFormValidation {
 
         return false; // no offensive word found
     }
-
 }
