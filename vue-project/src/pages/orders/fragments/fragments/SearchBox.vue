@@ -23,11 +23,12 @@
 
 <script setup lang="ts">
 import { Button, Icon, Input } from '@components'
-import { inject, ref } from 'vue'
+import { inject, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 // Setup refs
 const submitBtn = ref<InstanceType<typeof Button.Primary> | null>(null)
-
+const route = useRoute()
 // Inject dependencies
 const injected = inject('useOrders') as {
     debouncedGetOrders: () => void,
@@ -41,4 +42,11 @@ const handleEnterPress = () => {
     // Try to trigger button click via the exposed method or native element
     submitBtn.value.$el?.click?.()
 }
+
+onMounted(() => {
+    if(route.query?.phone) {
+        orderFilter.value.search = route.query?.phone
+        submitBtn.value.$el?.click?.()
+    }
+})
 </script>
