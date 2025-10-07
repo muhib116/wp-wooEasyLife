@@ -17,7 +17,7 @@ import {
 } from "@/api";
 
 import { manageCourier } from "./useHandleCourierEntry";
-import { normalizePhoneNumber, showNotification } from "@/helper";
+import { filterOrderById, normalizePhoneNumber, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
 import { isEmpty, isFunction } from "lodash";
 import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
@@ -428,8 +428,11 @@ export const useOrders = () => {
         product.product_quantity = payload.quantity;
       }
       const response = await updateOrder(payload);
-      if (response) activeOrder.value.product_info = response;
-      getOrders();
+      await getOrders();
+      if (response) {
+        const updatedOrder = filterOrderById(activeOrder.value.id, orders.value)
+        setActiveOrder(updatedOrder)
+      }
     } catch (err) {
       console.error(err);
     } finally {

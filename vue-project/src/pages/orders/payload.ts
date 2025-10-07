@@ -23,6 +23,7 @@ export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
             order_notes = {}
         } = item || {};
 
+        console.log(total)
         // Build addresses safely
         const shipping_address_str = [
             shipping_address?.address_1?.trim(),

@@ -158,6 +158,21 @@ class OrderListAPI
                 'permission_callback' => api_permission_check(),
             ]
         );
+
+        register_rest_route(
+            __API_NAMESPACE, 
+            '/orders/update-total',
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'update_order_total'], // <-- New method call
+                'permission_callback' => api_permission_check(),
+                'args' => [
+                    'order_id' => ['required' => true, 'type' => 'integer'],
+                    // Total should be treated as a number (float/double)
+                    'new_total' => ['required' => true, 'type' => 'number'], 
+                ]
+            ]
+        );
     }
 
     /**
@@ -842,6 +857,49 @@ class OrderListAPI
             }
         }
     } 
+
+    /**
+     * Updates the order total amount manually. Used primarily for COD adjustments.
+     * This skips WooCommerce's automatic calculation, allowing manual total set.
+     * 
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function update_order_total(\WP_REST_Request $request) {
+        $order_id = $request->get_param('order_id');
+        $new_total = floatval($request->get_param('new_total'));
+        
+        $order = wc_get_order($order_id);
+        
+        if (!$order) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Order not found.',
+            ], 404);
+        }
+        
+        // 1. COD অ্যামাউন্ট পরিবর্তন মানে অর্ডারের মোট মূল্য পরিবর্তন করা
+        $order->set_total($new_total); 
+        
+        // 2. Order Note যোগ করা (ঐচ্ছিক: ম্যানুয়াল পরিবর্তন ট্র্যাক করার জন্য)
+        $order->add_order_note(
+            sprintf('Order Total (COD) manually updated to %s via WEL plugin.', wc_price($new_total, ['currency' => $order->get_currency()])),
+            0, // Not a customer note
+            true // Is a system note
+        );
+
+        // 3. সেভ করা
+        $order->save();
+        
+        return new \WP_REST_Response([
+            'status' => 'success',
+            'message' => "Order Total (COD) updated to " . wc_price($new_total, ['currency' => $order->get_currency()]),
+            'data' => [
+                'order_id' => $order_id,
+                'new_total' => $new_total
+            ]
+        ], 200);
+    }
 }
 
 

@@ -1,9 +1,11 @@
+import { getLicenseStatus } from "@/api"
 import { getUser } from "@/remoteApi"
 import { ref } from "vue"
 
 export const userData = ref()
 export const licenseKey = ref(localStorage.getItem('license_key'))
 export const isValidLicenseKey = ref(true)
+export const licenseStatus = ref('valid')
 export const licenseAlertMessage = ref<{
     type: "danger" | "warning" | "info" | "success",
     message: string
@@ -93,5 +95,6 @@ export const useServiceProvider = () =>
         loadUserData,
         redirectToLicensePage,
         getNoticeOfBalanceOver,
+        licenseStatus
     }
 }

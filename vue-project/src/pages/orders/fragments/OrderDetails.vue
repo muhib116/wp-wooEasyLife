@@ -54,6 +54,17 @@
                     {{ activeOrder.billing_address?.address_1 }} 
                     {{ activeOrder.billing_address?.address_2 }}
                 </h4>
+
+                <h4>
+                    <span style="font-weight: bold;">
+                        Total Amount
+                    </span> 
+                    {{ activeOrder.total }}
+                </h4>
+
+                <CODAssigner
+                    :order="activeOrder"
+                />
             </div>
 
             <div>
@@ -83,6 +94,7 @@
     import DesktopOrderedProductDetails from './DesktopOrderedProductDetails.vue'
     import MobileOrderedProductDetails from './MobileOrderedProductDetails.vue'
     import DeliveryPartner from '@/pages/orders/fragments/fragments/data/DeliveryPartner.vue'
+    import CODAssigner from '@/pages/orders/fragments/fragments/data/CODAssigner.vue'
     import PrintStickerAndMark from './PrintStickerAndMark.vue'
     import { onMounted, onBeforeUnmount, inject, ref } from 'vue'
     import { printProductDetails } from '@/helper'

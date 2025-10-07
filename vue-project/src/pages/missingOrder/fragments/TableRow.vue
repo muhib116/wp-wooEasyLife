@@ -36,25 +36,25 @@
           <Whatsapp
             :phone_number="item.customer_phone"
           />
-            <Button.Native 
-                @onClick="btn => handleFraudCHeck(item.customer_phone, btn)"
-                title="Fraud Check"
-                class="flex items-center gap-2 font-semibold relative hover:scale-105 hover:z-30 duration-200 cursor-pointer p-1 border shadow rounded-full bg-[#f14a00] text-white"
-            >
-                <Icon name="PhUserList" size="20" />
-            </Button.Native>
+          <Button.Native 
+              @onClick="btn => handleFraudCHeck(item.customer_phone, btn)"
+              title="Fraud Check"
+              class="flex items-center gap-2 font-semibold relative hover:scale-105 hover:z-30 duration-200 cursor-pointer p-1 border shadow rounded-full bg-[#f14a00] text-white"
+          >
+              <Icon name="PhUserList" size="20" />
+          </Button.Native>
 
-            <RouterLink
-                :to="{
-                    name: 'orders',
-                    query: {
-                        phone: item.customer_phone
-                    }
-                }"
-                target="_blank"
-            >
-                Check
-            </RouterLink>
+          <RouterLink
+              :to="{
+                  name: 'orders',
+                  query: {
+                      phone: item.customer_phone
+                  }
+              }"
+              target="_blank"
+          >
+              Check
+          </RouterLink>
         </div>
 
         <div v-if="item.customer_email" class="truncate">

@@ -20,6 +20,12 @@ export const showNotification = (
   });
 }
 
+export const filterOrderById = (id: number, orders) => {
+    if(!id) return {}
+    return orders.find(order => order.id == id)
+
+}
+
 /**
  * Converts multi-line HTML into a single-line, well-formatted HTML string.
  */

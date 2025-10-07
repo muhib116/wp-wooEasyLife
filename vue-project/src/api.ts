@@ -353,5 +353,22 @@ export const updateLicenseStatus = async (status: 'valid' | 'invalid' | 'expired
   await axios.post(`${localApiBaseURL}/license-status`, { status });
 };
 
+export const getLicenseStatus = async () => {
+  const { data } = await axios.get(`${localApiBaseURL}/license-status`);
+  return data;
+};
+
+/**
+ * Updates the WooCommerce order total (used for manual COD amount change).
+ * @param payload { order_id: number | string, new_total: number }
+ */
+export const updateOrderTotal = async (payload: {
+    order_id: number | string,
+    new_total: number
+}) => {
+    const { data } = await axios.post(`${localApiBaseURL}/orders/update-total`, payload);
+    return data;
+};
+
 // const status = 'valid' | 'invalid' | 'expired' | 'unauthenticated'
 //await axios.post(`https://domain.com/wp-json/wooeasylife/v1/license-status`, { status });

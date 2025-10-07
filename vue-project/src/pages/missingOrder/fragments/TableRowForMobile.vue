@@ -1,6 +1,6 @@
 <template>
     <Table.Tr>
-      <Table.Td class="space-y-2">
+      <Table.Td class="space-y-2 !px-0">
         <div>
             <div class="flex gap-2 truncate">
               <span
@@ -29,15 +29,36 @@
             </div>
       
             <div>
-              <div class="flex justify-between whitespace-nowrap">
+              <div class="flex justify-between items-center whitespace-nowrap">
                 <a :href="`tel:${item.customer_phone}`" class="block text-orange-500 underline">
                   <span class="font-semibold"> 📞 Phone: </span>
                   {{ item.customer_phone }}
                 </a>
         
-                <Whatsapp
-                  :phone_number="item.customer_phone"
-                />
+                <div class="flex items-center gap-3">
+                  <Whatsapp
+                    :phone_number="item.customer_phone"
+                  />
+                  <Button.Native 
+                    @onClick="btn => handleFraudCHeck(item.customer_phone, btn)"
+                    title="Fraud Check"
+                    class="flex items-center gap-2 font-semibold relative hover:scale-105 hover:z-30 duration-200 cursor-pointer p-1 border shadow rounded-full bg-[#f14a00] text-white"
+                  >
+                    <Icon name="PhUserList" size="20" />
+                  </Button.Native>
+  
+                  <RouterLink
+                    :to="{
+                        name: 'orders',
+                        query: {
+                            phone: item.customer_phone
+                        }
+                    }"
+                    target="_blank"
+                  >
+                      Check
+                  </RouterLink>
+                </div>
               </div>
               <div v-if="item.customer_email" class="truncate">
                 <span class="font-semibold"> 📨 Email: </span>
@@ -138,18 +159,38 @@
     >
       <CartDetails :order="item" />
     </Modal>
+
+    <Modal 
+      v-model="toggleFraudCheckModal" 
+      @close="toggleFraudCheckModal = false"
+      :title="item.customer_name"
+    >
+      <FraudData
+        :data="data" 
+        class="max-w-[600px] mx-auto"
+      />
+    </Modal>
   </template>
   
   <script setup lang="ts">
-  import { Table, Button, Modal, Select, Whatsapp } from "@components";
   import { inject, ref } from "vue";
+  import { Table, Button, Modal, Select, Whatsapp, Icon } from "@components";
   import CartDetails from "./CartDetails.vue";
+  import { useFraudChecker } from '@/pages/fraudChecker/useFraudChecker'
+  import FraudData from '@/pages/fraudChecker/FraudData.vue'
   
   const props = defineProps<{
     item: object;
   }>();
   
   const toggleModal = ref(false);
+  const toggleFraudCheckModal = ref(false);
   const selectedStatus = ref(props.item.status)
   const { updateStatus, options, selectedOption } = inject("useMissingOrder");
+  const { handleFraudCheck, data } = useFraudChecker()
+  
+  const handleFraudCHeck = async (phone, btn) => {
+    await handleFraudCheck(phone, btn)
+    toggleFraudCheckModal.value = true
+  }
 </script>

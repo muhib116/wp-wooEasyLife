@@ -9,6 +9,7 @@
         :iconName="iconName"
         :label="label"
         @iconClick="$emit('onIconClick')"
+        :hideMicrophone="hideMicrophone"
     />
 </template>
 
@@ -21,6 +22,7 @@
         iconSource: String,
         iconName: String,
         label: String,
+        hideMicrophone: Boolean
     })
     const localValue  = defineModel();
 </script>

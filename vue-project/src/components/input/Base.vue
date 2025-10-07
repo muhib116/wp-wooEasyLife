@@ -19,6 +19,7 @@
                 :style="{ ...bgStyle }"
             ></span>
             <Button.Native
+                v-if="!hideMicrophone"
                 class="absolute z-10 right-1 top-1/2 -translate-y-1/2 size-[25px] grid place-content-center rounded-full opacity-50 hover:opacity-100"
                 @click="handleVoiceToText"
                 :loading="isRecognizing"
@@ -92,6 +93,7 @@
         },
         label: String,
         iconPosition: String,
+        hideMicrophone: Boolean
     })
     const uid = computed(() => attrs?.id || `component_id_${instance.uid}`)
 

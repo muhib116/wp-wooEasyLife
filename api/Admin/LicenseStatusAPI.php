@@ -19,6 +19,11 @@ class LicenseStatusAPI extends WP_REST_Controller {
                 'methods'             => 'POST',
                 'callback'            => [$this, 'update_license_status'],
                 'permission_callback' => api_permission_check(),
+            ],
+            [
+                'methods'             => 'GET',
+                'callback'            => [$this, 'get_license_status'],
+                'permission_callback' => api_permission_check(),
             ]
         ]);
     }
@@ -44,6 +49,28 @@ class LicenseStatusAPI extends WP_REST_Controller {
             'status'  => 'success',
             'message' => 'License status updated successfully.',
             'data'    => ['license_status' => $status],
+        ], 200);
+    }
+
+
+    /**
+     * NEW: Callback to retrieve the current license status from wp_options.
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function get_license_status(WP_REST_Request $request) {
+        $current_status = get_option('woo_easy_life_license_status', 'unauthenticated');
+
+        // লাইসেন্স কী (key) লোড করাও প্রয়োজন হতে পারে
+        $license_data = get_option(__PREFIX . 'license');
+
+        return new WP_REST_Response([
+            'status'  => 'success',
+            'message' => 'Current license status retrieved.',
+            'data'    => [
+                'license_status' => $current_status,
+            ],
         ], 200);
     }
 }
