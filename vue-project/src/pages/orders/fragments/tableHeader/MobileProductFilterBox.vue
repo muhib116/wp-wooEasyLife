@@ -20,29 +20,9 @@
             </button>
         </div>
 
-        <!-- START: New DSP Filter for Mobile -->
-        <div class="border px-4 py-2 rounded mb-1">
-            <label class="flex justify-between items-center text-black text-[16px] font-semibold">
-                Filter by Probability
-                <select 
-                    class="outline-none bg-transparent !border-none focus:outline-none text-sm font-light"
-                    v-model="selectedDspFilter"
-                >
-                    <option
-                        v-for="option in dspFilterOptions"
-                        :key="option.value"
-                        :value="option.value"
-                    >
-                        {{ option.label }}
-                    </option>
-                </select>
-            </label>
-        </div>
-        <!-- END: New DSP Filter for Mobile -->
-
         <div class="border px-4 py-2 rounded mb-1">
             <div
-                class="flex justify-between items-center text-black text-[16px] font-semibold"
+                class="flex justify-between items-center text-black font-semibold"
                 @click="toggleStatus = !toggleStatus"
             >
                 Filter by Status
@@ -86,6 +66,69 @@
                 </template>
             </div>
         </div>
+
+        <!-- START: New DSP Filter for Mobile -->
+        <div class="border px-4 py-2 rounded mb-1">
+            <label class="flex justify-between items-center text-black font-semibold">
+                Filter by Probability
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none text-sm font-light"
+                    v-model="selectedDspFilter"
+                >
+                    <option
+                        v-for="option in dspFilterOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </option>
+                </select>
+            </label>
+        </div>
+        <!-- END: New DSP Filter for Mobile -->
+
+        <div class="border px-4 py-2 rounded mb-1">
+            <label class="flex justify-between items-center text-black font-semibold whitespace-nowrap">
+                Filter by Done/Undone
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none w-full font-light text-right"
+                    v-model="orderFilter.is_done"
+                    @change="async () => {
+                        await debouncedGetOrders({})
+                        $emit('close')
+                    }"
+                    title="Filter by Done/Undone Status"
+                >
+                    <option value="">All Orders</option>
+                    <option value="1">Marked as Done</option>
+                    <option value="0">Marked as Undone</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="border px-4 py-2 rounded mb-1">
+            <label class="flex justify-between items-center text-black font-semibold whitespace-nowrap">
+                Filter by Following
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none w-full font-light text-right"
+                    v-model="orderFilter.need_follow"
+                    @change="async () => {
+                        await debouncedGetOrders({})
+                        $emit('close')
+                    }"
+                    title="Filter by Follow Up Status"
+                >
+                    <option value="">All Orders</option>
+                    <option value="1">Marked as Follow</option>
+                    <option value="0">Marked as Not follow</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="font-light border px-2 py-1 rounded-sm">
+            
+        </div>
+
         
         <TableHeaderAction
             class="flex-col bg-red-50 w-full [&>*]:w-full [&>*>*]:w-full [&>*]:text-[16px]"
@@ -107,6 +150,7 @@ const {
     isLoading,
     selectedDspFilter,
     dspFilterOptions,
+    debouncedGetOrders
 } = inject('useOrders')
 
 const toggleStatus = ref(false)

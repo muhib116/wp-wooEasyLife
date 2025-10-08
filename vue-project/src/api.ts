@@ -31,6 +31,8 @@ export const getOrderList = async (payload: {
   per_page?: number;
   page?: number;
   billing_phone?: string;
+  is_done?: boolean;
+  need_follow?: boolean
 }) => {
   const { data } = await axios.get(`${localApiBaseURL}/orders`, {
     params: payload,

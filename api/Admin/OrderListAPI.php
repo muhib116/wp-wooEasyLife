@@ -201,6 +201,9 @@ class OrderListAPI
         $total_new_orders_not_handled_by_wel_plugin = $this->get_total_new_orders_not_handled_by_wel_plugin();
         $total_new_order_handled_by_wel_but_balance_cut_failed = $this->get_total_new_order_handled_by_wel_but_balance_cut_failed();
     
+        $is_done_filter = $request->get_param('is_done');
+        $need_follow_filter = $request->get_param('need_follow');
+
         // Use WooCommerce Order Query to fetch orders with pagination and search
         $args = array_merge([
             'status'        => $status,
@@ -212,6 +215,73 @@ class OrderListAPI
             'orderby' => 'id',
             'order'   => 'DESC', // Descending order
         ], getMetaDataOfOrderForArgs());
+
+        // --- Start: Meta Query Construction ---
+        $meta_query = $args['meta_query'] ?? [];
+        
+        // --- 1. 'Mark as Done' filter (woo_easy_is_done) ---
+        if ($is_done_filter == '1') {
+            // Filter for: Marked as Done (value = 1)
+            $meta_query[] = [
+                'key'     => 'woo_easy_is_done',
+                'value'   => '1',
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ];
+        } elseif ($is_done_filter == '0') {
+            // Filter for: Marked as Undone (NOT EXISTS OR value = 0)
+            $meta_query[] = [
+                'relation' => 'OR',
+                [
+                    'key'     => 'woo_easy_is_done',
+                    'compare' => 'NOT EXISTS', 
+                ],
+                [
+                    'key'     => 'woo_easy_is_done',
+                    'value'   => '0',
+                    'compare' => '=',
+                    'type'    => 'NUMERIC',
+                ]
+            ];
+        }
+        
+        // --- 2. 'Need Follow' filter (woo_easy_need_follow) ---
+        if ($need_follow_filter == '1') {
+            // Filter for: Needs Follow Up (value = 1)
+            $meta_query[] = [
+                'key'     => 'woo_easy_need_follow',
+                'value'   => '1',
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ];
+        } elseif ($need_follow_filter == '0') {
+            // Filter for: Does NOT need Follow Up (NOT EXISTS OR value = 0)
+            $meta_query[] = [
+                'relation' => 'OR',
+                [
+                    'key'     => 'woo_easy_need_follow',
+                    'compare' => 'NOT EXISTS', // Items that were never flagged
+                ],
+                [
+                    'key'     => 'woo_easy_need_follow',
+                    'value'   => '0',
+                    'compare' => '=',
+                    'type'    => 'NUMERIC',
+                ]
+            ];
+        }
+        
+        // --- Final Meta Query Application ---
+        if (!empty($meta_query)) {
+            // If there were multiple filters, ensure they are combined with 'AND'
+            if (count($meta_query) > 1 && !isset($meta_query['relation'])) {
+                // If multiple top-level meta queries, make the relation 'AND'
+                $args['meta_query'] = ['relation' => 'AND', ...$meta_query];
+            } else {
+                $args['meta_query'] = $meta_query;
+            }
+        }
+        // --- End: Meta Query Construction ---
     
         // Add search conditions
         if (!empty($search)) {
@@ -295,7 +365,8 @@ class OrderListAPI
                 'site_logo' => get_site_logo_url(),
                 'is_wel_order_handled' => $order->get_meta('is_wel_order_handled', true),
                 'is_wel_balance_cut'   => $order->get_meta('is_wel_balance_cut', true),
-                'is_done'   => $order->get_meta('woo_easy_is_done', true),
+                'is_done'     => $order->get_meta('woo_easy_is_done', true),
+                'need_follow' => $order->get_meta('woo_easy_need_follow', true),
                 'customer_custom_data' => $customer_custom_data,
                 'total_new_orders_not_handled_by_wel_plugin' => $total_new_orders_not_handled_by_wel_plugin,
                 'total_new_order_handled_by_wel_but_balance_cut_failed' => $total_new_order_handled_by_wel_but_balance_cut_failed,

@@ -1,8 +1,8 @@
 <template>
     <div v-if="orderFilter" class="print:hidden flex flex-col xl:flex-row gap-4 items-center md:items-stretch md:justify-between whitespace-nowrap">
         <div v-if="$slots.leftSide" class="sm:flex gap-2 md:gap-4 items-center">
+            <slot name="leftSide"></slot>
             
-            <!-- START: New DSP Filter for Desktop -->
             <label class="font-light border px-2 py-1 rounded-sm">
                 <select 
                     class="outline-none bg-transparent !border-none focus:outline-none"
@@ -18,9 +18,32 @@
                     </option>
                 </select>
             </label>
-            <!-- END: New DSP Filter for Desktop -->
 
-            <slot name="leftSide"></slot>
+            <label class="font-light border px-2 py-1 rounded-sm">
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none"
+                    v-model="orderFilter.is_done"
+                    @change="debouncedGetOrders"
+                    title="Filter by Done/Undone Status"
+                >
+                    <option value="">All Orders</option>
+                    <option value="1">Marked as Done</option>
+                    <option value="0">Marked as Undone</option>
+                </select>
+            </label>
+
+            <label class="font-light border px-2 py-1 rounded-sm">
+                <select 
+                    class="outline-none bg-transparent !border-none focus:outline-none"
+                    v-model="orderFilter.need_follow"
+                    @change="debouncedGetOrders"
+                    title="Filter by Follow Up Status"
+                >
+                    <option value="">All Orders</option>
+                    <option value="1">Marked as Follow</option>
+                    <option value="0">Marked as Not follow</option>
+                </select>
+            </label>
         </div>
 
         <!-- Pagination Controls -->

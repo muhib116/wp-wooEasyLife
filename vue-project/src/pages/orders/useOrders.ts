@@ -60,6 +60,8 @@ export const useOrders = () => {
     per_page: 20,
     status: "",
     search: "",
+    is_done: "",
+    need_follow: "",
   });
 
   // --- START: New code for DSP Filter ---
