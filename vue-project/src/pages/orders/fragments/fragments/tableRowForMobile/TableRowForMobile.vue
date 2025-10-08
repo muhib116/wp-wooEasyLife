@@ -37,20 +37,35 @@
                     </span>
                 </div>
                 
-                <Button.Native
-                    class="opacity-30 flex items-center gap-2"
-                    :class="{
-                        '!opacity-100 text-green-500' : order.is_done == 1
-                    }"
-                    @onClick="btn => markAsDone(order, btn)"
-                >
-                    <Icon
-                        name="PhChecks"
-                        size="25"
-                        weight="bold"
-                    />
-                    {{ order.is_done == 1 ? 'done' : '' }}
-                </Button.Native>
+                <div class="flex items-center gap-4">
+                    <Button.Native
+                        class="opacity-30 flex items-center gap-2"
+                        :class="{
+                            '!opacity-100 text-green-500' : order.is_done == 1
+                        }"
+                        @onClick="btn => markAsDone(order, btn)"
+                    >
+                        <Icon
+                            name="PhChecks"
+                            size="25"
+                            weight="bold"
+                        />
+                    </Button.Native>
+    
+                    <Button.Native
+                        class="opacity-50 flex items-center gap-2"
+                        :class="{
+                            '!opacity-100 text-green-500' : order.need_follow == 1
+                        }"
+                        @onClick="btn => markAsFollowing(order, btn)"
+                    >
+                        <Icon
+                            name="PhHeadset"
+                            size="25"
+                        />
+                        {{ order?.need_follow == 1 ? 'Following' : '' }}
+                    </Button.Native>
+                </div>
             </div>
             <div
                 class="flex flex-wrap items-start gap-2 relative"
@@ -324,7 +339,8 @@
         courierStatusInfo,
         getDeliveryProbability,
         setActiveOrder,
-        markAsDone
+        markAsDone,
+        markAsFollowing
     } = inject('useOrders')
 
     const toggleAddressModel = ref(false)

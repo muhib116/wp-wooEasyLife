@@ -10,6 +10,7 @@ import {
   includePastNewOrdersToWELPlugin,
   includeMissingNewOrdersOfFailedBalanceCut,
   toggleIsDone,
+  toggleIsFollowing,
   updateOrder,
   updateShippingMethod,
   getShippingMethods,
@@ -404,13 +405,30 @@ export const useOrders = () => {
 
   const markAsDone = async (order, btn: { isLoading: boolean }) => {
     const isDone = Number(!Number(order.is_done));
-    if (!isDone && !confirm('Are sure to make this undone?')) return
+    if (!isDone && !confirm('Are you sure to make this undone?')) return
     btn.isLoading = true;
     const payload = { order_id: order.id, is_done: isDone };
     try {
       await toggleIsDone(payload);
       order.is_done = isDone;
       showNotification({ type: isDone ? 'success' : 'warning', message: `Marked as ${isDone ? 'done!' : 'undone'}` });
+    } catch (err) {
+      console.error(err);
+      showNotification({ type: 'danger', message: 'Something went wrong!' });
+    } finally {
+      btn.isLoading = false;
+    }
+  }
+
+  const markAsFollowing = async (order, btn: { isLoading: boolean }) => {
+    const need_follow = Number(!Number(order.need_follow));
+    if (!need_follow && !confirm('Are you sure ?')) return
+    btn.isLoading = true;
+    const payload = { order_id: order.id, need_follow: need_follow };
+    try {
+      await toggleIsFollowing(payload);
+      order.need_follow = need_follow;
+      showNotification({ type: need_follow ? 'success' : 'warning', message: `Marked as ${need_follow ? 'following!' : 'normal'}` });
     } catch (err) {
       console.error(err);
       showNotification({ type: 'danger', message: 'Something went wrong!' });
@@ -561,7 +579,7 @@ export const useOrders = () => {
   });
 
   return {
-    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
+    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, markAsFollowing, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
     paymentMethods, 
     loadPaymentMethods,
     // Export new properties

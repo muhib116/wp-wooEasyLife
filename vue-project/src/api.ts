@@ -95,6 +95,17 @@ export const toggleIsDone = async (payload: {
   return data;
 }
 
+export const toggleIsFollowing = async (payload: {
+  order_id: number | string
+  need_follow: boolean
+}) => {
+  const { data } = await axios.post(
+    `${localApiBaseURL}/toggle-as-follow-unfollow`,
+    payload
+  )
+  return data;
+}
+
 export const updateOrder = async (payload: {
   order_id: number | string
   product_id: number | string

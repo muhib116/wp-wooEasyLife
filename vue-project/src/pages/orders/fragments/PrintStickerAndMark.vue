@@ -24,6 +24,19 @@
             />
             {{ order.is_done == 1 ? 'done' : '' }}
         </Button.Native>
+        <Button.Native
+            class="opacity-50 flex items-center gap-2"
+            :class="{
+                '!opacity-100 text-green-500' : order.need_follow == 1
+            }"
+            @onClick="btn => markAsFollowing(order, btn)"
+        >
+            <Icon
+                name="PhHeadset"
+                size="25"
+            />
+            {{ order?.need_follow == 1 ? 'Following' : '' }}
+        </Button.Native>
     </div>
 </template>
 
@@ -61,7 +74,8 @@
     }>();
 
     const {
-        markAsDone
+        markAsDone,
+        markAsFollowing
     } = inject('useOrders')
 
     const { configData } = inject('configData')

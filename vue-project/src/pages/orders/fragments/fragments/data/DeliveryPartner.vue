@@ -44,6 +44,19 @@
             <span title="Consignment Id">
                 🆔 {{ order?.courier_data?.consignment_id }}
             </span>
+
+            
+            <a 
+                :href="`https://www.steadfast.com.bd/user/edit-parcel/${order?.courier_data?.consignment_id}`" 
+                title="Update Steadfast Parcel Data"
+                class="flex items-center gap-2"
+                target="__blank"
+            >
+                <Icon name="PhArrowSquareOut" size="20" />
+                Edit Parcel Data
+            </a>
+
+
             
             <span 
                 class="font-medium text-sky-500 flex items-center gap-2" 

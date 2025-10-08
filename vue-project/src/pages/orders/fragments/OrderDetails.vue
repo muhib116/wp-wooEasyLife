@@ -68,7 +68,7 @@
             </div>
 
             <div>
-                <div class="max-w-[190px] md:ml-auto pr-4 whitespace-nowrap">
+                <div class="max-w-[235px] md:ml-auto pr-4 whitespace-nowrap">
                     <DeliveryPartner
                         :order="activeOrder"
                     />

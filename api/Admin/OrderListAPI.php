@@ -99,6 +99,15 @@ class OrderListAPI
                 'permission_callback' => api_permission_check(), // Or add your permission logic here
             ]
         );
+        register_rest_route(
+            __API_NAMESPACE, 
+            '/toggle-as-follow-unfollow', 
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'toggle_as_follow_unfollow'],
+                'permission_callback' => api_permission_check(), // Or add your permission logic here
+            ]
+        );
 
         register_rest_route(
             __API_NAMESPACE, 
@@ -744,6 +753,42 @@ class OrderListAPI
             'message' => 'Order updated successfully.',
             'order_id' => $order_id,
             'is_done' => $is_done,
+        ], 200);
+    }
+
+    public function toggle_as_follow_unfollow($request) {
+        global $wpdb;
+        $params = $request->get_json_params();
+    
+        // Validate the payload
+        if (!isset($params['order_id'])) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Missing order_id in the payload.',
+            ], 400);
+        }
+    
+        $order_id = intval($params['order_id']);
+        $need_follow = isset($params['need_follow']) ? intval($params['need_follow']) : 0;
+    
+        // Retrieve the order
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Order not found.',
+            ], 404);
+        }
+    
+        // Update the order meta
+        $order->update_meta_data('woo_easy_need_follow', $need_follow);
+        $order->save_meta_data(); // Ensure the changes are saved
+    
+        return new \WP_REST_Response([
+            'status' => 'success',
+            'message' => 'Order updated successfully.',
+            'order_id' => $order_id,
+            'need_follow' => $need_follow,
         ], 200);
     }
     
