@@ -45,6 +45,7 @@ class UpdatePlugin
             return $transient;
         }
 
+
         if (
             isset($update_data['version'], $update_data['download_url']) &&
             version_compare($this->plugin_version, $update_data['version'], '<')
@@ -165,6 +166,8 @@ class UpdatePlugin
     }
 
     private function get_meta_data () {
+        error_log('WEL Update Check: Initiating API call for metadata.'); // Add this line
+
         $response = wp_remote_get(
             $this->update_server_url,
             [
@@ -172,13 +175,51 @@ class UpdatePlugin
                     'Authorization' => 'Bearer ' . $this->license_key,
                     'origin' => site_url()
                 ],
+                'timeout' => 20, // ensure enough timeout
+                'sslverify' => false, // Only for testing, should be true in production
             ]
         );
 
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+        if (is_wp_error($response)) {
+            error_log('WEL Update Check ERROR: WP_Error - ' . $response->get_error_message());
             return false;
         }
 
-        return json_decode(wp_remote_retrieve_body($response), true);
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        
+        if ($response_code !== 200) {
+            error_log('WEL Update Check ERROR: HTTP Code ' . $response_code . ' Body: ' . $response_body);
+            return false;
+        }
+
+        $data = json_decode($response_body, true);
+        
+        if (empty($data) || !isset($data['version'])) {
+            error_log('WEL Update Check ERROR: Invalid JSON or missing version in response.');
+            return false;
+        }
+        
+        error_log('WEL Update Check SUCCESS: Remote Version is ' . $data['version'] . '. Current Version is ' . $this->plugin_version); // Add this line
+        
+        return $data;
     }
+
+    // private function get_meta_data () {
+    //     $response = wp_remote_get(
+    //         $this->update_server_url,
+    //         [
+    //             'headers' => [
+    //                 'Authorization' => 'Bearer ' . $this->license_key,
+    //                 'origin' => site_url()
+    //             ],
+    //         ]
+    //     );
+
+    //     if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+    //         return false;
+    //     }
+
+    //     return json_decode(wp_remote_retrieve_body($response), true);
+    // }
 }
