@@ -8,7 +8,7 @@
         }"
     >
         <Icon
-            name="PhSpinner"
+            name="PhCircleNotch"
             :size="size"
             :weight="weight"
             class="animate-spin !w-full !h-full"
@@ -33,7 +33,11 @@
         },
         weight: {
             type: String,
-            default: 'bold',
-        }
+            default: 'regular',
+        },
+        color: {
+            type: String,
+            default: 'inherit',
+        },
     })
 </script>

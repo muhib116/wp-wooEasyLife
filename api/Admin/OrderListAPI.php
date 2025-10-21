@@ -329,6 +329,7 @@ class OrderListAPI
         {
             $product_info = getProductInfo($order);
             $customer_ip = $order->get_meta('_customer_ip_address', true);
+            $customer_device_token = $order->get_meta('_wel_device_token', true);
             $total_order_per_customer_for_current_order_status = get_total_orders_by_billing_phone_or_email_and_status($order);
     
             // Fetch fraud data from the custom table
@@ -337,6 +338,7 @@ class OrderListAPI
             $fraud_data = customer_courier_fraud_data($order);
     
             $ip_block_listed = get_block_data_by_type($customer_ip, 'ip');
+            $device_block_listed = get_block_data_by_type($customer_device_token, 'device_token');
             $phone_block_listed = get_block_data_by_type(normalize_phone_number($_billing_phone), 'phone_number');
             $email_block_listed = get_block_data_by_type($_billing_email, 'email');
             $discount_total = $order->get_discount_total(); // Total discount amount
@@ -379,9 +381,11 @@ class OrderListAPI
                 'order_source'     => get_order_source($order),
                 'created_via' => $created_via,
                 'customer_ip'   => $customer_ip,
+                'customer_device_token'   => $customer_device_token,
                 'phone_block_listed' => $phone_block_listed,
                 'email_block_listed' => $email_block_listed,
                 'ip_block_listed' => $ip_block_listed,
+                'device_block_listed' => $device_block_listed,
                 'discount_total' => $discount_total,
                 'discount_tax' => $discount_tax,
                 'order_notes' => $order_notes,

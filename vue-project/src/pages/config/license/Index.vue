@@ -40,19 +40,19 @@
         <div class="flex flex-col md:flex-row justify-center gap-3 md:gap-6 -mb-2 md:text-lg">
             <a
                 class="flex items-center gap-3"
-                href="tel:+8801789909958"
+                href="tel:+01770989591"
             >
                 <Icon
                     class="bg-blue-500 text-white p-1 rounded-full shadow"
                     name="PhPhone"
                     size="35"
                 />
-                +880 1789-909958
+                01770989591
             </a>
 
             <a 
                 class="flex items-center gap-3"
-                href="https://wa.me/+8801789909958"
+                href="https://wa.me/+01770989591"
                 target="_blank"
             >
                 <Icon
@@ -60,7 +60,7 @@
                     name="PhWhatsappLogo"
                     size="35"
                 />
-                +880 1789-909958
+                01770989591
             </a>
 
             <a 

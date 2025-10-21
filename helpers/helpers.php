@@ -351,7 +351,7 @@ function get_block_data_by_type($value, $type = 'phone_number') {
     $table_name = $wpdb->prefix . __PREFIX . 'block_list'; // Adjusted to match standard table prefix
 
     // Validate the type to prevent SQL injection
-    $allowed_types = ['phone_number', 'ip', 'email'];
+    $allowed_types = ['phone_number', 'ip', 'email', 'device_token'];
     if (!in_array($type, $allowed_types, true)) {
         return false; // Invalid type
     }

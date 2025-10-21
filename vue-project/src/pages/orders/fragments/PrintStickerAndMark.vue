@@ -20,7 +20,7 @@
         >
             <Icon
                 name="PhChecks"
-                size="25"
+                size="20"
             />
             {{ order.is_done == 1 ? 'done' : '' }}
         </Button.Native>
@@ -33,9 +33,8 @@
         >
             <Icon
                 name="PhHeadset"
-                size="25"
+                size="20"
             />
-            {{ order?.need_follow == 1 ? 'Following' : '' }}
         </Button.Native>
     </div>
 </template>

@@ -16,9 +16,8 @@
             </span>
             <Icon
                 class="inline-block sm:hidden shadow-sm"
-                name="PhArrowsClockwise"
+                name="PhCheck"
                 size="25"
-                weight="fill"
             />
         </Button.Primary>
     </div>

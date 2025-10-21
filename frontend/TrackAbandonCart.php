@@ -29,19 +29,41 @@ class TrackAbandonCart {
     }
 
     public function enqueue_my_ajax_script() {
+        // --- 1. Enqueue AbandonedOrder.js (Existing) ---
         wp_enqueue_script( 
-            'woo-easy-life-ajax-script', 
+            'woo-easy-life-abandon-script', // Handlename changed slightly for clarity
             plugins_url('includes/checkoutPage/AbandonedOrder.js', __DIR__), 
-            [], 
+            [], // Added dependency on jQuery if your JS uses it
+            null, 
+            true 
+        );
+        
+        // --- 2. Enqueue wel_app.js (NEW) ---
+        wp_enqueue_script( 
+            'woo-easy-life-app-script', // New unique handle name
+            plugins_url('includes/checkoutPage/wel_app.js', __DIR__), 
+            [], // No dependencies
             null, 
             true 
         );
     
         // Localize script to pass the AJAX URL
-        wp_localize_script( 'woo-easy-life-ajax-script', 'woo_easy_life_ajax_obj', array(
+        wp_localize_script( 'woo-easy-life-abandon-script', 'woo_easy_life_ajax_obj', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'wc_session_id' => ( class_exists( 'WooCommerce' ) && WC()->session ) ? WC()->session->get_customer_id() : ''
-        ));        
+        ));    
+
+        $this->enqueue_checkout_scripts();
+    }
+
+    public function enqueue_checkout_scripts() {
+        if (is_checkout()) {
+            // Enqueue FingerprintJS library (from a CDN or local package)
+            wp_enqueue_script('fingerprintjs', 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js', [], '4.0.0', true);
+
+            // Enqueue your custom device tracking script
+            wp_enqueue_script('wel-device-tracker', plugins_url('js/device-tracker.js', __FILE__), ['jquery', 'fingerprintjs'], '1.0', true);
+        }
     }
 
 

@@ -11,6 +11,8 @@ class CheckoutFormValidation {
     public function __construct()
     {   
         add_action('woocommerce_checkout_create_order', [$this, 'modify_order_phone'], 10, 2);
+        add_action('woocommerce_checkout_create_order', [$this, 'save_device_token_to_order'], 10, 2);
+
         add_action('woocommerce_after_checkout_validation', [$this, 'form_validation'], 10, 2);
     }
 
@@ -341,5 +343,19 @@ class CheckoutFormValidation {
         }
 
         return false; // no offensive word found
+    }
+
+    public function save_device_token_to_order($order, $data) {
+        if (!is_wel_license_valid()) {
+            return;
+        }
+        
+        if (isset($_POST['wel_device_token'])) {
+            $device_token = sanitize_text_field(wp_unslash($_POST['wel_device_token']));
+            if (!empty($device_token)) {
+                // Save to order meta
+                $order->update_meta_data('_wel_device_token', $device_token);
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@
             :type="alertMessage.type"
         />
         <div class="mb-2">
-            <h3 class="font-semibold text-gray-900">
+            <h3 class="font-semibold text-gray-900 text-xl">
                 Blacklisted Customers
             </h3>
         </div>
@@ -19,7 +19,7 @@
         >
             <Table.THead>
                 <Table.Th>#sl</Table.Th>
-                <Table.Th>Phone/Email/Ip</Table.Th>
+                <Table.Th>Phone/Email/Ip/Device</Table.Th>
                 <Table.Th>Type</Table.Th>
                 <Table.Th>Blocked At</Table.Th>
                 <Table.Th class="text-right">Action</Table.Th>

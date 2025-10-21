@@ -67,7 +67,7 @@ class BlockListAPI extends WP_REST_Controller {
     public function get_all_blocked_entries() {
         global $wpdb;
 
-        $results = $wpdb->get_results("SELECT * FROM {$this->table_name}", ARRAY_A);
+        $results = $wpdb->get_results("SELECT * FROM {$this->table_name} ORDER BY id DESC", ARRAY_A);
 
         if (empty($results)) {
             return new WP_REST_Response([
@@ -92,7 +92,7 @@ class BlockListAPI extends WP_REST_Controller {
 
         $customer_id = sanitize_text_field($request->get_param('customer_id'));
         $type = sanitize_text_field($request->get_param('type'));
-        $ip_phone_or_email = sanitize_text_field($request->get_param('ip_phone_or_email'));
+        $ip_phone_email_or_device = sanitize_text_field($request->get_param('ip_phone_email_or_device'));
         $created_at = current_time('mysql');
         $updated_at = current_time('mysql');
 
@@ -101,7 +101,7 @@ class BlockListAPI extends WP_REST_Controller {
             $wpdb->prepare(
                 "SELECT * FROM {$this->table_name} WHERE type = %s AND ip_phone_or_email = %s",
                 $type,
-                $ip_phone_or_email
+                $ip_phone_email_or_device
             ),
             ARRAY_A
         );
@@ -126,7 +126,7 @@ class BlockListAPI extends WP_REST_Controller {
             [
                 'customer_id' => $customer_id,
                 'type'        => $type,
-                'ip_phone_or_email' => $ip_phone_or_email,
+                'ip_phone_or_email' => $ip_phone_email_or_device,
                 'created_at'  => $created_at,
                 'updated_at'  => $updated_at,
             ],
@@ -152,7 +152,7 @@ class BlockListAPI extends WP_REST_Controller {
             'data'    => [
                 'id'          => $wpdb->insert_id,
                 'type'        => $type,
-                'ip_phone_or_email' => $ip_phone_or_email,
+                'ip_phone_or_email' => $ip_phone_email_or_device,
                 'created_at'  => $created_at,
                 'updated_at'  => $updated_at,
             ],
@@ -176,10 +176,10 @@ class BlockListAPI extends WP_REST_Controller {
         $responses = [];
 
         foreach ($payload as $entry) {
-            if (!isset($entry['type'], $entry['ip_phone_or_email'])) {
+            if (!isset($entry['type'], $entry['ip_phone_email_or_device'])) {
                 $responses[] = [
                     'status'  => 'error',
-                    'message' => 'Missing type or ip_phone_or_email in entry.',
+                    'message' => 'Missing type or ip_phone_email_or_device in entry.',
                     'entry'   => $entry,
                 ];
                 continue;
@@ -187,16 +187,25 @@ class BlockListAPI extends WP_REST_Controller {
 
             $customer_id = sanitize_text_field($entry['customer_id']);
             $type = sanitize_text_field($entry['type']);
-            $ip_phone_or_email = sanitize_text_field($entry['ip_phone_or_email']);
+            $ip_phone_email_or_device = sanitize_text_field($entry['ip_phone_email_or_device']);
             $created_at = current_time('mysql');
             $updated_at = current_time('mysql');
+
+            if(empty($type) || empty($ip_phone_email_or_device)){
+                $responses[] = [
+                    'status'  => 'error',
+                    'message' => 'Type, IP, Phone, Email or Device Token cannot be empty.',
+                    'entry'   => $entry,
+                ];
+                continue;
+            }
 
             // Check for uniqueness
             $existing_record = $wpdb->get_row(
                 $wpdb->prepare(
                     "SELECT * FROM {$this->table_name} WHERE type = %s AND ip_phone_or_email = %s",
                     $type,
-                    $ip_phone_or_email
+                    $ip_phone_email_or_device
                 ),
                 ARRAY_A
             );
@@ -222,7 +231,7 @@ class BlockListAPI extends WP_REST_Controller {
                 [
                     'customer_id'        => $customer_id,
                     'type'        => $type,
-                    'ip_phone_or_email' => $ip_phone_or_email,
+                    'ip_phone_or_email' => $ip_phone_email_or_device,
                     'created_at'  => $created_at,
                     'updated_at'  => $updated_at,
                 ],
@@ -251,7 +260,7 @@ class BlockListAPI extends WP_REST_Controller {
                     'id'          => $wpdb->insert_id,
                     'customer_id' => $customer_id,
                     'type'        => $type,
-                    'ip_phone_or_email' => $ip_phone_or_email,
+                    'ip_phone_or_email' => $ip_phone_email_or_device,
                     'created_at'  => $created_at,
                     'updated_at'  => $updated_at,
                 ],
@@ -301,15 +310,15 @@ class BlockListAPI extends WP_REST_Controller {
 
         $id = $request->get_param('id');
         $type = sanitize_text_field($request->get_param('type'));
-        $ip_phone_or_email = sanitize_text_field($request->get_param('ip_phone_or_email'));
+        $ip_phone_email_or_device = sanitize_text_field($request->get_param('ip_phone_email_or_device'));
         $updated_at = current_time('mysql');
 
-        // Check for unique combination of type and ip_phone_or_email
+        // Check for unique combination of type and ip_phone_email_or_device
         $existing_entry = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT id FROM {$this->table_name} WHERE type = %s AND ip_phone_or_email = %s AND id != %d",
                 $type,
-                $ip_phone_or_email,
+                $ip_phone_email_or_device,
                 $id
             )
         );
@@ -325,7 +334,7 @@ class BlockListAPI extends WP_REST_Controller {
             $this->table_name,
             [
                 'type'        => $type,
-                'ip_phone_or_email' => $ip_phone_or_email,
+                'ip_phone_or_email' => $ip_phone_email_or_device,
                 'updated_at'  => $updated_at,
             ],
             ['id' => $id],
@@ -350,7 +359,7 @@ class BlockListAPI extends WP_REST_Controller {
             'data'    => [
                 'id'          => $id,
                 'type'        => $type,
-                'ip_phone_or_email' => $ip_phone_or_email,
+                'ip_phone_or_email' => $ip_phone_email_or_device,
                 'updated_at'  => $updated_at,
             ],
         ], 200);
@@ -450,13 +459,13 @@ class BlockListAPI extends WP_REST_Controller {
                     'type' => [
                         'required'    => true,
                         'type'        => 'string',
-                        'enum'        => ['phone_number', 'email', 'ip'],
+                        'enum'        => ['phone_number', 'email', 'ip', 'device_token'],
                         'description' => 'Type of entry to block (phone_number or ip).',
                     ],
-                    'ip_phone_or_email' => [
+                    'ip_phone_email_or_device' => [
                         'required'    => true,
                         'type'        => 'string',
-                        'description' => 'The phone number or IP address to block.',
+                        'description' => 'The phone number, email, device or IP address to block.',
                     ],
                 ],
             ]

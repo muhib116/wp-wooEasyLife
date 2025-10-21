@@ -241,9 +241,9 @@ export const deleteSMS = async (id: number) => {
 // sms config CRUD end
 
 // block list CRUD start
-export const ip_phone_or_email_block_bulk_entry = async (
+export const ip_phone_email_or_device_block_bulk_entry = async (
   payload: {
-    type: "ip" | "phone_number" | "email";
+    type: "ip" | "phone_number" | "email" | "device_token";
     ip_phone_or_email: string;
   }[]
 ) => {
@@ -376,11 +376,11 @@ export const getLicenseStatus = async () => {
  * @param payload { order_id: number | string, new_total: number }
  */
 export const updateOrderTotal = async (payload: {
-    order_id: number | string,
-    new_total: number
+  order_id: number | string,
+  new_total: number
 }) => {
-    const { data } = await axios.post(`${localApiBaseURL}/orders/update-total`, payload);
-    return data;
+  const { data } = await axios.post(`${localApiBaseURL}/orders/update-total`, payload);
+  return data;
 };
 
 // const status = 'valid' | 'invalid' | 'expired' | 'unauthenticated'

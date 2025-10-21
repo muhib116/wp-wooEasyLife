@@ -8,6 +8,7 @@ export const useIntegration = () => {
     const configData = ref([])
 
     const UpdateConfig = async (btn: {isLoading?: boolean}) => {
+        console.log(btn)
         try {
             isLoading.value = true
             btn ? btn.isLoading = true : ''

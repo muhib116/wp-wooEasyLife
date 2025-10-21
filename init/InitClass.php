@@ -145,6 +145,7 @@ class InitClass {
             "ip_block" => true,
             "phone_number_block" => true,
             "email_block" => true,
+            "device_block" => true,
             "daily_order_place_limit_per_customer" => 3,
             "only_bangladeshi_ip" => false,
             "courier_automation" => false,

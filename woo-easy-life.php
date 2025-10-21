@@ -151,6 +151,8 @@ if (!class_exists('WooEasyLife')) :
         private function initialize_components()
         {
             global $current_version;
+            global $license_key;
+
             new WooEasyLife\Init\BootClass();
             new WooEasyLife\API\API_Register();
             new WooEasyLife\Admin\Admin_Class_Register();

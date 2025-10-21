@@ -7,6 +7,7 @@
         <component
             :is="iconComponent"
             v-bind="$attrs"
+            :size="size"
         />
     </span>
 </template>
@@ -27,7 +28,8 @@
             validator: value => ['phosphor', 'custom'].includes(value),
         },
         title: String,
-        wrapperClass: String
+        wrapperClass: String,
+        size: String
     })
     watch(
         () => props.name,

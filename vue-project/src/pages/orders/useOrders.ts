@@ -4,7 +4,7 @@ import {
   getOrderList,
   getOrderStatusListWithCounts,
   getWoocomerceStatuses,
-  ip_phone_or_email_block_bulk_entry,
+  ip_phone_email_or_device_block_bulk_entry,
   checkFraudCustomer,
   updateCourierData,
   includePastNewOrdersToWELPlugin,
@@ -75,13 +75,13 @@ export const useOrders = () => {
     { label: '>= 50%', value: 50 },
   ]);
 
-    const loadPaymentMethods = async () => {
-      try {
-          const { data } = await getPaymentMethods();
-          paymentMethods.value = data;
-      } catch (error) {
-          console.error("Error loading payment methods:", error);
-      }
+  const loadPaymentMethods = async () => {
+    try {
+      const { data } = await getPaymentMethods();
+      paymentMethods.value = data;
+    } catch (error) {
+      console.error("Error loading payment methods:", error);
+    }
   }
 
   const getDeliveryProbability = (order) => {
@@ -240,10 +240,15 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-    const payload = [...selectedOrders.value].map((item) => ({ type: "phone_number", ip_phone_or_email: item?.billing_address?.phone }));
+    const payload = [...selectedOrders.value].map((item) => ({ type: "phone_number", ip_phone_email_or_device: item?.billing_address?.phone }));
     try {
       btn.isLoading = true;
-      await ip_phone_or_email_block_bulk_entry(payload);
+      const response = await ip_phone_email_or_device_block_bulk_entry(payload);
+
+      (response || []).forEach(({ status, message }) => {
+        showNotification({ type: status === 'success' ? "success" : "danger", message });
+      });
+
       await getOrders();
     } finally {
       btn.isLoading = false;
@@ -255,10 +260,33 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-    const payload = [...selectedOrders.value].map((item) => ({ type: "email", ip_phone_or_email: item?.billing_address?.email }));
+    const payload = [...selectedOrders.value].map((item) => ({ type: "email", ip_phone_email_or_device: item?.billing_address?.email }));
     try {
       btn.isLoading = true;
-      await ip_phone_or_email_block_bulk_entry(payload);
+      const response = await ip_phone_email_or_device_block_bulk_entry(payload);
+
+      (response || []).forEach(({ status, message }) => {
+        showNotification({ type: status === 'success' ? "success" : "danger", message });
+      });
+
+      await getOrders();
+    } finally {
+      btn.isLoading = false;
+    }
+  };
+
+  const handleDeviceBlock = async (btn) => {
+    if (!selectedOrders.value.size) {
+      showNotification({ type: 'warning', message: 'Please select at least one order to block the device.' });
+      return;
+    }
+    const payload = [...selectedOrders.value].map((item) => ({ type: "device_token", ip_phone_email_or_device: item?.customer_device_token }));
+    try {
+      btn.isLoading = true;
+      const response = await ip_phone_email_or_device_block_bulk_entry(payload);
+      (response || []).forEach(({ status, message }) => {
+        showNotification({ type: status === 'success' ? "success" : "danger", message });
+      });
       await getOrders();
     } finally {
       btn.isLoading = false;
@@ -270,10 +298,15 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-    const payload = [...selectedOrders.value].map((item) => ({ type: "ip", ip_phone_or_email: item?.customer_ip }));
+    const payload = [...selectedOrders.value].map((item) => ({ type: "ip", ip_phone_email_or_device: item?.customer_ip }));
     try {
       btn.isLoading = true;
-      await ip_phone_or_email_block_bulk_entry(payload);
+      const response = await ip_phone_email_or_device_block_bulk_entry(payload);
+
+      (response || []).forEach(({ status, message }) => {
+        showNotification({ type: status === 'success' ? "success" : "danger", message });
+      });
+      
       await getOrders();
     } finally {
       btn.isLoading = false;
@@ -363,8 +396,7 @@ export const useOrders = () => {
           /**
            * if by chance any courier entry data missed to save in db then it resolved it
            */
-          if(!order.courier_data?.consignment_id) 
-          {
+          if (!order.courier_data?.consignment_id) {
             storeBulkRecordsInToOrdersMeta([{
               order_id: order.id,
               invoice: order.id,
@@ -375,7 +407,7 @@ export const useOrders = () => {
               partner: courierPartner,
               status: courierUpdatedStatus
             }])
-          
+
             await loadOrderStatusList();
             await getOrders();
             showNotification({ type: "success", message: "Order data synced with courier platform." });
@@ -581,10 +613,51 @@ export const useOrders = () => {
   });
 
   return {
-    orders, selectAll, isLoading, totalPages, currentPage, activeOrder, orderFilter, showInvoices, totalRecords, toggleNewOrder, selectedStatus, selectedOrders, shippingMethods, orderListLoading, courierStatusInfo, isShippingEditing, wooCommerceStatuses, orderStatusWithCounts, getOrders, markAsDone, markAsFollowing, handleFilter, handleIPBlock, setActiveOrder, setSelectedOrder, toggleSelectAll, handleFraudCheck, handleEmailBlock, handleUpdateOrder, handleStatusChange, debouncedGetOrders, handleCourierEntry, loadOrderStatusList, clearSelectedOrders, handlePhoneNumberBlock, refreshBulkCourierData, getDeliveryProbability, handleUpdateShippingMethod, include_balance_cut_failed_new_orders, include_past_new_orders_thats_not_handled_by_wel_plugin,
-    paymentMethods, 
+    orders,
+    selectAll,
+    isLoading,
+    totalPages,
+    currentPage,
+    activeOrder,
+    orderFilter,
+    showInvoices,
+    totalRecords,
+    toggleNewOrder,
+    selectedStatus,
+    selectedOrders,
+    shippingMethods,
+    orderListLoading,
+    courierStatusInfo,
+    isShippingEditing,
+    wooCommerceStatuses,
+    orderStatusWithCounts,
+    getOrders,
+    markAsDone,
+    markAsFollowing,
+    handleFilter,
+    handleIPBlock,
+    setActiveOrder,
+    setSelectedOrder,
+    toggleSelectAll,
+    handleFraudCheck,
+    handleEmailBlock,
+    handleDeviceBlock,
+    handleUpdateOrder,
+    handleStatusChange,
+    debouncedGetOrders,
+    handleCourierEntry,
+    loadOrderStatusList,
+    clearSelectedOrders,
+    handlePhoneNumberBlock,
+    refreshBulkCourierData,
+    getDeliveryProbability,
+    handleUpdateShippingMethod,
+    include_balance_cut_failed_new_orders,
+    include_past_new_orders_thats_not_handled_by_wel_plugin,
     loadPaymentMethods,
-    // Export new properties
-    selectedDspFilter, dspFilterOptions, filteredOrders
+    paymentMethods,
+    selectedDspFilter,
+    dspFilterOptions,
+    filteredOrders
   };
 };

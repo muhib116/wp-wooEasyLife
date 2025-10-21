@@ -5,7 +5,7 @@
     </Table.Td>
     <Table.Td>{{ item.ip_phone_or_email }}</Table.Td>
     <Table.Td class="capitalize">
-      {{ item.type.replaceAll("_", " ") }}
+      {{ item.type.replaceAll("_", " ") || "Device Token" }}
     </Table.Td>
     <Table.Td>{{ printDate(item.created_at) }}</Table.Td>
     <Table.Td>

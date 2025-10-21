@@ -120,6 +120,7 @@
         handleCourierEntry,
         handlePhoneNumberBlock, 
         handleEmailBlock, 
+        handleDeviceBlock,
         handleIPBlock,
         selectedOrders,
         showInvoices,
@@ -176,10 +177,18 @@
             method: handleEmailBlock
         },
         {
+            icon: 'PhDeviceMobileSlash',
+            title: 'Block Device',
+            active: configData.value.device_block,
+            bg: '#7869b4',
+            color: '#fff',
+            method: handleDeviceBlock
+        },
+        {
             icon: 'PhUserList',
             title: 'Fraud Check',
             active: configData.value.fraud_customer_checker,
-            bg: '#F14A00',
+            bg: '#f8ab0b',
             color: '#fff',
             method: handleFraudCheck
         }

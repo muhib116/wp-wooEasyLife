@@ -105,7 +105,7 @@
         <Switch
             v-else
             v-model="configData[objKey]"
-            @onInput="UpdateConfig()"
+            @onInput="UpdateConfig"
         />
     </Table.Td>
 </Table.Tr>
