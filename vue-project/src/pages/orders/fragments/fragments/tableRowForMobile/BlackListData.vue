@@ -30,11 +30,30 @@
             />
             Email blocked
         </span>
+        <span
+            v-if="order?.device_block_listed"
+            class="!py-0 !text-[10px] flex items-center text-[#e82661]"
+        >
+            <Icon
+                name="PhDeviceMobileSlash"
+                size="12"
+            />
+            Device blocked
+        </span>
     </div>
 </template>
 
 <script setup lang="ts">
+    import { Icon } from '@/components'
+    
+    type OrderBlacklistData = {
+        ip_block_listed?: boolean
+        phone_block_listed?: boolean
+        email_block_listed?: boolean
+        device_block_listed?: boolean
+    }
+    
     defineProps<{
-        order: object
+        order: OrderBlacklistData
     }>()
 </script>

@@ -1,11 +1,11 @@
 <template>
-    <!-- <Select.Primary
+    <Select.Primary
         label="Order status"
         defaultOption="Select Status"
         :options="wooCommerceStatuses"
         itemKey="slug"
         v-model="form.order_status"
-    /> -->
+    />
     <div class="grid md:grid-cols-2 gap-4">
         <Input.Primary
             label="Customer Name *"
@@ -77,11 +77,7 @@
         },
     ]
 
-    const {
-        form,
-    } = inject('useCustomOrder')
+    const { form } = inject<any>('useCustomOrder') as any
 
-    const {
-        wooCommerceStatuses,
-    } = inject('useOrders')
+    const { wooCommerceStatuses } = inject<any>('useOrders') as any
 </script>

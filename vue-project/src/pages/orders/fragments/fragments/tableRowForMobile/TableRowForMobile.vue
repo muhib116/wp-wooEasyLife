@@ -310,33 +310,24 @@
     import { Whatsapp, CourierEntry } from '@/components';
     import QuickOrderStatusChange from '@/pages/orders/fragments/fragments/data/QuickOrderStatusChange.vue'
 
+    // allow the full order object to be passed through without strict structural typing
     const props = defineProps<{
-        order: {
-            customer_custom_data?: {
-                fraud_score?: string | number;
-            };
-            customer_report?: {
-                total_order?: string | number;
-                confirmed?: string | number;
-                success_rate?: string;
-            };
-            courier_data?: {
-                partner?: string;
-                parcel_tracking_link?: string;
-                consignment_id?: string;
-                status?: string;
-            };
-            payment_method_title?: string;
-            shipping_methods?: string[];
-            currency_symbol?: string;
-            shipping_cost?: string | number;
-            product_price?: string | number;
-            discount_total?: string | number;
-            applied_coupons?: string[];
-            status?: string;
-            total_order_per_customer_for_current_order_status?: number | undefined;
-        };
+        order: any;
     }>();
+
+    const ordersContext = inject('useOrders') as {
+        setSelectedOrder: (order: any) => void;
+        selectedOrders: Set<any>;
+        courierStatusInfo: Record<string, string>;
+        getDeliveryProbability: (order: any) => number;
+        setActiveOrder: (order: any) => void;
+        markAsDone: (order: any, btn?: any) => void;
+        markAsFollowing: (order: any, btn?: any) => void;
+    } | undefined;
+
+    if (!ordersContext) {
+        throw new Error('useOrders not provided');
+    }
 
     const {
         setSelectedOrder,
@@ -346,7 +337,7 @@
         setActiveOrder,
         markAsDone,
         markAsFollowing
-    } = inject('useOrders')
+    } = ordersContext
 
     const toggleAddressModel = ref(false)
     const toggleFraudHistoryModel = ref(false)
