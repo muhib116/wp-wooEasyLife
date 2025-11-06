@@ -202,6 +202,11 @@
                         class="cursor-pointer"
                     />
                 </span>
+
+                <QuickOrderStatusChange
+                    class="ml-auto"
+                    :order="order"
+                />
             </div>
 
             <hr />
@@ -293,7 +298,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Icon, Modal, Button } from '@components'
+    import { Table, Icon, Modal, Button } from '@/components'
     import { inject, ref, computed } from 'vue'
     import Address from '../address/Index.vue'
     import FraudHistory from '../FraudHistory.vue'
@@ -303,6 +308,7 @@
     import { useTableRowForMobile } from './useTableRowForMobile'
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
     import { Whatsapp, CourierEntry } from '@/components';
+    import QuickOrderStatusChange from '@/pages/orders/fragments/fragments/data/QuickOrderStatusChange.vue'
 
     const props = defineProps<{
         order: {
