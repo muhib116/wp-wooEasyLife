@@ -104,15 +104,15 @@
         Icon,
         Modal,
         CourierEntry
-    } from '@components'
+    } from '@/components'
 
     defineOptions({
         inheritAttrs: false
     })
     
     const toggleCourierDropdown = ref(false)
-    const {configData} = inject('configData')
-    const { userData } = inject('useServiceProvider')
+    const {configData} = inject('configData') as any
+    const { userData } = inject('useServiceProvider') as any
 
 
     const { 
@@ -129,7 +129,7 @@
         orders,
         include_past_new_orders_thats_not_handled_by_wel_plugin,
         include_balance_cut_failed_new_orders
-    } = inject('useOrders')
+    } = inject('useOrders') as any
 
     const actionBtns = computed(() => [
         {

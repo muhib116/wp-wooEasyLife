@@ -17,7 +17,13 @@
             <!-- /background decoration -->
 
             <slot>
-                <div class="flex items-start gap-3">
+                <component
+                    :is="isValidRoute ? 'router-link' : 'div'"
+                    :to="isValidRoute ? to : null" 
+                    class="flex items-start gap-3"
+                    :class="{ 'cursor-pointer hover:opacity-80 transition-opacity': isValidRoute || hasInvalidRoute }"
+                    @click="handleClick"
+                >
                     <span class="aspect-square p-2 bg-black/10 inline-block rounded-full flex-shrink-0 flex-grow-0">
                         <Icon
                             :name="iconName"
@@ -37,7 +43,7 @@
                             v-html="subtitle"
                         />
                     </div>
-                </div>
+                </component>
                 <footer class="min-h-4" :class="$slots.footer ? 'mt-2' : ''">
                     <slot name="footer"></slot>
                 </footer>
@@ -48,7 +54,9 @@
 
 <script setup lang="ts">
     import Card from './Native.vue'
-    import { Icon } from '@components'
+    import { Icon } from '@/components'
+    import { computed } from 'vue'
+    import { useRouter } from 'vue-router'
 
     defineOptions({
         inheritAttrs: false
@@ -62,14 +70,47 @@
         title?: string
         subtitle?: string
         footerContent?: any
+        to?: {
+            name?: string
+            params?: Record<string, any>
+            query?: Record<string, any>
+        }
     }
 
-    withDefaults(defineProps<Props>(), {
+    const props = withDefaults(defineProps<Props>(), {
         title: 'Title',
         subtitle: 'Subtitle',
         iconName: 'PhPresentationChart',
         iconClass: '',
         iconWeight: 'light',
-        iconSize: 25
+        iconSize: 25,
+        to: undefined
     })
+
+    const router = useRouter()
+
+    const isValidRoute = computed(() => {
+        if (!props.to?.name) return false
+        
+        try {
+            // Try to resolve the route to check if it exists
+            router.resolve(props.to)
+            return true
+        } catch (error) {
+            console.warn('Invalid route:', props.to, error)
+            return false
+        }
+    })
+
+    const hasInvalidRoute = computed(() => {
+        return props.to?.name && !isValidRoute.value
+    })
+
+    const handleClick = () => {
+        if (hasInvalidRoute.value) {
+            console.error('Attempted to navigate to invalid route:', props.to)
+            // You could emit an event or show a notification here
+            // For now, just log the error
+        }
+    }
 </script>

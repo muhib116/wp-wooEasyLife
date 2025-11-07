@@ -6,17 +6,29 @@
         itemKey="slug"
         v-model="form.order_status"
     />
-    <div class="grid md:grid-cols-2 gap-4">
+    <div class="grid gap-4">
         <Input.Primary
             label="Customer Name *"
             placeholder="Write customer name."
             v-model="form.first_name"
         />
-        <Input.Primary
-            label="Customer Phone Number *"
-            placeholder="Write valid phone number."
-            v-model="form.phone"
-        />
+
+        <div>
+            <Input.Primary
+                label="Customer Phone Number *"
+                placeholder="Write valid phone number."
+                v-model="form.phone"
+                @input="getCustomerDeliveryStatus(form.phone)"
+            />
+            <div 
+                v-if="fraudData?.report"
+                class="mt-2 text-sm text-gray-600 flex gap-4"
+            >
+                <div>Delivered: <span class="text-green-500">{{ fraudData.report.confirmed }}</span></div>
+                <div>Cancelled: <span class="text-red-500">{{ fraudData.report.cancel }}</span></div>
+                <div>Delivery Success Rate: <span class="font-semibold" :class="fraudData.report.success_rate < 50 ? 'text-red-500' : 'text-green-500'">{{ fraudData.report.success_rate }}</span></div>
+            </div>
+        </div>
     </div>
 
     <Textarea.Native
@@ -50,10 +62,14 @@
 </template>
 
 <script setup lang="ts">
-    import { Input, Select, Textarea } from '@components'
-    import { ref, inject } from 'vue'
+    import { Input, Select, Textarea } from '@/components'
+    import { ref, inject, onUnmounted } from 'vue'
+    import { normalizePhoneNumber, validateBDPhoneNumber, showNotification } from '@/helper'
+    import { useFraudChecker } from '@/pages/fraudChecker/useFraudChecker'
 
     const selectedSource = ref(null)
+    const { configData } = inject('configData') as any
+
     const orderSource = [
         {
             id: 'whats-app',
@@ -77,7 +93,66 @@
         },
     ]
 
+    const { handleFraudCheck, data: fraudData } = useFraudChecker()
     const { form } = inject<any>('useCustomOrder') as any
 
     const { wooCommerceStatuses } = inject<any>('useOrders') as any
+
+    let timeoutId: number | null = null
+    let debounceTimeoutId: number | null = null
+    
+    const showInvalidPhoneNotification = () => {
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+            showNotification({
+                type: 'danger',
+                message: 'Please enter a valid Bangladeshi phone number.'
+            })
+        }, 2000)
+    }
+    
+    const getCustomerDeliveryStatus = async (phone: string) => {
+        // Reset previous fraud data
+        fraudData.value = null
+        
+        // Clear previous debounce timeout
+        if (debounceTimeoutId) clearTimeout(debounceTimeoutId)
+        
+        // Early return if phone is empty or too short
+        if (!phone || phone.trim().length < 10) {
+            return
+        }
+        
+        // Debounce API calls to avoid too many requests while typing
+        debounceTimeoutId = setTimeout(async () => {
+            // Clean and validate phone number
+            const cleanedPhone = normalizePhoneNumber(phone.trim())
+            const isValidPhone = validateBDPhoneNumber(cleanedPhone)
+            
+            if (!isValidPhone) {
+                showInvalidPhoneNotification()
+                return
+            }
+            
+            try {
+                // Create button object for the handleFraudCheck function
+                const buttonState = { isLoading: false }
+                
+                // Call fraud check API
+                await handleFraudCheck(cleanedPhone, buttonState)
+            } catch (error) {
+                console.error('Error fetching customer fraud data:', error)
+                showNotification({
+                    type: 'danger',
+                    message: 'Failed to check customer data. Please try again.'
+                })
+            }
+        }, 1000) // Wait 1 second after user stops typing
+    }
+
+    // Cleanup timeouts when component unmounts
+    onUnmounted(() => {
+        if (timeoutId) clearTimeout(timeoutId)
+        if (debounceTimeoutId) clearTimeout(debounceTimeoutId)
+    })
 </script>

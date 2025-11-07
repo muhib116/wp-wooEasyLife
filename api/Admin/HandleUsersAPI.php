@@ -22,6 +22,14 @@ class HandleUsersAPI extends WP_REST_Controller {
                 'permission_callback' => api_permission_check(),
             ]
         ]);
+
+        register_rest_route(__API_NAMESPACE, 'users/delivery-stats', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [$this, 'get_customer_delivery_stats'],
+                'permission_callback' => api_permission_check(),
+            ]
+        ]);
     }
 
     /**
@@ -52,6 +60,80 @@ class HandleUsersAPI extends WP_REST_Controller {
             'status'  => 'success',
             'message' => 'Shop managers retrieved successfully.',
             'data'    => $shop_managers,
+        ], 200);
+    }
+
+    /**
+     * Get customer delivery statistics by phone number
+     */
+    public function get_customer_delivery_stats(WP_REST_Request $request) {
+        $phone = $request->get_param('phone');
+        
+        if (empty($phone)) {
+            return new WP_REST_Response([
+                'status'  => 'error',
+                'message' => 'Phone number is required.',
+            ], 400);
+        }
+
+        // Normalize phone number
+        $normalized_phone = normalize_phone_number($phone);
+        
+        // Get all orders for this phone number
+        $args = [
+            'billing_phone' => $normalized_phone,
+            'status' => 'any',
+            'return' => 'objects',
+            'type' => 'shop_order',
+            'limit' => -1
+        ];
+        
+        $orders = wc_get_orders($args);
+        
+        if (empty($orders)) {
+            return new WP_REST_Response([
+                'status' => 'success',
+                'data' => [
+                    'total_orders' => 0,
+                    'confirmed_orders' => 0,
+                    'canceled_orders' => 0,
+                    'success_rate' => 0,
+                    'phone' => $normalized_phone
+                ]
+            ], 200);
+        }
+
+        $total_orders = count($orders);
+        $confirmed_orders = 0;
+        $canceled_orders = 0;
+        
+        // Define success statuses (completed, processing, etc.)
+        $success_statuses = ['completed', 'processing'];
+        // Define cancel statuses
+        $cancel_statuses = ['cancelled', 'refunded', 'failed'];
+        
+        foreach ($orders as $order) {
+            $status = $order->get_status();
+            
+            if (in_array($status, $success_statuses)) {
+                $confirmed_orders++;
+            } elseif (in_array($status, $cancel_statuses)) {
+                $canceled_orders++;
+            }
+        }
+        
+        // Calculate success rate
+        $success_rate = $total_orders > 0 ? round(($confirmed_orders / $total_orders) * 100, 1) : 0;
+        
+        return new WP_REST_Response([
+            'status' => 'success',
+            'data' => [
+                'total_orders' => $total_orders,
+                'confirmed_orders' => $confirmed_orders,
+                'canceled_orders' => $canceled_orders,
+                'success_rate' => $success_rate,
+                'phone' => $normalized_phone
+            ]
         ], 200);
     }
 }

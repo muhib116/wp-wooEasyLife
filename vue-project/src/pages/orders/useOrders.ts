@@ -22,8 +22,10 @@ import { filterOrderById, normalizePhoneNumber, showNotification } from "@/helpe
 import { steadfastBulkStatusCheck } from "@/remoteApi";
 import { isEmpty, isFunction } from "lodash";
 import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
+import { useRoute } from "vue-router";
 
 export const useOrders = () => {
+  const route = useRoute();
   const orders = ref([]);
   const shippingMethods = ref(null);
   const totalRecords = ref(0);
@@ -60,8 +62,8 @@ export const useOrders = () => {
     per_page: 20,
     status: "",
     search: "",
-    is_done: "",
-    need_follow: "",
+    is_done: undefined as boolean | undefined,
+    need_follow: undefined as boolean | undefined,
   });
 
   // --- START: New code for DSP Filter ---
@@ -605,6 +607,9 @@ export const useOrders = () => {
   watch(() => selectedOrders, (newVal) => { selectAll.value = selectedOrders.value.size === orders.value.length; }, { deep: true });
 
   onMounted(async () => {
+    if (route.query.status) {
+      orderFilter.value.status = String(route.query.status);
+    }
     loadOrderStatusList();
     loadAllStatuses();
     await loadShippingMethods();

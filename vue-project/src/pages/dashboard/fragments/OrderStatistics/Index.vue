@@ -21,28 +21,44 @@
             <Card.Stylist
                 v-for="(item, index) in orderStatuses"
                 :key="index"
-                class="bg-blue-500 text-white order-status"
+                class="bg-blue-500 text-white order-status cursor-pointer"
                 :class="`status-${item.slug}`"
                 :title="orderStatistics.status_wise[item.slug] || 0"
                 :subtitle="item.title"
                 :iconName="iconsWithBg[item.slug]?.icon"
+                :to="{ 
+                    name: 'orders',
+                    query: { status: item.slug }
+                }"
             />
         </div>
     </DashboardCard>
 </template>
 <script setup lang="ts">
-    import { Card, Loader, MessageBox } from '@components'
+    import { Card, Loader, MessageBox } from '@/components'
+    import type { Ref } from 'vue'
     import { useOrderStatistics } from './useOrderStatistics'
     import DashboardCard from '../DashboardCard.vue'
+    interface OrderStatus {
+        slug: string
+        title: string
+    }
+
+    const _useOrderStatistics = useOrderStatistics() as {
+        orderStatuses: Ref<OrderStatus[]>
+        orderStatistics: Record<string, any>
+        isLoading: Ref<boolean>
+        loadOrderStatisticsData: (...args: any[]) => any
+    }
 
     const {
         orderStatuses,
         orderStatistics,
         isLoading,
         loadOrderStatisticsData
-    } = useOrderStatistics()
+    } = _useOrderStatistics
 
-    const iconsWithBg = {
+    const iconsWithBg: Record<string, { icon: string }> = {
         processing: {
             icon: 'PhBasket'
         },

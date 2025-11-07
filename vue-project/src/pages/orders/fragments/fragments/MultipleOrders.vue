@@ -104,19 +104,36 @@
 <script setup lang="ts">
     import { ref, onMounted } from 'vue'
     import { getOrderList } from '@/api'
-    import { Table, Button, Loader, Icon } from '@components'
+    import { Table, Button, Loader, Icon } from '@/components'
     import OrderDetails from './OrderDetails.vue'
     import { normalizePhoneNumber } from '@/helper'
 
     const props = defineProps<{
-        item: object
+        item: {
+            status: string;
+            billing_address: {
+                phone: string;
+                first_name: string;
+                last_name: string;
+                email?: string;
+                address_1: string;
+                address_2: string;
+            };
+        };
     }>()
 
     const orders = ref([])
     const selectedOrderInfo = ref([])
     
     onMounted(async () => {
-        const payload = {
+        const payload: {
+            status?: string;
+            billing_phone?: string;
+            per_page?: number;
+            page?: number;
+            is_done?: boolean;
+            need_follow?: boolean;
+        } = {
             status: props.item.status,
             billing_phone: normalizePhoneNumber(props.item.billing_address.phone)
         }

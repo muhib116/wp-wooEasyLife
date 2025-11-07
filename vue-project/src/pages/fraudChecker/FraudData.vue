@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table, Card } from '@components'
+    import { Table, Card } from '@/components'
     import fraudCheckImg from './fraudCheckImg.vue'
     import FraudProgress from './FraudProgress.vue'
     import { printDate } from '@/helper'
@@ -130,10 +130,4 @@
             hideShadow: true
         }
     )
-    
-    onMounted(() => {
-        if(props.phone) {
-            
-        }
-    })
 </script>

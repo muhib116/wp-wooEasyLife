@@ -25,6 +25,7 @@ export const useFraudChecker = () => {
             if (_data?.length) {
                 data.value = _data[0];
             }
+            return data.value
         } finally {
             btn.isLoading = false;
         }
