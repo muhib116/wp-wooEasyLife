@@ -106,12 +106,6 @@ class BootClass {
             if ($this->css_file_name) {
                 $css_url = plugins_url('vue-project/dist/' . $this->css_file_name, __DIR__);
                 
-                // Debug: Check if CSS file exists
-                $css_path = plugin_dir_path(__DIR__) . 'vue-project/dist/' . $this->css_file_name;
-                if (!file_exists($css_path)) {
-                    error_log('WEL: CSS file not found at: ' . $css_path);
-                }
-                
                 wp_enqueue_style(
                     'woo-easy-life-style',
                     $css_url,
@@ -137,32 +131,6 @@ class BootClass {
 
 
     public function check_woocommerce_installed() {
-
-        // Debug info - remove after testing
-        if (current_user_can('manage_options') && isset($_GET['page']) && $_GET['page'] === 'woo-easy-life') {
-            $debug_info = [
-                'Manifest Path' => $this->manifest_path,
-                'Manifest Exists' => file_exists($this->manifest_path) ? 'Yes' : 'No',
-                'CSS File Name' => $this->css_file_name ?: 'Not Set',
-                'JS File Name' => $this->js_file_name ?: 'Not Set',
-            ];
-            
-            if ($this->css_file_name) {
-                $css_url = plugins_url('vue-project/dist/' . $this->css_file_name, __DIR__);
-                $css_path = plugin_dir_path(__DIR__) . 'vue-project/dist/' . $this->css_file_name;
-                $debug_info['CSS URL'] = $css_url;
-                $debug_info['CSS File Exists'] = file_exists($css_path) ? 'Yes' : 'No';
-            }
-            
-            echo '<div class="notice notice-info is-dismissible"><p><strong>WEL Debug Info:</strong><pre>' . print_r($debug_info, true) . '</pre></p></div>';
-        }
-
-        if ($this->assets_file_name) {
-            $assets = plugins_url('vue-project/dist/' . $this->assets_file_name, __DIR__);
-            echo '<div class="notice notice-warning is-dismissible">
-                    '.$assets.'
-                  </div>';
-        }
 
         // Check if WooCommerce is active
         if (class_exists('WooCommerce')) {
