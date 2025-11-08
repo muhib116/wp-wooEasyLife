@@ -1,5 +1,5 @@
 <template>
-    <div class="wel-chatbot-container">
+    <div class="fixed bottom-5 right-5 z-[9999] font-sans">
         <!-- Chatbot Toggle Button -->
         <ChatToggleButton 
             v-if="!isOpen" 
@@ -33,12 +33,4 @@ const {
 } = useChatBoat()
 </script>
 
-<style scoped>
-.wel-chatbot-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-</style>
+<!-- Styles are now in Tailwind classes directly in the template -->

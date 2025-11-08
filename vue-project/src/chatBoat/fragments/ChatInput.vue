@@ -1,16 +1,16 @@
 <template>
-    <div class="wel-chatbot-input">
+    <div class="p-4 bg-white border-t border-gray-200 flex gap-2">
         <input 
             v-model="inputValue" 
             @keyup.enter="handleSend"
             type="text" 
             placeholder="Type your message..."
-            class="wel-input"
+            class="flex-1 py-2.5 px-3.5 border border-gray-200 rounded-3xl outline-none text-sm focus:border-indigo-500"
         />
         <button 
             @click="handleSend" 
             :disabled="!inputValue.trim()"
-            class="wel-send-button"
+            class="w-10 h-10 rounded-full wel-gradient-primary text-white border-0 cursor-pointer flex items-center justify-center transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             aria-label="Send Message"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -44,48 +44,4 @@ function handleSend() {
 }
 </script>
 
-<style scoped>
-.wel-chatbot-input {
-    padding: 16px;
-    background: white;
-    border-top: 1px solid #e5e5e5;
-    display: flex;
-    gap: 8px;
-}
-
-.wel-input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid #e5e5e5;
-    border-radius: 24px;
-    outline: none;
-    font-size: 14px;
-}
-
-.wel-input:focus {
-    border-color: #667eea;
-}
-
-.wel-send-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-}
-
-.wel-send-button:hover:not(:disabled) {
-    transform: scale(1.05);
-}
-
-.wel-send-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-</style>
+<!-- Styles are now in Tailwind classes directly in the template -->

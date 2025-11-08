@@ -1,5 +1,5 @@
 <template>
-    <div class="wel-chatbot-window">
+    <div class="fixed bottom-20 right-4 w-96 h-96 bg-white rounded-lg shadow-2xl flex flex-col z-50 wel-chatbot-window-responsive">
         <ChatHeader @close="$emit('close')" />
         <ChatMessages 
             :messages="messages" 
