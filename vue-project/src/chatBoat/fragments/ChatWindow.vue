@@ -40,22 +40,4 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-.wel-chatbot-window {
-    width: 380px;
-    height: 500px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-@media (max-width: 480px) {
-    .wel-chatbot-window {
-        width: calc(100vw - 40px);
-        height: calc(100vh - 100px);
-    }
-}
-</style>
+<!-- Styles are in ../styles.css -->

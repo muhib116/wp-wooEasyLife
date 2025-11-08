@@ -33,19 +33,4 @@ const {
 } = useChatBoat()
 </script>
 
-<style>
-/* Force Tailwind import if needed */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-</style>
-
-<style scoped>
-.wel-chatbot-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-</style>
+<!-- Styles are imported in main.ts -->

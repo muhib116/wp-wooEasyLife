@@ -2,6 +2,9 @@ import { createApp } from 'vue'
 import ChatBoat from './Index.vue'
 import '../index.css'
 
+// Import styles explicitly to ensure they're bundled
+import './styles.css'
+
 // Mount chatbot only if the element exists
 const chatbotElement = document.getElementById('wel-chatbot-app')
 console.log('chatbotElement:', chatbotElement);
