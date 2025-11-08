@@ -3,14 +3,18 @@
         <div 
             v-for="(message, index) in messages || []" 
             :key="index"
-            :class="['mb-4 wel-fade-in', message.type === 'user' ? 'text-right' : '']"
+            :class="['mb-4', message.type === 'user' ? 'text-right' : '']"
+            style="animation: fadeIn 0.3s ease-in; word-wrap: break-word;"
         >
-            <div :class="[
-                'py-2.5 px-3.5 rounded-xl max-w-[75%] wel-message-content',
-                message.type === 'user' 
-                    ? 'wel-gradient-primary text-white ml-auto rounded-br-sm' 
-                    : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
-            ]">
+            <div 
+                :class="[
+                    'py-2.5 px-3.5 rounded-xl max-w-[75%]',
+                    message.type === 'user' 
+                        ? 'text-white ml-auto rounded-br-sm' 
+                        : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
+                ]"
+                :style="message.type === 'user' ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : ''"
+            >
                 {{ message.text }}
             </div>
             <div class="text-xs text-gray-500 mt-1">{{ message.time }}</div>
@@ -47,3 +51,15 @@ watch(() => props.messages.length, () => {
 </script>
 
 <!-- Styles are now in Tailwind classes directly in the template -->
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

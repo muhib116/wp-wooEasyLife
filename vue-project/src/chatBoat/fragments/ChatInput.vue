@@ -10,7 +10,8 @@
         <button 
             @click="handleSend" 
             :disabled="!inputValue.trim()"
-            class="w-10 h-10 rounded-full wel-gradient-primary text-white border-0 cursor-pointer flex items-center justify-center transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            class="w-10 h-10 rounded-full text-white border-0 cursor-pointer flex items-center justify-center transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             aria-label="Send Message"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

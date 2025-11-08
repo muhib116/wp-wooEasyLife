@@ -5,6 +5,7 @@
 .toplevel_page_woo-easy-life {
   font-size: 16px !important;
 }
+
 .toplevel_page_woo-easy-life :is(#wpcontent, #wpfooter) {
   margin-left: 140px !important;
 }
@@ -12,7 +13,9 @@
 .toplevel_page_woo-easy-life.folded :is(#wpcontent, #wpfooter) {
   margin-left: 16px !important;
 }
+
 .toplevel_page_woo-easy-life {
+
   h1,
   h2,
   h3,
@@ -46,6 +49,7 @@
 
 /* wordpress default style overwrite start */
 #woo-easy-life {
+
   .wp-person a:focus .gravatar,
   a:focus,
   a:focus .media-icon img,
@@ -70,6 +74,7 @@
     line-height: normal !important;
     min-height: auto !important;
   }
+
   input[type="color"],
   input[type="date"],
   input[type="datetime-local"],
@@ -93,6 +98,7 @@
     padding: 0;
     max-width: 100% !important;
   }
+
   .outline-none {
     outline: 0px solid transparent;
     outline-offset: 0px;
@@ -119,16 +125,29 @@
     box-shadow: none !important;
     outline: none !important;
   }
-  
+
   textarea {
     border-color: inherit !important;
   }
+
   select {
     height: auto !important;
     min-height: auto !important;
   }
 
-  input[type=date], input[type=datetime-local], input[type=datetime], input[type=email], input[type=month], input[type=number], input[type=password], input[type=search], input[type=tel], input[type=text], input[type=time], input[type=url], input[type=week]{
+  input[type=date],
+  input[type=datetime-local],
+  input[type=datetime],
+  input[type=email],
+  input[type=month],
+  input[type=number],
+  input[type=password],
+  input[type=search],
+  input[type=tel],
+  input[type=text],
+  input[type=time],
+  input[type=url],
+  input[type=week] {
     min-height: auto !important;
   }
 }
@@ -141,11 +160,14 @@
     margin-left: 0 !important;
     padding-left: 0 !important;
   }
-  input[type=checkbox], input[type=radio] {
+
+  input[type=checkbox],
+  input[type=radio] {
     width: 12px;
     height: 17px;
     aspect-ratio: 1/1;
   }
+
   input[type=checkbox]:checked:before {
     width: 1.875rem;
     height: 1.875rem;
@@ -155,15 +177,18 @@
 
 
 @media print {
+
   #adminmenuwrap,
   #wpadminbar,
   #adminmenuback,
   .notice {
     display: none !important;
   }
+
   html.wp-toolbar {
     padding-top: 0 !important;
   }
+
   .toplevel_page_woo-easy-life.folded :is(#wpcontent, #wpfooter) {
     margin-left: 0 !important;
     padding-left: 0 !important;

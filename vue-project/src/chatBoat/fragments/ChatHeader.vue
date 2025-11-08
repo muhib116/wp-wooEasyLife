@@ -1,5 +1,5 @@
 <template>
-    <div class="wel-gradient-primary text-white p-4 flex items-center justify-between">
+    <div class="text-white p-4 flex items-center justify-between" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
         <div class="flex items-center gap-2">
             <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
