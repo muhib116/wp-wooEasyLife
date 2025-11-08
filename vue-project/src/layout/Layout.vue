@@ -20,6 +20,7 @@
     </div>
 
     <Tutorials/>
+    <ChatBoat/>
 </template>
 
 <script setup lang="ts">
@@ -28,7 +29,9 @@
     import { useCourier } from '@/pages/config/courier/useCourier'
     import { useNotification } from './useNotification'
     import { useLayout } from './useLayout'
+    // @ts-ignore: no declaration file for this .vue module
     import Tutorials from '@/tutorials/Index.vue'
+    import ChatBoat from '@/chatBoat/Index.vue'
 
     defineProps<{
         hideAlerts: boolean

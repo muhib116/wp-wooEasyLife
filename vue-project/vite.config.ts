@@ -21,11 +21,15 @@ export default defineConfig({
       '@components': fileURLToPath(new URL('./src/components', import.meta.url))
     },
   },
+  base: './', // Use relative paths for assets
   build: {
     manifest: true,
     outDir: "./dist",
     rollupOptions: {
-      input: "./src/main.ts",
+      input: {
+        main: "./src/main.ts",
+        chatbot: "./src/chatBoat/main.ts"
+      },
     },
   },
   server: {

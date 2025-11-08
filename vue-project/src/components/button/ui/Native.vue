@@ -44,10 +44,10 @@
 </template>
 
 <script setup lang="ts">
-    import { Icon, Loader } from '@components'
+    import { Icon, Loader } from '@/components'
     import { ref, computed, onMounted } from 'vue'
     import { twMerge } from 'tailwind-merge'
-    import { HTMLAttributes } from 'vue'
+    import type { HTMLAttributes } from 'vue'
 
     defineOptions({
         name: 'NativeButton',

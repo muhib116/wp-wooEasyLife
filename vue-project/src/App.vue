@@ -14,3 +14,10 @@
     document.body.classList.add('folded')
   })
 </script>
+
+<style>
+/* Force Tailwind import if needed */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+</style>

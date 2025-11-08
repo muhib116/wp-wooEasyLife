@@ -15,5 +15,6 @@ class Frontend_Class_Register{
         new StoreCheckoutUrl();
         new WhatsAppButton();
         new CookieOrderLimiter();
+        new ChatBoat();
     }
 }

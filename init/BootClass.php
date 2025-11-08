@@ -12,10 +12,16 @@ class BootClass {
     public function __construct()
     {
         $this->manifest_path = plugin_dir_path(__DIR__) . 'vue-project/dist/.vite/manifest.json';
-        $this->manifest = json_decode(file_get_contents($this->manifest_path), true);
-        $this->css_file_name = $this->manifest['src/main.ts']['css'][0] ?? null;
-        $this->js_file_name = $this->manifest['src/main.ts']['file'] ?? null;
-        $this->assets_file_name = $this->manifest['src/main.ts']['assets'][0] ?? null;
+        
+        if (file_exists($this->manifest_path)) {
+            $this->manifest = json_decode(file_get_contents($this->manifest_path), true);
+            
+            if ($this->manifest && isset($this->manifest['src/main.ts'])) {
+                $this->css_file_name = $this->manifest['src/main.ts']['css'][0] ?? null;
+                $this->js_file_name = $this->manifest['src/main.ts']['file'] ?? null;
+                $this->assets_file_name = $this->manifest['src/main.ts']['assets'][0] ?? null;
+            }
+        }
 
         add_action('admin_menu', [$this, 'wel_add_menu']);
         add_action('admin_head', [$this, 'wel_custom_menu_icon']);
@@ -98,13 +104,25 @@ class BootClass {
             }
     
             if ($this->css_file_name) {
+                $css_url = plugins_url('vue-project/dist/' . $this->css_file_name, __DIR__);
+                
+                // Debug: Check if CSS file exists
+                $css_path = plugin_dir_path(__DIR__) . 'vue-project/dist/' . $this->css_file_name;
+                if (!file_exists($css_path)) {
+                    error_log('WEL: CSS file not found at: ' . $css_path);
+                }
+                
                 wp_enqueue_style(
                     'woo-easy-life-style',
-                    plugins_url('vue-project/dist/' . $this->css_file_name, __DIR__),
+                    $css_url,
                     [],
                     null
                 );
+            } else {
+                error_log('WEL: No CSS file name found in manifest');
             }
+        } else {
+            error_log('WEL: Manifest file not found at: ' . $this->manifest_path);
         }
     
         // Pass data to Vue
@@ -119,6 +137,25 @@ class BootClass {
 
 
     public function check_woocommerce_installed() {
+
+        // Debug info - remove after testing
+        if (current_user_can('manage_options') && isset($_GET['page']) && $_GET['page'] === 'woo-easy-life') {
+            $debug_info = [
+                'Manifest Path' => $this->manifest_path,
+                'Manifest Exists' => file_exists($this->manifest_path) ? 'Yes' : 'No',
+                'CSS File Name' => $this->css_file_name ?: 'Not Set',
+                'JS File Name' => $this->js_file_name ?: 'Not Set',
+            ];
+            
+            if ($this->css_file_name) {
+                $css_url = plugins_url('vue-project/dist/' . $this->css_file_name, __DIR__);
+                $css_path = plugin_dir_path(__DIR__) . 'vue-project/dist/' . $this->css_file_name;
+                $debug_info['CSS URL'] = $css_url;
+                $debug_info['CSS File Exists'] = file_exists($css_path) ? 'Yes' : 'No';
+            }
+            
+            echo '<div class="notice notice-info is-dismissible"><p><strong>WEL Debug Info:</strong><pre>' . print_r($debug_info, true) . '</pre></p></div>';
+        }
 
         if ($this->assets_file_name) {
             $assets = plugins_url('vue-project/dist/' . $this->assets_file_name, __DIR__);
