@@ -108,7 +108,7 @@ class BlockListAPI extends WP_REST_Controller {
 
 
         // update customer data start
-        $this->update_customer_data(null, $customer_id);
+        $this->update_customer_data($customer_id);
         // update customer data end
 
 

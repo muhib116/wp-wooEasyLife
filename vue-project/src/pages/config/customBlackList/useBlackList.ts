@@ -4,6 +4,8 @@ import { onMounted, ref } from "vue"
 export const useBlackList = () => {
 
     const isLoading = ref(false)
+
+    const selectAll = ref(false)
     const alertMessage = ref({
         message: '',
         type: ''
@@ -34,6 +36,54 @@ export const useBlackList = () => {
         }
     }
 
+
+    const toggleSelectAll = () => {
+        blackListData.value.forEach(item => {
+            item.isSelected = selectAll.value
+        })
+    }
+    
+    const handleBulkDelete = async () => {
+        const selectedIds = blackListData.value
+            .filter(item => item.isSelected)
+            .map(item => item.id)
+
+        if (selectedIds.length === 0) {
+            alertMessage.value = {
+                message: 'No items selected for deletion.',
+                type: 'error'
+            }
+            return
+        }
+
+        if (!confirm(`Are you sure you want to remove ${selectedIds.length} selected items?`)) {
+            return
+        }
+
+        try {
+            isLoading.value = true
+            await Promise.all(selectedIds.map(async id => {
+                await deleteBlockListData(id)
+            }))
+            await loadBlackListData()
+            alertMessage.value = {
+                message: 'Selected items removed successfully.',
+                type: 'success'
+            }
+        } catch (error) {
+            alertMessage.value = {
+                message: 'An error occurred while removing items.',
+                type: 'error'
+            }
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    const hasSelectedItems = () => {
+        return blackListData.value.some(item => item.isSelected)
+    }
+
     onMounted(() => {
         loadBlackListData()
     })
@@ -42,6 +92,10 @@ export const useBlackList = () => {
         isLoading,
         blackListData,
         alertMessage,
-        removeFromBlacklist
+        selectAll,
+        removeFromBlacklist,
+        handleBulkDelete,
+        toggleSelectAll,
+        hasSelectedItems
     }
 }

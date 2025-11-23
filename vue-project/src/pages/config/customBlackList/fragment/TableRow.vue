@@ -1,5 +1,15 @@
 <template>
   <Table.Tr>
+    <Table.Td
+        @click="item.isSelected = !item.isSelected"  
+        class="cursor-pointer hover:bg-green-50"
+    >
+        <input
+          type="checkbox"
+          :value="item.id"
+          :checked="item.isSelected"
+        />
+    </Table.Td>
     <Table.Td class="capitalize">
       {{ index + 1 }}
     </Table.Td>
@@ -30,9 +40,11 @@ const { removeFromBlacklist } = inject("useBlackList");
 defineProps<{
   index: number;
   item: {
+    id: number | string;
     ip_phone_or_email: string;
     type: string;
     created_at: string;
+    isSelected?: boolean;
   };
 }>();
 </script>

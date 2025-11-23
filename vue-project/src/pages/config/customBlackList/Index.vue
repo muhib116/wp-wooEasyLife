@@ -8,16 +8,37 @@
             :title="alertMessage.message"
             :type="alertMessage.type"
         />
-        <div class="mb-2">
+        <div class="mb-2 flex items-center justify-between">
             <h3 class="font-semibold text-gray-900 text-xl">
                 Blacklisted Customers
             </h3>
+
+            <Button.Native
+                v-if="hasSelectedItems()"
+                @onClick="handleBulkDelete"
+                class="px-1 text-red-500"
+            >
+                <Icon name="PhX" size="20" />
+                Remove Selected Items
+            </Button.Native>
         </div>
+
+
         <Table.Table
             class="whitespace-nowrap"
             v-if="blackListData?.length"
         >
             <Table.THead>
+                <Table.Th class="w-8">
+                    <label class="flex gap-2">
+                        <input
+                            type="checkbox"
+                            v-model="selectAll"
+                            @change="toggleSelectAll"
+                            title="Click here to select all items"
+                        />
+                    </label>
+                </Table.Th>
                 <Table.Th>#sl</Table.Th>
                 <Table.Th>Phone/Email/Ip/Device</Table.Th>
                 <Table.Th>Type</Table.Th>
@@ -43,16 +64,20 @@
 
 
 <script setup>
-    import { Table, MessageBox, Loader, Card } from '@components'
+    import { Table, MessageBox, Loader, Card, Button, Icon } from '@components'
     import { useBlackList } from './useBlackList'
-    import { provide } from 'vue'
+    import { provide, ref } from 'vue'
     import TableTrow from './fragment/TableRow.vue'
 
     const _useBlackList = useBlackList()
     const {
         isLoading,
+        selectAll,
         blackListData,
         alertMessage,
+        handleBulkDelete,
+        toggleSelectAll,
+        hasSelectedItems
     } = _useBlackList
 
     provide('useBlackList', _useBlackList)
