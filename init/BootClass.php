@@ -59,15 +59,126 @@ class BootClass {
     }
 
     public function wel_add_bar_menu($wp_admin_bar) {
+        // Get order counts
+        $order_counts = $this->get_cached_order_counts();
+        $total_new = $order_counts['processing'];
+        
+        // Create badge HTML
+        $badge_html = '';
+        if ($total_new > 0) {
+            $badge_html = '
+                <span style="
+                    display: grid;
+                    background: #c3912c;
+                    color: white;
+                    border-radius: 10px;
+                    width: 20px;
+                    height: 20px;
+                    aspect-ratio: 1 / 1;
+                    font-size: 12px;
+                    margin-left: 6px;
+                    flex-shrink: 0;
+                    place-content: center;
+                ">' . $total_new . '</span>
+            ';
+        }
+        
+        // Main menu item
         $wp_admin_bar->add_node(array(
             'id'    => 'woo-easy-life-bar-menu',
-            'title' => 'Woo easy life', // The text shown in the admin bar
-            'title' => '<span style="height: 100%; display: flex; align-items: center; justify-content: center;">' . $this->svg_icon_wel . '<span style="margin-left: 8px;">WEL</span></span>',
-            'href'  => admin_url('admin.php?page=woo-easy-life'), // Link to your plugin settings page
+            'title' => '<span style="height: 100%; display: flex; align-items: center; justify-content: center;">' 
+                        . $this->svg_icon_wel 
+                        . '<span style="margin-left: 8px;">WEL</span>' 
+                        . $badge_html 
+                        . '</span>',
+            'href'  => admin_url('admin.php?page=woo-easy-life'),
             'meta'  => array(
-                'title' => __('Go to WooEasyLife'), // Tooltip on hover
+                'title' => __('Go to WooEasyLife - ' . $total_new . ' new orders'),
             ),
         ));
+
+        // Add submenu for call not received orders
+        if ($order_counts['call-not-received'] > 0) {
+            $wp_admin_bar->add_node(array(
+                'parent' => 'woo-easy-life-bar-menu',
+                'id'     => 'wel-call-not-received-orders',
+                'title'  => sprintf(__('📞 Call Not Received (%d)'), $order_counts['call-not-received']),
+                'href'   => admin_url('admin.php?page=woo-easy-life#/orders?status=call-not-received'),
+            ));
+        }
+        
+        // Add submenu for processing orders (New Orders)
+        if ($order_counts['processing'] > 0) {
+            $wp_admin_bar->add_node(array(
+                'parent' => 'woo-easy-life-bar-menu',
+                'id'     => 'wel-processing-orders',
+                'title'  => sprintf(__('🆕 New Orders (%d)'), $order_counts['processing']),
+                'href'   => admin_url('admin.php?page=woo-easy-life#/orders?status=processing'),
+            ));
+        }
+        
+        // Add submenu for courier entry (courier-entry status)
+        if ($order_counts['courier-entry'] > 0) {
+            $wp_admin_bar->add_node(array(
+                'parent' => 'woo-easy-life-bar-menu',
+                'id'     => 'wel-courier-entry',
+                'title'  => sprintf(__('📦 Courier Entry (%d)'), $order_counts['courier-entry']),
+                'href'   => admin_url('admin.php?page=woo-easy-life#/orders?status=courier-entry'),
+            ));
+        }
+        
+        // Add view all orders link
+        $wp_admin_bar->add_node(array(
+            'parent' => 'woo-easy-life-bar-menu',
+            'id'     => 'wel-all-orders',
+            'title'  => '
+                            <hr style="margin-top: 5px; border: none; border-top: 1px solid #ddd5;">
+                            📋 View All Orders
+                        ',
+            'href'   => admin_url('admin.php?page=woo-easy-life#/orders'),
+        ));
+    }
+
+    private function get_cached_order_counts() {
+        $cache_key = 'wel_order_counts';
+        $counts = get_transient($cache_key);
+        
+        if (false === $counts) {
+            $counts = $this->get_order_counts();
+            set_transient($cache_key, $counts, 30); // Cache for 30 seconds
+        }
+        
+        return $counts;
+    }
+
+    private function get_order_counts() {
+        if (!class_exists('WooCommerce')) {
+            return array(
+                'call-not-received' => 0,
+                'processing' => 0,
+                'courier-entry' => 0
+            );
+        }
+        
+        $counts = array();
+
+        foreach (array('call-not-received', 'processing', 'courier-entry') as $status) {
+            $args = array(
+                'status' => $status,
+                'limit'  => -1,
+                'return' => 'ids',
+            );
+            
+            $orders = wc_get_orders($args);
+            $counts[$status] = count($orders);
+        }
+        
+        return $counts;
+    }
+
+    public function clear_orders_cache() {
+        delete_transient('wel_new_orders_count');
+        delete_transient('wel_order_counts');
     }
 
     public function wel_render_admin_page() {
