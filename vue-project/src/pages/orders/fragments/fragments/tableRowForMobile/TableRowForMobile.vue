@@ -19,6 +19,7 @@
                 :checked="[...selectedOrders].find(item => item.id == order.id)"
             />
         </Table.Td>
+
         <Table.Td class="space-y-2 w-fit">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
@@ -67,7 +68,7 @@
                 </div>
             </div>
             <div
-                class="flex flex-wrap items-start gap-2 relative"
+                class="flex flex-wrap items-center gap-2 relative"
             >
                 <span
                     title="Customer fraud score"
@@ -93,6 +94,14 @@
                         size="18"
                     />
                 </span>
+
+                <div
+                    class="flex text-sm"
+                    v-if="order?.customer_report && (order.customer_report.confirmed || order.customer_report.cancel)"
+                >
+                    <span class="text-green-500">{{ order.customer_report.confirmed }}</span>
+                    /<span class="text-red-500">{{ order.customer_report.cancel }}</span>
+                </div>
             </div>
 
             <div
