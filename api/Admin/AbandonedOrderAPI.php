@@ -155,146 +155,392 @@ class AbandonedOrderAPI extends WP_REST_Controller {
     }
     
     /**
-     * Get all abandoned orders with optional filters (status, start_date, end_date) and pagination
+     * Log errors with context
+     */
+    private function log_error($message, $context = []) {
+        $log_message = sprintf(
+            '[AbandonedOrderAPI] %s | Context: %s | Time: %s',
+            $message,
+            json_encode($context),
+            current_time('Y-m-d H:i:s')
+        );
+        
+        error_log($log_message);
+        
+        // Also log to custom file
+        $log_file = WP_CONTENT_DIR . '/uploads/woo-easy-life-logs/abandoned-order-api.log';
+        $log_dir = dirname($log_file);
+        
+        if (!is_dir($log_dir)) {
+            wp_mkdir_p($log_dir);
+        }
+        
+        if (is_writable($log_dir)) {
+            file_put_contents($log_file, $log_message . PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+    }
+
+    /**
+     * Get all abandoned orders with optional filters and pagination
      */
     public function get_all_abandoned_orders(WP_REST_Request $request) {
         global $wpdb;
-        $this->mark_abandoned_carts(); // Ensure abandoned carts are marked before fetching
-    
-        // Initialize query conditions
-        $query_conditions = "1=1"; // Always true, allowing optional conditions
-        $query_params = [];
-    
-        // Get status filter (optional) - Case Insensitive Search
-        $status = $request->get_param('status');
-        if (!empty($status)) {
-            $status = sanitize_text_field($status);
-            $query_conditions .= " AND LOWER(status) = LOWER(%s)";
-            $query_params[] = $status;
-        }
-    
-        // Get date filters (optional)
-        $start_date = $request->get_param('start_date');
-        $end_date = $request->get_param('end_date');
-    
-        if (!empty($start_date) && !empty($end_date)) {
-            $start_date = sanitize_text_field($start_date);
-            $end_date = sanitize_text_field($end_date);
-    
-            // Validate date format
-            if (!strtotime($start_date) || !strtotime($end_date)) {
+        
+        try {
+            // Mark abandoned carts before fetching
+            $this->mark_abandoned_carts();
+            
+            // Initialize query conditions
+            $query_conditions = "1=1";
+            $query_params = [];
+            
+            // Status filter with validation
+            $status = $request->get_param('status');
+            if (!empty($status)) {
+                $status = sanitize_text_field($status);
+                $valid_statuses = ['active', 'abandoned', 'confirmed', 'call-not-received'];
+                
+                if (!in_array(strtolower($status), array_map('strtolower', $valid_statuses))) {
+                    $this->log_error('Invalid status filter', ['status' => $status]);
+                    return new WP_REST_Response([
+                        'status'  => 'error',
+                        'message' => 'Invalid status. Valid options: ' . implode(', ', $valid_statuses),
+                    ], 400);
+                }
+                
+                $query_conditions .= " AND LOWER(status) = LOWER(%s)";
+                $query_params[] = $status;
+            }
+            
+            // Date filters with validation
+            $start_date = $request->get_param('start_date');
+            $end_date = $request->get_param('end_date');
+            
+            if (!empty($start_date) && !empty($end_date)) {
+                $start_date = sanitize_text_field($start_date);
+                $end_date = sanitize_text_field($end_date);
+                
+                // Validate date format
+                if (!strtotime($start_date) || !strtotime($end_date)) {
+                    $this->log_error('Invalid date format', [
+                        'start_date' => $start_date,
+                        'end_date' => $end_date
+                    ]);
+                    
+                    return new WP_REST_Response([
+                        'status'  => 'error',
+                        'message' => 'Invalid date format. Use YYYY-MM-DD.',
+                    ], 400);
+                }
+                
+                // Validate date range
+                if (strtotime($start_date) > strtotime($end_date)) {
+                    return new WP_REST_Response([
+                        'status'  => 'error',
+                        'message' => 'Start date cannot be after end date.',
+                    ], 400);
+                }
+                
+                $query_conditions .= " AND abandoned_at BETWEEN %s AND %s";
+                $query_params[] = $start_date . ' 00:00:00';
+                $query_params[] = $end_date . ' 23:59:59';
+            }
+            
+            // Pagination with validation
+            $page = max(1, intval($request->get_param('page') ?? 1));
+            $per_page = max(1, min(100, intval($request->get_param('per_page') ?? 10))); // Max 100 per page
+            $offset = ($page - 1) * $per_page;
+            
+            // Get total count with error handling
+            $total_count = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_name} WHERE $query_conditions",
+                ...$query_params
+            ));
+            
+            if ($wpdb->last_error) {
+                $this->log_error('Database error getting total count', [
+                    'error' => $wpdb->last_error,
+                    'query' => $wpdb->last_query
+                ]);
+                
                 return new WP_REST_Response([
                     'status'  => 'error',
-                    'message' => 'Invalid date format. Use YYYY-MM-DD.',
-                ], 400);
+                    'message' => 'Database error occurred while counting records.',
+                ], 500);
             }
-    
-            $query_conditions .= " AND abandoned_at BETWEEN %s AND %s";
-            $query_params[] = $start_date . ' 00:00:00';
-            $query_params[] = $end_date . ' 23:59:59';
-        }
-    
-        // Get pagination parameters
-        $page = max(1, intval($request->get_param('page') ?? 1));
-        $per_page = max(1, intval($request->get_param('per_page') ?? 10));
-        $offset = ($page - 1) * $per_page;
-    
-        // Get total count of filtered abandoned orders
-        $total_count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$this->table_name} WHERE $query_conditions",
-            ...$query_params
-        ));
-    
-        // Query the database with pagination
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE $query_conditions ORDER BY abandoned_at DESC LIMIT %d OFFSET %d",
-                ...array_merge($query_params, [$per_page, $offset])
-            ),
-            ARRAY_A
-        );
-
-        // If no results found
-        if (empty($results)) {
+            
+            $total_count = intval($total_count);
+            
+            // Query the database with pagination
+            $results = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$this->table_name} WHERE $query_conditions ORDER BY abandoned_at DESC LIMIT %d OFFSET %d",
+                    ...array_merge($query_params, [$per_page, $offset])
+                ),
+                ARRAY_A
+            );
+            
+            if ($wpdb->last_error) {
+                $this->log_error('Database error getting results', [
+                    'error' => $wpdb->last_error,
+                    'query' => $wpdb->last_query
+                ]);
+                
+                return new WP_REST_Response([
+                    'status'  => 'error',
+                    'message' => 'Database error occurred while fetching records.',
+                ], 500);
+            }
+            
+            // If no results found
+            if (empty($results)) {
+                return new WP_REST_Response([
+                    'status'  => 'success',
+                    'message' => 'No abandoned orders found.',
+                    'data'    => [],
+                    'pagination' => [
+                        'current_page' => $page,
+                        'per_page'     => $per_page,
+                        'total_count'  => $total_count,
+                        'total_pages'  => max(1, ceil($total_count / $per_page)),
+                    ],
+                ], 200);
+            }
+            
+            // Process results with error handling
+            foreach ($results as &$result) {
+                try {
+                    // Get WooCommerce order data (both recent and lifetime)
+                    $wc_data = $this->get_wc_order_data_by_abandoned_data($result);
+                    
+                    // Extract recent order data
+                    $result['last_wc_order_current_status'] = $wc_data['recent_order']['last_wc_order_current_status'] ?? '';
+                    $result['last_wc_order_at'] = $wc_data['recent_order']['last_wc_order_at'] ?? '';
+                    $result['last_wc_order_id'] = $wc_data['recent_order']['last_wc_order_id'] ?? null;
+                    
+                    // Add lifetime orders data
+                    $result['lifetime_orders'] = $wc_data['lifetime_orders'] ?? [];
+                    
+                    // Format dates with null checks
+                    $result['created_at'] = !empty($result['created_at']) ? 
+                        human_time_difference(strtotime($result['created_at'])) : '';
+                    
+                    $result['abandoned_at'] = !empty($result['abandoned_at']) ? 
+                        human_time_difference(strtotime($result['abandoned_at'])) : '';
+                    
+                    $result['recovered_at'] = !empty($result['recovered_at']) ? 
+                        human_time_difference(strtotime($result['recovered_at'])) : '';
+                    
+                    // Deserialize cart contents safely
+                    if (isset($result['cart_contents'])) {
+                        $unserialized = maybe_unserialize($result['cart_contents']);
+                        $result['cart_contents'] = is_array($unserialized) ? $unserialized : [];
+                    }
+                    
+                } catch (Exception $e) {
+                    $this->log_error('Error processing result', [
+                        'result_id' => $result['id'] ?? 'unknown',
+                        'exception' => $e->getMessage()
+                    ]);
+                    
+                    // Set default values on error
+                    $result['last_wc_order_current_status'] = '';
+                    $result['last_wc_order_at'] = '';
+                    $result['last_wc_order_id'] = null;
+                    $result['lifetime_orders'] = [];
+                    $result['cart_contents'] = [];
+                }
+            }
+            
             return new WP_REST_Response([
                 'status'  => 'success',
-                'message' => 'No abandoned orders found.',
-                'data'    => [],
+                'message' => 'Abandoned orders retrieved successfully.',
+                'data'    => $results,
                 'pagination' => [
                     'current_page' => $page,
                     'per_page'     => $per_page,
                     'total_count'  => $total_count,
-                    'total_pages'  => ceil($total_count / $per_page),
+                    'total_pages'  => max(1, ceil($total_count / $per_page)),
                 ],
             ], 200);
+            
+        } catch (Exception $e) {
+            $this->log_error('Exception in get_all_abandoned_orders', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_params' => $request->get_params()
+            ]);
+            
+            return new WP_REST_Response([
+                'status'  => 'error',
+                'message' => 'An unexpected error occurred while fetching abandoned orders.',
+            ], 500);
         }
- 
-        // Deserialize cart_contents for each result
-        foreach ($results as &$result) {
-            $data = $this->get_wc_order_data_by_abandoned_data($result);
-            $result['last_wc_order_current_status'] = $data['last_wc_order_current_status'];
-            $result['last_wc_order_at'] = $data['last_wc_order_at'];
-            $result['created_at'] = human_time_difference($result['created_at']);
-            $result['abandoned_at'] = human_time_difference($result['abandoned_at']);
-            $result['recovered_at'] = human_time_difference($result['recovered_at']);
-
-            if (isset($result['cart_contents'])) {
-                $result['cart_contents'] = maybe_unserialize($result['cart_contents']);
-            }
-        }
-    
-        return new WP_REST_Response([
-            'status'  => 'success',
-            'message' => 'Abandoned orders retrieved successfully.',
-            'data'    => $results,
-            'pagination' => [
-                'current_page' => $page,
-                'per_page'     => $per_page,
-                'total_count'  => $total_count,
-                'total_pages'  => ceil($total_count / $per_page),
-            ],
-        ], 200);
     }
     
     private function get_wc_order_data_by_abandoned_data($abandonedOrder) {
-        $customer_phone = $abandonedOrder["customer_phone"];
-        $customer_email = $abandonedOrder["customer_email"];
+        try {
+            $customer_phone = $abandonedOrder["customer_phone"] ?? '';
+            $customer_email = $abandonedOrder["customer_email"] ?? '';
 
-        // Get last WooCommerce order by phone or email
-        $args = [
-            'limit'    => 1, // Get the most recent order
-            'orderby'  => 'date',
-            'order'    => 'DESC',
-            'status'   => ['wc-processing', 'wc-confirmed', 'wc-completed', 'wc-on-hold', 'wc-pending'],
-            'type'     => 'shop_order'
-        ];
-    
-        // Check by billing phone or email
-        if ($customer_phone) {
-            $args['billing_phone'] = $customer_phone;
-        } elseif ($customer_email) {
-            $args['billing_email'] = $customer_email;
-        }
-    
-        $wc_orders = wc_get_orders($args);
+            // Validate input
+            if (empty($customer_phone) && empty($customer_email)) {
+                $this->log_error('No phone or email provided for WC order lookup', [
+                    'abandoned_order_id' => $abandonedOrder['id'] ?? 'unknown'
+                ]);
+                
+                return [
+                    'recent_order' => [
+                        'last_wc_order_current_status' => '',
+                        'last_wc_order_at' => false,
+                        'last_wc_order_id' => null
+                    ],
+                    'lifetime_orders' => []
+                ];
+            }
 
+            // Get all available WooCommerce order statuses
+            $all_statuses = array_keys(wc_get_order_statuses());
+            
+            // Base args for WooCommerce orders query
+            $base_args = [
+                'type' => 'shop_order',
+                'status' => $all_statuses
+            ];
 
-        if (!empty($wc_orders)) {
-            $wc_order = $wc_orders[0];
+            // Add search criteria
+            if (!empty($customer_phone)) {
+                $base_args['billing_phone'] = $customer_phone;
+            } elseif (!empty($customer_email)) {
+                $base_args['billing_email'] = $customer_email;
+            }
 
-            $wc_order_date = $wc_order->get_date_created();
-            $order_status = $wc_order->get_status();
+            // Log search parameters
+            $this->log_error('Searching for WC orders', [
+                'search_phone' => $customer_phone,
+                'search_email' => $customer_email,
+                'abandoned_order_id' => $abandonedOrder['id'] ?? 'unknown'
+            ]);
 
-            $results['last_wc_order_current_status']  = $order_status;
-            $results['last_wc_order_at']  = human_time_difference($wc_order_date, null, true);
-        } else {
+            // 1. GET RECENT ORDER (Most recent order)
+            $recent_args = array_merge($base_args, [
+                'limit' => 1,
+                'orderby' => 'date',
+                'order' => 'DESC'
+            ]);
+
+            $recent_orders = wc_get_orders($recent_args);
+            $recent_order_data = [
+                'last_wc_order_current_status' => '',
+                'last_wc_order_at' => false,
+                'last_wc_order_id' => null
+            ];
+
+            if (!empty($recent_orders)) {
+                $recent_order = $recent_orders[0];
+                
+                if ($recent_order && is_object($recent_order)) {
+                    $wc_order_date = $recent_order->get_date_created();
+                    $order_status = $recent_order->get_status();
+                    
+                    $recent_order_data = [
+                        'last_wc_order_current_status' => $order_status,
+                        'last_wc_order_at' => $wc_order_date ? human_time_difference($wc_order_date->getTimestamp(), null, true) : false,
+                        'last_wc_order_id' => $recent_order->get_id()
+                    ];
+                }
+            }
+
+            // 2. GET LIFETIME ORDERS GROUPED BY STATUS
+            $lifetime_args = array_merge($base_args, [
+                'limit' => -1, // Get all orders
+                'orderby' => 'date',
+                'order' => 'DESC'
+            ]);
+
+            $all_orders = wc_get_orders($lifetime_args);
+            $lifetime_orders = [];
+            
+            if (!empty($all_orders)) {
+                // Group orders by status
+                $status_groups = [];
+                
+                foreach ($all_orders as $order) {
+                    if (!$order || !is_object($order)) continue;
+                    
+                    $status = $order->get_status();
+                    $order_date = $order->get_date_created();
+                    $formatted_date = $order_date ? $order_date->format('M j, Y') : '';
+                    
+                    if (!isset($status_groups[$status])) {
+                        $status_groups[$status] = [
+                            'count' => 0,
+                            'order_dates' => []
+                        ];
+                    }
+                    
+                    $status_groups[$status]['count']++;
+                    if ($formatted_date) {
+                        $status_groups[$status]['order_dates'][] = $formatted_date;
+                    }
+                }
+                
+                // Format the grouped data
+                foreach ($status_groups as $status => $data) {
+                    // Get status label from WooCommerce
+                    $status_labels = wc_get_order_statuses();
+                    $status_key = 'wc-' . $status;
+                    $status_title = isset($status_labels[$status_key]) ? $status_labels[$status_key] : ucwords(str_replace('-', ' ', $status));
+                    
+                    // Limit to last 3 dates for display
+                    $recent_dates = array_slice($data['order_dates'], 0, 3);
+                    
+                    $lifetime_orders[] = [
+                        'title' => $status_title,
+                        'status' => $status,
+                        'count' => $data['count'],
+                        'order_at' => implode(', ', $recent_dates),
+                        'all_dates' => $data['order_dates'] // Include all dates if needed
+                    ];
+                }
+                
+                // Sort by count (descending)
+                usort($lifetime_orders, function($a, $b) {
+                    return $b['count'] - $a['count'];
+                });
+            }
+
             $results = [
-                'last_wc_order_current_status'  => '',
-                'last_wc_order_at'  => false
+                'recent_order' => $recent_order_data,
+                'lifetime_orders' => $lifetime_orders
+            ];
+
+            // Log successful data retrieval
+            $this->log_error('Successfully retrieved WC order data', [
+                'abandoned_order_id' => $abandonedOrder['id'] ?? 'unknown',
+                'recent_order_found' => !empty($recent_orders),
+                'total_lifetime_orders' => count($all_orders),
+                'status_groups' => count($lifetime_orders)
+            ]);
+
+            return $results;
+            
+        } catch (Exception $e) {
+            $this->log_error('Exception in get_wc_order_data_by_abandoned_data', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'abandoned_order' => $abandonedOrder
+            ]);
+            
+            return [
+                'recent_order' => [
+                    'last_wc_order_current_status' => '',
+                    'last_wc_order_at' => false,
+                    'last_wc_order_id' => null
+                ],
+                'lifetime_orders' => []
             ];
         }
-
-        return $results;
     }
     
     

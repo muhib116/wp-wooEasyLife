@@ -1,7 +1,7 @@
 <template>
   <Table.Tr>
     <Table.Td class="space-y-1">
-      <div class="flex gap-2 truncate">
+      <div class="flex gap-2">
         <span
           class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
           title="Order Id"
@@ -14,6 +14,46 @@
         >
           Has order ({{ item.last_wc_order_at }})
         </span>
+
+        <button class="relative group">
+          <Icon 
+            name="PhInfo" 
+            size="22"
+          />
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg shadow-lg z-50 min-w-[300px] max-w-[400px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ">
+            <div class="text-center font-semibold mb-2 border-b border-gray-600 pb-1">
+              Lifetime Orders History
+            </div>
+            
+            <div v-if="item?.lifetime_orders && item.lifetime_orders.length > 0" class="space-y-2">
+              <div 
+                v-for="order in item.lifetime_orders" 
+                :key="order.status"
+                class="flex justify-between items-start gap-2"
+              >
+                <div class="flex-1">
+                  <div class="font-medium text-blue-300">{{ order.title }}</div>
+                  <div class="text-xs text-gray-300" v-if="order.order_at">
+                    {{ order.order_at }}
+                  </div>
+                </div>
+                <div class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  {{ order.count }}
+                </div>
+              </div>
+              
+              <div class="border-t border-gray-600 pt-2 mt-2">
+                <div class="text-xs text-gray-400 text-center">
+                  Total: {{ item.lifetime_orders.reduce((sum, order) => sum + order.count, 0) }} orders
+                </div>
+              </div>
+            </div>
+            
+            <div v-else class="text-center text-gray-400 py-2">
+              No order history found
+            </div>
+          </div>
+        </button>
       </div>
       <span 
         class="font-medium text-red-500"
