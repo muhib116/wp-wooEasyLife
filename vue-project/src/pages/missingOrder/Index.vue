@@ -51,7 +51,6 @@
                 <div
                     v-if="(userData?.remaining_order) > 0"
                 >
-                    {{ selectedOption }}
                     <Dashboard v-if="selectedOption.id == 'dashboard'" />
                     <OrderList v-else />
                 </div>
