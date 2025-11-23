@@ -461,11 +461,6 @@ export const useMissingOrder = () => {
         }
     }
 
-    // Computed property for selected option based on current status
-    const selectedOptionComputed = computed<Option>(() => {
-        return options.value.find(option => option.id === orderFilter.value.status) || options.value[0]
-    })
-
     onMounted(() => {
         loadAbandonedOrder()
     })
@@ -479,7 +474,7 @@ export const useMissingOrder = () => {
         totalRecords,
         dashboardData,
         abandonOrders,
-        selectedOption: selectedOptionComputed,
+        selectedOption,
         updateStatus,
         handleFilter,
         loadDashboardData,

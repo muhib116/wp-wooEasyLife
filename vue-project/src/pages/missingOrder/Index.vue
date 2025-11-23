@@ -30,7 +30,7 @@
                         }"
                     >
                         <Button.Native
-                            @click="selectedOption = {id: 'dashboard', title: 'Dashboard', color: 'black'}"
+                            @onClick="selectedOption = {id: 'dashboard', title: 'Dashboard', color: 'black'}"
                             class="hover:text-sky-500 font-medium"
                             :class="selectedOption.id == 'dashboard' ? 'text-sky-500 font-semibold' : ''"
                         >
@@ -51,6 +51,7 @@
                 <div
                     v-if="(userData?.remaining_order) > 0"
                 >
+                    {{ selectedOption }}
                     <Dashboard v-if="selectedOption.id == 'dashboard'" />
                     <OrderList v-else />
                 </div>
