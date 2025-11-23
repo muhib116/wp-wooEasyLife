@@ -318,20 +318,20 @@ export const printProductDetails = (order, cb, invoice_logo) => {
             </html>
     `);
     
-    // printWindow.document.close();
-    // // Wait for the print job to complete before closing and calling the callback
-    // printWindow.onafterprint = () => {
-    //     printWindow.close();
-    //     if (typeof cb === "function") {
-    //         cb();
-    //     }
-    // };
+    printWindow.document.close();
+    // Wait for the print job to complete before closing and calling the callback
+    printWindow.onafterprint = () => {
+        printWindow.close();
+        if (typeof cb === "function") {
+            cb();
+        }
+    };
 
-    // checkImageLoad(qrUrl, (isLoaded) => {
-    //     if (isLoaded) {
-    //         setTimeout(() => {
-    //             printWindow.print();
-    //         }, 100); // Delay to ensure the image is loaded
-    //     }
-    // })
+    checkImageLoad(qrUrl, (isLoaded) => {
+        if (isLoaded) {
+            setTimeout(() => {
+                printWindow.print();
+            }, 100); // Delay to ensure the image is loaded
+        }
+    })
 }

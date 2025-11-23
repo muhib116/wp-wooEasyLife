@@ -1,7 +1,7 @@
 <template>
     <div class="flex gap-4 items-center justify-end">
+        <!-- v-if="order?.courier_data?.consignment_id" -->
         <Button.Native
-            v-if="order?.courier_data?.consignment_id"
             class="opacity-50 flex items-center hover:opacity-100"
             @onClick="btn => printProductDetails(order, () => markAsDone(order, btn), configData.invoice_logo)"
             title="Print Tag"

@@ -292,6 +292,19 @@ export const getProducts = async (searchKey?: string) => {
   );
   return data;
 };
+
+// Add this function to your existing API file
+
+export const getProduct = async (productId: number) => {
+    try {
+        const { data } = await axios.get(`${localApiBaseURL}/products/${productId}`);
+        return data;
+    } catch (error) {
+        console.error(`Error fetching product ${productId}:`, error);
+        throw error;
+    }
+};
+
 export const createOrder = async (payload) => {
   const { data } = await axios.post(
     `${localApiBaseURL}/create-custom-order`,

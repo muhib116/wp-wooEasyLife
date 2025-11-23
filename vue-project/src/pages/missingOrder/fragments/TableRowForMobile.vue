@@ -15,6 +15,9 @@
               >
                 Has order ({{ item.last_wc_order_at }})
               </span>
+              <OrderHistory
+                :item="item"
+              />
             </div>
             <span 
               class="font-medium text-red-500"
@@ -178,6 +181,7 @@
   import CartDetails from "./CartDetails.vue";
   import { useFraudChecker } from '@/pages/fraudChecker/useFraudChecker'
   import FraudData from '@/pages/fraudChecker/FraudData.vue'
+  import OrderHistory from './OrderHistory.vue'
   
   const props = defineProps<{
     item: object;

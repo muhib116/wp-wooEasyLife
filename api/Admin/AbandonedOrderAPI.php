@@ -198,7 +198,7 @@ class AbandonedOrderAPI extends WP_REST_Controller {
             $status = $request->get_param('status');
             if (!empty($status)) {
                 $status = sanitize_text_field($status);
-                $valid_statuses = ['active', 'abandoned', 'confirmed', 'call-not-received'];
+                $valid_statuses = ['active', 'abandoned', 'confirmed', 'call-not-received', 'canceled'];
                 
                 if (!in_array(strtolower($status), array_map('strtolower', $valid_statuses))) {
                     $this->log_error('Invalid status filter', ['status' => $status]);
