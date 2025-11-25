@@ -129,6 +129,7 @@
         toggleNewOrder,
         refreshBulkCourierData,
         orders,
+        handleLabelPrint,
         include_past_new_orders_thats_not_handled_by_wel_plugin,
         include_balance_cut_failed_new_orders
     } = inject('useOrders') as any
@@ -146,12 +147,12 @@
         },
         {
             icon: 'PhTag',
-            title: 'Label Print',
+            title: 'Print Label',
             active: configData.value.invoice_print,
             bg: '#1d9c82',
             color: '#fff',
-            method: () => {
-                showLabels.value = true
+            method: (btn) => {
+                handleLabelPrint(configData.value.invoice_logo, btn)
             }
         },
         {

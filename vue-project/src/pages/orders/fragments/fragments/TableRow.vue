@@ -11,7 +11,7 @@
             <input
                 type="checkbox"
                 :value="order.id"
-                :checked="[...selectedOrders].find(item => item.id == order.id)"
+                :checked="[...selectedOrders].find(item => item?.id == order.id)"
             />
         </Table.Td>
         <Table.Td >

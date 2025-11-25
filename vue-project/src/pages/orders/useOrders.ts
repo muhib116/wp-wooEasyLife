@@ -18,7 +18,7 @@ import {
 } from "@/api";
 
 import { manageCourier } from "./useHandleCourierEntry";
-import { filterOrderById, normalizePhoneNumber, showNotification } from "@/helper";
+import { filterOrderById, formatInvoice, normalizePhoneNumber, printProductDetails, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
 import { isEmpty, isFunction } from "lodash";
 import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
@@ -37,7 +37,6 @@ export const useOrders = () => {
   const isLoading = ref(false);
   const orderListLoading = ref(false);
   const showInvoices = ref(false);
-  const showLabels = ref(false);
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
@@ -309,7 +308,7 @@ export const useOrders = () => {
       (response || []).forEach(({ status, message }) => {
         showNotification({ type: status === 'success' ? "success" : "danger", message });
       });
-      
+
       await getOrders();
     } finally {
       btn.isLoading = false;
@@ -355,7 +354,6 @@ export const useOrders = () => {
       await manageCourier(selectedOrders, courierPartner, async () => {
         await loadOrderStatusList();
         await getOrders();
-        showNotification({ type: "success", message: "Your order information has been submitted to the courier platform." });
       });
     } catch ({ response }) {
       const { status, message } = response?.data;
@@ -377,7 +375,7 @@ export const useOrders = () => {
       }
 
       const ids = courierData.map((item) => {
-        return item.id // order id == steadfast invoice id
+        return formatInvoice(item.id || '') // order id == steadfast invoice id
         // return item.courier_data.consignment_id
       });
 
@@ -402,7 +400,7 @@ export const useOrders = () => {
           if (!order.courier_data?.consignment_id) {
             storeBulkRecordsInToOrdersMeta([{
               order_id: order.id,
-              invoice: order.id,
+              invoice: formatInvoice(order.id || ''),
               recipient_name: order.customer_custom_data.first_name + order.customer_custom_data.last_name,
               recipient_phone: order.customer_custom_data.phone,
               recipient_address: order.customer_custom_data.address,
@@ -605,6 +603,31 @@ export const useOrders = () => {
     }
   }
 
+  const handleLabelPrint = (invoiceLogo, btn) => {
+    if (orders.value.length === 0) {
+      showNotification({
+        type: 'warning',
+        message: 'No orders available for label printing.'
+      });
+      return;
+    }
+
+    const printableOrders = orders.value.filter(order => {
+      return !order?.is_done && order?.courier_data?.consignment_id;
+    });
+    if (printableOrders.length === 0) {
+      showNotification({
+        type: 'warning',
+        message: 'No printable orders found. Please ensure orders are not marked as done and have valid courier data.'
+      });
+      return;
+    }
+    
+    printableOrders.forEach(order => {
+      printProductDetails(order, () => markAsDone(order, btn), invoiceLogo);
+    })
+  }
+
   watch(() => selectedOrders, (newVal) => { selectAll.value = selectedOrders.value.size === orders.value.length; }, { deep: true });
 
   onMounted(async () => {
@@ -627,7 +650,6 @@ export const useOrders = () => {
     activeOrder,
     orderFilter,
     showInvoices,
-    showLabels,
     totalRecords,
     toggleNewOrder,
     selectedStatus,
@@ -662,6 +684,7 @@ export const useOrders = () => {
     include_balance_cut_failed_new_orders,
     include_past_new_orders_thats_not_handled_by_wel_plugin,
     loadPaymentMethods,
+    handleLabelPrint,
     paymentMethods,
     selectedDspFilter,
     dspFilterOptions,

@@ -104,6 +104,7 @@ export const steadfastBulkOrderCreate = async (payload: {
     );
     return data;
   } catch (err) {
+    console.log(err)
     handleLicenseValidations(err)
   }
 };

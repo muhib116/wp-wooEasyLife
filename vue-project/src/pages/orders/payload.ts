@@ -1,4 +1,4 @@
-import { normalizePhoneNumber, showNotification } from "@/helper"
+import { normalizePhoneNumber, showNotification, formatInvoice } from "@/helper"
 
 type SteadFastPayload = {
     orders: {
@@ -9,6 +9,7 @@ type SteadFastPayload = {
         cod_amount: number | string
     }[]
 }
+
 
 export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
     if (!Array.isArray(selectedOrders)) return { orders: [] }; // Safety check
@@ -23,7 +24,6 @@ export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
             order_notes = {}
         } = item || {};
 
-        console.log(total)
         // Build addresses safely
         const shipping_address_str = [
             shipping_address?.address_1?.trim(),
@@ -43,7 +43,7 @@ export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
         }
 
         return {
-            invoice: id || '',
+            invoice: formatInvoice(id || ''), // Apply prefix to invoice
             recipient_name: customer_name,
             recipient_phone: normalizePhoneNumber(
                 shipping_address?.phone || billing_address?.phone || ''
@@ -57,10 +57,30 @@ export const getSteadFastPayload = (selectedOrders: SteadFastPayload) => {
     return { orders };
 }
 
+/**
+ * Extract order ID from invoice string
+ * Examples:
+ * - "LOC-293" -> "293"
+ * - "EXM-12345" -> "12345"
+ * - "123" -> "123"
+ */
+const extractOrderId = (invoice: string | number): string => {
+    const invoiceStr = String(invoice);
+    
+    // Check if invoice contains a hyphen (formatted invoice)
+    if (invoiceStr.includes('-')) {
+        // Split by hyphen and return the last part
+        const parts = invoiceStr.split('-');
+        return parts[parts.length - 1];
+    }
+    
+    // If no hyphen, return as is
+    return invoiceStr;
+};
 export const getSteadFastResponsePayload = (data) => {
     return data.map(item => {
         return {
-            order_id: item.invoice,
+            order_id: extractOrderId(item.invoice),
             invoice: item.invoice,
             recipient_name: item.recipient_name,
             recipient_phone: item.recipient_phone,

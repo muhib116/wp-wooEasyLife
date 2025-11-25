@@ -130,7 +130,7 @@ export const useMissingOrder = () => {
         
         for (const product of productsInCart) {
             try {
-                const productId = 252//parseInt(String(product.product_id));
+                const productId = parseInt(String(product.product_id));
                 const quantity = parseInt(String(product.quantity));
                 
                 // Basic validation first

@@ -5,23 +5,23 @@ import { toast, type ToastPosition } from 'vue3-toastify';
  * Show a notification toast with optional HTML support.
  */
 export const showNotification = (
-  alertMsg: { type: 'success' | 'info' | 'warning' | 'danger'; message: string },
-  closeTime: number | false = 3000,
-  supportHtml: boolean = true,
-  position: ToastPosition = "bottom-right"
+    alertMsg: { type: 'success' | 'info' | 'warning' | 'danger'; message: string },
+    closeTime: number | false = 3000,
+    supportHtml: boolean = true,
+    position: ToastPosition = "bottom-right"
 ): void => {
-    if(alertMsg && !alertMsg.type || !alertMsg.message) return
-  const toastType = alertMsg.type === 'danger' ? 'error' : alertMsg.type;
+    if (alertMsg && !alertMsg.type || !alertMsg.message) return
+    const toastType = alertMsg.type === 'danger' ? 'error' : alertMsg.type;
 
-  toast[toastType](supportHtml ? htmlOneLiner(alertMsg.message) : alertMsg.message, {
-    autoClose: closeTime,
-    position: position,
-    dangerouslyHTMLString: supportHtml, // Enable HTML rendering if true
-  });
+    toast[toastType](supportHtml ? htmlOneLiner(alertMsg.message) : alertMsg.message, {
+        autoClose: closeTime,
+        position: position,
+        dangerouslyHTMLString: supportHtml, // Enable HTML rendering if true
+    });
 }
 
 export const filterOrderById = (id: number, orders) => {
-    if(!id) return {}
+    if (!id) return {}
     return orders.find(order => order.id == id)
 
 }
@@ -30,14 +30,14 @@ export const filterOrderById = (id: number, orders) => {
  * Converts multi-line HTML into a single-line, well-formatted HTML string.
  */
 export const htmlOneLiner = (html: string): string => {
-  return html
-    .replace(/\n/g, " ")          // Replace new lines with spaces
-    .replace(/\s+/g, " ")         // Collapse multiple spaces into a single space
-    .replace(/>\s+</g, "><")      // Remove spaces between HTML tags
-    .trim();                      // Trim leading & trailing spaces
+    return html
+        .replace(/\n/g, " ")          // Replace new lines with spaces
+        .replace(/\s+/g, " ")         // Collapse multiple spaces into a single space
+        .replace(/>\s+</g, "><")      // Remove spaces between HTML tags
+        .trim();                      // Trim leading & trailing spaces
 }
-  
-  
+
+
 
 export const getContrastColor = (hexColor: string) => {
     // Remove the hash symbol if present
@@ -67,7 +67,7 @@ export const hslToHex = (h, s, l) => {
     if (l < 25) {
         l = l + (25 - l) * 0.5; // Increase darkness by 50% towards mid-lightness
     }
-    
+
     l /= 100;
     const a = s * Math.min(l, 1 - l) / 100;
     const f = n => {
@@ -75,7 +75,7 @@ export const hslToHex = (h, s, l) => {
         const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
         return Math.round(255 * color).toString(16).padStart(2, '0');
     };
-    
+
     return `#${f(0)}${f(8)}${f(4)}`;
 }
 
@@ -119,7 +119,7 @@ export const printDate = (dateString: string) => {
 }
 
 
-export const calculateSMSDetails = (props:string) => {
+export const calculateSMSDetails = (props: string) => {
     const GSM_7BIT = "GSM_7BIT";
     const GSM_7BIT_EX = "GSM_7BIT_EX";
     const UTF16 = "UTF16";
@@ -133,7 +133,7 @@ export const calculateSMSDetails = (props:string) => {
     const gsm7bitExRegExp = RegExp("^[" + gsm7bitChars + gsm7bitExChar + "]*$");
     const gsm7bitExOnlyRegExp = RegExp("^[\\" + gsm7bitExChar + "]*$");
 
-    function detectEncoding(text:string) {
+    function detectEncoding(text: string) {
         switch (false) {
             case text.match(gsm7bitRegExp) == null:
                 return GSM_7BIT;
@@ -144,7 +144,7 @@ export const calculateSMSDetails = (props:string) => {
         }
     }
 
-    function countGsm7bitEx(text:string) {
+    function countGsm7bitEx(text: string) {
         var char2, chars; chars = function () {
             var _i, _len, _results; _results = [];
 
@@ -214,7 +214,7 @@ export const validateAndFormatPhoneNumber = (phone: string) => {
 }
 
 
-export const  detectInternetState = (callback) => {
+export const detectInternetState = (callback) => {
     function updateStatus() {
         if (!navigator.onLine) {
             callback({
@@ -226,16 +226,16 @@ export const  detectInternetState = (callback) => {
 
         if (navigator.connection) {
             const { effectiveType } = navigator.connection;
-        
+
             const messages = {
                 "2g": { type: "warning", message: "Slow internet connection." },
                 "slow": { type: "danger", message: "Poor internet connection." }
             };
-        
+
             if (messages[effectiveType]) {
                 callback(messages[effectiveType]);
             }
-        }        
+        }
     }
 
     // Initial check
@@ -262,6 +262,59 @@ export const checkImageLoad = (imgUrl: string, callback: (isLoaded: boolean) => 
     img.src = imgUrl;
 }
 
+/**
+ * Generate invoice prefix from domain name
+ * Examples:
+ * - example.com -> EXM
+ * - my-store.com -> MST
+ * - shop-bangladesh.com -> SBD
+ */
+export const getInvoicePrefix = (): string => {
+    try {
+        // Get the current domain
+        const domain = window.location.hostname;
+
+        // Remove common TLDs and split by separators
+        const cleanDomain = domain
+            .replace(/\.(com|net|org|bd|io|co|app|shop)$/i, '') // Remove TLD
+            .replace(/^www\./i, ''); // Remove www prefix
+
+        // Split by dots and hyphens
+        const parts = cleanDomain.split(/[.\-_]/);
+
+        // If single word, take first 3 letters
+        if (parts.length === 1) {
+            const word = parts[0];
+            return word.substring(0, 3).toUpperCase();
+        }
+
+        // If multiple words, take first letter of each (max 3)
+        const prefix = parts
+            .slice(0, 3)
+            .map(part => part.charAt(0))
+            .join('')
+            .toUpperCase();
+
+        return prefix || 'ORD'; // Fallback to 'ORD' if empty
+
+    } catch (error) {
+        console.error('Error generating invoice prefix:', error);
+        return 'ORD'; // Default fallback
+    }
+};
+
+
+
+/**
+ * Format invoice with prefix
+ * Examples:
+ * - 12345 -> EXM-12345
+ */
+export const formatInvoice = (orderId: number | string): string => {
+    const prefix = getInvoicePrefix();
+    return `${prefix}-${orderId}`;
+};
+
 export const handlePrint = () => {
     window.print();
 }
@@ -269,7 +322,7 @@ export const handlePrint = () => {
 export const printProductDetails = (order, cb, invoice_logo) => {
     const qrData = order.courier_data.consignment_id
     const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
-    
+
     const printWindow = window.open("", "");
     printWindow.document.write(`
         <!DOCTYPE html>
@@ -315,9 +368,9 @@ export const printProductDetails = (order, cb, invoice_logo) => {
                     </div>
                 </div>
             </body>
-            </html>
+        </html>
     `);
-    
+
     printWindow.document.close();
     // Wait for the print job to complete before closing and calling the callback
     printWindow.onafterprint = () => {

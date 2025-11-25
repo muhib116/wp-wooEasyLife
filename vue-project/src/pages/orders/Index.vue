@@ -3,9 +3,6 @@
         <PrintInvoice
             v-if="showInvoices"
         />
-        <PrintLabels
-            v-if="showLabels"
-        />
         <Container
             v-else
         >
@@ -25,7 +22,7 @@
     import PrintLabels from './fragments/fragments/PrintLabels.vue'
 
     const _useOrders = useOrders()
-    const { showInvoices, showLabels } = _useOrders
+    const { showInvoices } = _useOrders
 
     provide('useOrders', _useOrders)
 </script>
