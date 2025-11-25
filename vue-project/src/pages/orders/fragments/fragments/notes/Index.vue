@@ -15,6 +15,11 @@
             placeholder="Write courier note."
             v-model="order.order_notes.courier_note"
         />
+        
+        <div class="space-y-1 mt-2">
+            <h3 class="text-[16px]">COD Modification Note:</h3>
+            <div class="text-red-500" v-html="order.cod_modification_note"></div>
+        </div>
 
         <Button.Primary
             class="ml-auto"

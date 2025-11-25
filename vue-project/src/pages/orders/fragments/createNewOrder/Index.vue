@@ -10,6 +10,13 @@
         <Coupon />
 
         <Input.Primary
+            label="COD"
+            placeholder="Modify the COD if Needed."
+            type="number"
+            v-model="form.cod_amount"
+        />
+
+        <Input.Primary
             label="Customer Note (Optional)"
             placeholder="Write customer note."
             v-model="form.customer_note"

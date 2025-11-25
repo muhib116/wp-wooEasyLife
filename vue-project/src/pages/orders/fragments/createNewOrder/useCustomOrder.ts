@@ -1,5 +1,5 @@
 import { createOrder, validateCoupon } from "@/api"
-import { normalizePhoneNumber, validateBDPhoneNumber } from "@/helper";
+import { normalizePhoneNumber, showNotification, validateBDPhoneNumber } from "@/helper";
 import { computed, ref, inject } from "vue"
 
 export const useCustomOrder = () => 
@@ -236,7 +236,6 @@ export const useCustomOrder = () =>
             return
         }
 
-
         try {
             btn.isLoading = true
             const products = form.value.products.map(item => {
@@ -253,7 +252,12 @@ export const useCustomOrder = () =>
                 {phone: form.value.phone}
             ]
             const coupon_codes = form.value.coupons.map(item => item.coupon_code)
-    
+
+            // Calculate total and COD
+            const calculatedTotal = getItemsTotal.value - couponDiscount.value + (parseFloat(form.value.shippingMethod.shipping_cost) || 0);
+            const CODAmount = form.value.cod_amount ? parseFloat(form.value.cod_amount) : null;
+            const hasCodModification = CODAmount !== null && CODAmount !== calculatedTotal;
+
             const payload = {
                 products: products,
                 address,
@@ -263,16 +267,33 @@ export const useCustomOrder = () =>
                 customer_note: form.value.customer_note,
                 order_source: form.value.created_via,
                 order_status: form.value.order_status,
-                coupon_codes: coupon_codes
+                coupon_codes: coupon_codes,
+                // Add COD amount if modified
+                ...(hasCodModification && {
+                    cod_amount: CODAmount,
+                    add_order_note: true // Flag to add order note
+                })
             }
-    
+
             const { data } = await createOrder(payload)
             if(data.order_id){
                 await getOrders()
                 toggleNewOrder.value = false
+                
+                // Show success notification
+                showNotification({
+                    type: 'success',
+                    message: hasCodModification 
+                        ? `Order created successfully with modified COD amount: ${CODAmount}`
+                        : 'Order created successfully'
+                })
             }
         } catch (err) {
             console.log({err})
+            showNotification({
+                type: 'danger',
+                message: err?.response?.data?.message || 'Failed to create order. Please try again.'
+            })
         } finally {
             btn.isLoading = false
         }

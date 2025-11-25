@@ -351,6 +351,8 @@ class OrderListAPI
             $customer_custom_data = $customerHandler->handle_customer_data(null, $order);
             $parcel_weight = get_order_total_weight($order);
             $referrer_url = get_post_meta($order_id, '_referrer_url', true);
+            //get order note of cod modification
+            $cod_modification_note = get_order_cod_modification_note($order);
             
             $data[] = [
                 'id'            => $order->get_id(),
@@ -389,6 +391,7 @@ class OrderListAPI
                 'discount_total' => $discount_total,
                 'discount_tax' => $discount_tax,
                 'order_notes' => $order_notes,
+                'cod_modification_note' => $cod_modification_note,
                 'courier_data' => $courier_data,
                 'repeat_customer' => $is_repeat_customer,
                 'currency_symbol' => get_woocommerce_currency_symbol($order->get_currency()),
@@ -989,6 +992,22 @@ class OrderListAPI
         $order_id = $request->get_param('order_id');
         $new_total = floatval($request->get_param('new_total'));
         
+        // Validate order ID
+        if (empty($order_id)) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Order ID is required.',
+            ], 400);
+        }
+        
+        // Validate new total
+        if ($new_total <= 0) {
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'New total must be greater than 0.',
+            ], 400);
+        }
+        
         $order = wc_get_order($order_id);
         
         if (!$order) {
@@ -998,27 +1017,83 @@ class OrderListAPI
             ], 404);
         }
         
-        // 1. COD অ্যামাউন্ট পরিবর্তন মানে অর্ডারের মোট মূল্য পরিবর্তন করা
-        $order->set_total($new_total); 
+        // Get the current total before modification
+        $calculated_total = $order->get_total();
         
-        // 2. Order Note যোগ করা (ঐচ্ছিক: ম্যানুয়াল পরিবর্তন ট্র্যাক করার জন্য)
-        $order->add_order_note(
-            sprintf('Order Total (COD) manually updated to %s via WEL plugin.', wc_price($new_total, ['currency' => $order->get_currency()])),
-            0, // Not a customer note
-            true // Is a system note
-        );
-
-        // 3. সেভ করা
-        $order->save();
+        // Check if the total is actually changing
+        if ($calculated_total == $new_total) {
+            return new \WP_REST_Response([
+                'status' => 'success',
+                'message' => 'No changes needed. Order total is already set to ' . wc_price($new_total, ['currency' => $order->get_currency()]),
+                'data' => [
+                    'order_id' => $order_id,
+                    'total' => $new_total,
+                    'modified' => false
+                ]
+            ], 200);
+        }
         
-        return new \WP_REST_Response([
-            'status' => 'success',
-            'message' => "Order Total (COD) updated to " . wc_price($new_total, ['currency' => $order->get_currency()]),
-            'data' => [
-                'order_id' => $order_id,
-                'new_total' => $new_total
-            ]
-        ], 200);
+        try {
+            // 1. Update order total
+            $order->set_total($new_total);
+            
+            // 2. Add order note to track manual modification
+            $note_message = sprintf(
+                'Order Total (COD) manually updated from %s to %s via WEL plugin.',
+                wc_price($calculated_total, ['currency' => $order->get_currency()]),
+                wc_price($new_total, ['currency' => $order->get_currency()])
+            );
+            
+            $order->add_order_note(
+                $note_message,
+                0,    // Not a customer note
+                true  // Is a system note
+            );
+            
+            // 3. Add meta to track manual modification
+            $order->update_meta_data('_cod_amount_modified', true);
+            $order->update_meta_data('_original_total', $calculated_total);
+            $order->update_meta_data('_modified_total', $new_total);
+            $order->update_meta_data('_cod_modification_date', current_time('mysql'));
+            $order->update_meta_data('_cod_modified_by', get_current_user_id());
+            
+            // 4. Save the order
+            $order->save();
+            
+            // Log the action
+            error_log(sprintf(
+                'Order #%d total updated from %s to %s by user #%d',
+                $order_id,
+                $calculated_total,
+                $new_total,
+                get_current_user_id()
+            ));
+            
+            return new \WP_REST_Response([
+                'status' => 'success',
+                'message' => sprintf(
+                    'Order Total (COD) updated from %s to %s',
+                    wc_price($calculated_total, ['currency' => $order->get_currency()]),
+                    wc_price($new_total, ['currency' => $order->get_currency()])
+                ),
+                'data' => [
+                    'order_id' => $order_id,
+                    'original_total' => $calculated_total,
+                    'new_total' => $new_total,
+                    'modified' => true,
+                    'modified_by' => get_current_user_id(),
+                    'modified_at' => current_time('mysql')
+                ]
+            ], 200);
+            
+        } catch (\Exception $e) {
+            error_log('Order total update error: ' . $e->getMessage());
+            
+            return new \WP_REST_Response([
+                'status' => 'error',
+                'message' => 'Failed to update order total: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
 
@@ -1089,6 +1164,40 @@ function get_order_notes($order) {
         'courier_note' => $courier_note,
         'invoice_note' => $invoice_note,
     ];
+}
+
+/**
+ * Get the COD modification note(s) for an order.
+ *
+ * @param \WC_Order $order
+ * @return string|null  The latest COD modification note, or null if not found.
+ */
+function get_order_cod_modification_note($order) {
+    if (!$order instanceof \WC_Order) {
+        return null;
+    }
+
+    // Get all order notes (private notes, not customer notes)
+    $args = [
+        'order_id' => $order->get_id(),
+        'type'     => 'internal', // Only internal/system notes
+        'orderby'  => 'date_created',
+        'order'    => 'DESC',
+    ];
+    $notes = wc_get_order_notes($args);
+
+    // Search for COD modification notes
+    foreach ($notes as $note) {
+        if (
+            strpos($note->content, 'Order Total (COD) manually updated from') !== false &&
+            strpos($note->content, 'via WEL plugin.') !== false
+        ) {
+            return $note->content;
+        }
+    }
+
+    // If not found, return null
+    return null;
 }
 
 function get_order_shipping_methods($order) {
