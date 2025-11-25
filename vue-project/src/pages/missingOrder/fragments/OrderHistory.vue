@@ -2,14 +2,16 @@
     <button 
         v-if="item?.lifetime_orders && item.lifetime_orders?.length > 0" 
         class="relative"
-        @click="toggleOrderHistory = !toggleOrderHistory"
+        @click="() => {
+            toggleOrderHistory = !toggleOrderHistory;
+        }"
         v-click-outside="() => toggleOrderHistory && (toggleOrderHistory = false)"
     >
         <Icon 
             name="PhInfo" 
             size="22"
         />
-        <div v-if="toggleOrderHistory" class="absolute top-full right-0 bg-white border shadow-md rounded mt-1 z-10 w-fit block min-w-[250px]">
+        <div v-if="toggleOrderHistory" class="absolute top-full -right-4 md:right-0 bg-white border shadow-md rounded mt-1 z-10 w-fit block min-w-[250px]">
             <div class="text-center font-semibold p-2 border-b border-opacity-50 pb-1">
                 Lifetime Orders History
             </div>

@@ -2,7 +2,7 @@
     <Table.Tr>
       <Table.Td class="space-y-2 !px-0">
         <div>
-            <div class="flex gap-2 truncate">
+            <div class="flex gap-2">
               <span
                 class="px-1 bg-gray-500 text-white capitalize rounded-sm text"
                 title="Order Id"
@@ -135,13 +135,13 @@
                 class="grid gap-3 min-w-[135px]"
             >
                 <Select.Primary
-                :options="options"
-                v-model="selectedStatus"
+                  :options="options"
+                  v-model="selectedStatus"
                 />
 
                 <Button.Primary
-                class="!bg-green-500 justify-center"
-                @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
+                  class="!bg-green-500 justify-center"
+                  @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
                 >
                   Apply now
                 </Button.Primary>

@@ -80,5 +80,6 @@ class API_Register {
         new \WooEasyLife\API\Admin\AbandonedOrderAPI();
         new \WooEasyLife\API\Admin\HandleUsersAPI();
         new \WooEasyLife\API\Admin\LicenseStatusAPI();
+        new \WooEasyLife\API\Admin\ProductAPI();
     }
 }

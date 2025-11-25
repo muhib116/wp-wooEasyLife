@@ -124,13 +124,13 @@ export const useMissingOrder = () => {
     const selectedOption = ref<Option>(options.value[0])
 
     // Product existence check function
-    const checkProductsExistence = async (products: Product[]): Promise<{ validProducts: ValidProduct[], invalidProducts: InvalidProduct[] }> => {
+    const checkProductsExistence = async (productsInCart: Product[]): Promise<{ validProducts: ValidProduct[], invalidProducts: InvalidProduct[] }> => {
         const validProducts: ValidProduct[] = [];
         const invalidProducts: InvalidProduct[] = [];
         
-        for (const product of products) {
+        for (const product of productsInCart) {
             try {
-                const productId = parseInt(String(product.product_id));
+                const productId = 252//parseInt(String(product.product_id));
                 const quantity = parseInt(String(product.quantity));
                 
                 // Basic validation first
@@ -154,14 +154,15 @@ export const useMissingOrder = () => {
                 
                 // Check if product exists in WooCommerce
                 const productExists = await getProduct(productId);
+                console.log(`Checked product ${productId}:`, productExists);
                 
-                if (productExists && productExists.data && productExists.data.id) {
+                if (productExists && productExists.id) {
                     validProducts.push({
                         id: productId,
                         quantity: quantity,
-                        name: productExists.data.name || `Product #${productId}`,
-                        price: productExists.data.price || 0,
-                        stock_status: productExists.data.stock_status || 'instock'
+                        name: productExists.name || `Product #${productId}`,
+                        price: productExists.price || 0,
+                        stock_status: productExists.stock_status || 'instock'
                     });
                 } else {
                     invalidProducts.push({

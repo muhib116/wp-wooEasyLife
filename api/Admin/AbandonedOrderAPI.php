@@ -67,52 +67,151 @@ class AbandonedOrderAPI extends WP_REST_Controller {
      */
     private function mark_abandoned_carts() {
         global $wpdb;
-    
-        $cutoff_time = strtotime('-25 minutes'); // 25 minutes ago
-    
-        // for testing when development environment start
-        $server_ip = $_SERVER['SERVER_ADDR'];
-        if ($server_ip === '127.0.0.1' || $server_ip === '::1') {
-            $cutoff_time = strtotime('-1 minutes'); // 1 minute ago
-        }
-        // for testing when development environment end
-    
-        $cutoff_date = date('Y-m-d H:i:s', $cutoff_time);
-    
-        // Fetch all records matching the condition
-        $query = $wpdb->prepare(
-            "SELECT * FROM {$this->table_name} 
-            WHERE status = 'active'
-            AND created_at < %s",
-            $cutoff_date
-        );
-    
-        $records = $wpdb->get_results($query);
-    
-        // If records found, update them one by one
-        $balance_cut_data = [];
-        if (!empty($records)) {
-            foreach ($records as $record) {
-                $now = current_time('mysql'); // Get the current time in MySQL format
-                $update_query = $wpdb->prepare(
-                    "UPDATE {$this->table_name} 
-                    SET 
-                        status = 'abandoned', 
-                        abandoned_at = %s, 
-                        updated_at = %s 
-                    WHERE id = %d",
-                    $now, $now, $record->id
-                );
 
-    
-                $wpdb->query($update_query);
-    
-                // // Call balance_cut function after each update
-                $balance_cut_data[] = $this->balance_cut($record);
+        try {
+            // Determine cutoff time based on environment
+            $cutoff_minutes = 25; // Default production cutoff
+            
+            // Check if in development environment
+            $server_ip = $_SERVER['SERVER_ADDR'] ?? '127.0.0.1';
+            if ($server_ip === '127.0.0.1' || $server_ip === '::1' || strpos($server_ip, '192.168.') === 0) {
+                $cutoff_minutes = 1; // 1 minute for development
+                $this->log_error('Development environment detected', [
+                    'server_ip' => $server_ip,
+                    'cutoff_minutes' => $cutoff_minutes
+                ]);
             }
-        }
+            
+            $cutoff_time = strtotime("-{$cutoff_minutes} minutes");
+            $cutoff_date = date('Y-m-d H:i:s', $cutoff_time);
+            $now = current_time('mysql');
 
-        return $balance_cut_data;
+            // Fetch all active carts that should be marked as abandoned
+            $records = $wpdb->get_results($wpdb->prepare(
+                "SELECT * FROM {$this->table_name} 
+                WHERE LOWER(status) = LOWER(%s)
+                AND created_at < %s",
+                'active',
+                $cutoff_date
+            ), ARRAY_A);
+
+            // Check for database errors
+            if ($wpdb->last_error) {
+                $this->log_error('Database error in mark_abandoned_carts SELECT', [
+                    'error' => $wpdb->last_error,
+                    'query' => $wpdb->last_query
+                ]);
+                return [];
+            }
+
+            // If no records found, return early
+            if (empty($records)) {
+                $this->log_error('No active carts to mark as abandoned', [
+                    'cutoff_date' => $cutoff_date,
+                    'cutoff_minutes' => $cutoff_minutes
+                ]);
+                return [];
+            }
+
+            $balance_cut_data = [];
+            $updated_count = 0;
+            $failed_count = 0;
+
+            // Process each record
+            foreach ($records as $record) {
+                try {
+                    // Validate record has required fields
+                    if (empty($record['id'])) {
+                        $this->log_error('Record missing ID', ['record' => $record]);
+                        $failed_count++;
+                        continue;
+                    }
+
+                    // Update the record to abandoned status
+                    $updated = $wpdb->update(
+                        $this->table_name,
+                        [
+                            'status'       => 'abandoned',
+                            'abandoned_at' => $now,
+                            'updated_at'   => $now,
+                        ],
+                        ['id' => $record['id']],
+                        ['%s', '%s', '%s'],
+                        ['%d']
+                    );
+
+                    // Check for update errors
+                    if ($updated === false) {
+                        $this->log_error('Failed to update cart to abandoned', [
+                            'cart_id' => $record['id'],
+                            'error' => $wpdb->last_error
+                        ]);
+                        $failed_count++;
+                        continue;
+                    }
+
+                    // Only increment if actually updated (could be 0 if already abandoned)
+                    if ($updated > 0) {
+                        $updated_count++;
+                        
+                        // Call balance_cut function after successful update
+                        try {
+                            $balance_response = $this->balance_cut($record);
+                            $balance_cut_data[] = [
+                                'cart_id' => $record['id'],
+                                'response' => $balance_response,
+                                'success' => true
+                            ];
+                            
+                            $this->log_error('Balance cut successful', [
+                                'cart_id' => $record['id'],
+                                'customer_email' => $record['customer_email'] ?? '',
+                                'total_value' => $record['total_value'] ?? 0
+                            ]);
+                            
+                        } catch (Exception $e) {
+                            $this->log_error('Balance cut failed', [
+                                'cart_id' => $record['id'],
+                                'error' => $e->getMessage()
+                            ]);
+                            
+                            $balance_cut_data[] = [
+                                'cart_id' => $record['id'],
+                                'response' => null,
+                                'success' => false,
+                                'error' => $e->getMessage()
+                            ];
+                        }
+                    }
+
+                } catch (Exception $e) {
+                    $this->log_error('Exception processing abandoned cart', [
+                        'cart_id' => $record['id'] ?? 'unknown',
+                        'exception' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    $failed_count++;
+                }
+            }
+
+            // Log summary
+            $this->log_error('Mark abandoned carts completed', [
+                'total_found' => count($records),
+                'updated' => $updated_count,
+                'failed' => $failed_count,
+                'cutoff_date' => $cutoff_date,
+                'cutoff_minutes' => $cutoff_minutes
+            ]);
+
+            return $balance_cut_data;
+
+        } catch (Exception $e) {
+            $this->log_error('Critical exception in mark_abandoned_carts', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return [];
+        }
     }
 
     private function balance_cut($record) {

@@ -21,7 +21,10 @@
                     :is="isValidRoute ? 'router-link' : 'div'"
                     :to="isValidRoute ? to : null" 
                     class="flex items-start gap-3"
-                    :class="{ 'cursor-pointer hover:opacity-80 transition-opacity': isValidRoute || hasInvalidRoute }"
+                    :class="{ 
+                        'cursor-pointer hover:opacity-80 transition-opacity': isValidRoute || hasInvalidRoute,
+                        'hover:text-white': to
+                    }"
                     @click="handleClick"
                 >
                     <span class="aspect-square p-2 bg-black/10 inline-block rounded-full flex-shrink-0 flex-grow-0">

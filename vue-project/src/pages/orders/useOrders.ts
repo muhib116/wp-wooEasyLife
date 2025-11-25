@@ -37,6 +37,7 @@ export const useOrders = () => {
   const isLoading = ref(false);
   const orderListLoading = ref(false);
   const showInvoices = ref(false);
+  const showLabels = ref(false);
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
@@ -626,6 +627,7 @@ export const useOrders = () => {
     activeOrder,
     orderFilter,
     showInvoices,
+    showLabels,
     totalRecords,
     toggleNewOrder,
     selectedStatus,

@@ -29,6 +29,13 @@
             >
                 <Icon name="PhPhoneSlash" size="16" class="inline-block mr-2"/> Call Not Received
             </Button.Native>
+            <Button.Native
+                v-if="hasStatus('checkout-draft')"
+                @onClick="onClickChangeToDraft"
+                class="w-full border-t hover:scale-1 hover:bg-gray-200 gap-0 font-light whitespace-nowrap text-left px-3 py-2 text-sm text-yellow-600 disabled:opacity-50"
+            >
+                <Icon name="PhFileDashed" size="16" class="inline-block mr-2"/> Sent to Draft
+            </Button.Native>
         </div>
     </div>
 </template>
@@ -95,4 +102,5 @@
     // Typed handlers referenced from the template to avoid implicit 'any' on the `btn` parameter
     const onClickChangeToCancelled = (btn: { isLoading: boolean }) => changeOrderStatus(btn, 'cancelled')
     const onClickChangeToCallNotReceived = (btn: { isLoading: boolean }) => changeOrderStatus(btn, 'call-not-received')
+    const onClickChangeToDraft = (btn: { isLoading: boolean }) => changeOrderStatus(btn, 'checkout-draft')
 </script>

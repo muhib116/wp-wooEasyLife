@@ -7,9 +7,10 @@
         >
             <span 
                 v-if="[...selectedOrders].length"
-                class="size-6 shadow -mr-2 flex items-center justify-center md:text-[10px] aspect-square rounded-full bg-orange-500 text-white "
+                class="size-6 md:shadow flex items-center justify-center md:text-[10px] md:rounded-full md:bg-orange-500 md:text-white "
             >
                 {{ [...selectedOrders].length }}
+                <span class="font-light ml-1 inline-block md:hidden">Item(s) Selected</span>
             </span>
             <template
                 v-for="(item, index) in actionBtns"
@@ -124,6 +125,7 @@
         handleIPBlock,
         selectedOrders,
         showInvoices,
+        showLabels,
         toggleNewOrder,
         refreshBulkCourierData,
         orders,
@@ -140,6 +142,16 @@
             color: '#fff',
             method: () => {
                 toggleNewOrder.value = true
+            }
+        },
+        {
+            icon: 'PhTag',
+            title: 'Label Print',
+            active: configData.value.invoice_print,
+            bg: '#1d9c82',
+            color: '#fff',
+            method: () => {
+                showLabels.value = true
             }
         },
         {
