@@ -1,6 +1,6 @@
 import { getWPOption } from "@/api"
-import { detectInternetState } from "@/helper"
-import { onMounted, ref } from "vue"
+import { detectInternetState, showNotification } from "@/helper"
+import { onMounted, onUnmounted, ref } from "vue"
 
 
 const configData = ref()
@@ -11,20 +11,11 @@ export const useLayout = () => {
         configData.value = data
     }
 
-    const internetStatusMessage = ref({
-        type: '',
-        title: ''
-    })
-
-    onMounted(() => {
-        detectInternetState((data) => {
-            internetStatusMessage.value = data
-        })
-    })
+    const cleanup = detectInternetState(showNotification);
+    onUnmounted(cleanup);
 
     return {
         loadConfig,
-        configData,
-        internetStatusMessage
+        configData
     }
 }

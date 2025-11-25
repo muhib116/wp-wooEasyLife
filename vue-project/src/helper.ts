@@ -214,42 +214,56 @@ export const validateAndFormatPhoneNumber = (phone: string) => {
 }
 
 
-export const detectInternetState = (callback) => {
-    function updateStatus() {
+export const detectInternetState = (callback: (msg: { type: string; message: string }) => void) => {
+    // Handler for all events
+    const updateStatus = () => {
         if (!navigator.onLine) {
             callback({
-                type: "warning",
+                type: "danger",
                 message: 'You are currently offline. Check your internet connection.'
             });
             return;
         }
 
-        if (navigator.connection) {
-            const { effectiveType } = navigator.connection;
-
-            const messages = {
+        const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+        if (conn && conn.effectiveType) {
+            const messages: Record<string, { type: string; message: string }> = {
                 "2g": { type: "warning", message: "Slow internet connection." },
                 "slow": { type: "danger", message: "Poor internet connection." }
             };
-
-            if (messages[effectiveType]) {
-                callback(messages[effectiveType]);
+            if (messages[conn.effectiveType]) {
+                callback(messages[conn.effectiveType]);
             }
         }
-    }
+    };
 
     // Initial check
     updateStatus();
 
-    // Listen for online/offline events
+    // Remove previous listeners if any (optional, for SPA/hot reload safety)
+    window.removeEventListener("online", updateStatus);
+    window.removeEventListener("offline", updateStatus);
+
+    if ('connection' in navigator && navigator.connection?.removeEventListener) {
+        navigator.connection.removeEventListener("change", updateStatus);
+    }
+
+    // Add listeners
     window.addEventListener("online", updateStatus);
     window.addEventListener("offline", updateStatus);
-
-    // Listen for connection changes if supported
-    if ('connection' in navigator) {
+    if ('connection' in navigator && navigator.connection?.addEventListener) {
         navigator.connection.addEventListener("change", updateStatus);
     }
-}
+
+    // Return a cleanup function for use in Vue's onUnmounted, if needed
+    return () => {
+        window.removeEventListener("online", updateStatus);
+        window.removeEventListener("offline", updateStatus);
+        if ('connection' in navigator && navigator.connection?.removeEventListener) {
+            navigator.connection.removeEventListener("change", updateStatus);
+        }
+    };
+};
 
 export const checkImageLoad = (imgUrl: string, callback: (isLoaded: boolean) => void) => {
     let img = new Image();

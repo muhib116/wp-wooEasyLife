@@ -35,20 +35,6 @@ export const useNotification = () => {
     }
   }
 
-  // Start tracking orders
-  let intervalId: any = null;
-  onMounted(() => {
-    detectInternetState((data: { type: "success" | "info" | "warning" | "danger", message: string }) => {
-      showNotification(data)
-    })
-
-    intervalId = setInterval(checkNewOrderStatus, 25000)
-  })
-
-  onBeforeUnmount(() => {
-    clearInterval(intervalId)
-  })
-
   return {
     hasNewOrder,
   };

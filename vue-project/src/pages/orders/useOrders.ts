@@ -262,7 +262,14 @@ export const useOrders = () => {
       alert("Please select at least on item.");
       return;
     }
-    const payload = [...selectedOrders.value].map((item) => ({ type: "email", ip_phone_email_or_device: item?.billing_address?.email }));
+    const payload = [...selectedOrders.value].map((item) => {
+      if (!item?.billing_address?.email) {
+        showNotification({ type: 'warning', message: 'Email is missing.' });
+        return;
+      } else {
+        return { type: "email", ip_phone_email_or_device: item?.billing_address?.email };
+      }
+    });
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
@@ -282,7 +289,17 @@ export const useOrders = () => {
       showNotification({ type: 'warning', message: 'Please select at least one order to block the device.' });
       return;
     }
-    const payload = [...selectedOrders.value].map((item) => ({ type: "device_token", ip_phone_email_or_device: item?.customer_device_token }));
+
+    const payload = [...selectedOrders.value].map((item) => {
+      console.log(item)
+      if (!item?.customer_device_token) {
+        showNotification({ type: 'warning', message: 'Device token is missing. May be custom order.' });
+        return;
+      } else {
+        return { type: "device_token", ip_phone_email_or_device: item?.customer_device_token }
+      }
+    });
+    console.log({ payload })
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
@@ -622,7 +639,7 @@ export const useOrders = () => {
       });
       return;
     }
-    
+
     printableOrders.forEach(order => {
       printProductDetails(order, () => markAsDone(order, btn), invoiceLogo);
     })
