@@ -630,9 +630,10 @@ export const useOrders = () => {
     }
 
     const printableOrders = orders.value.filter(order => {
-      return !order?.is_done && order?.courier_data?.consignment_id;
+      return (!Number.parseInt(order?.is_done) && order?.courier_data?.consignment_id);
     });
-    if (printableOrders.length === 0) {
+
+    if (!printableOrders?.length) {
       showNotification({
         type: 'warning',
         message: 'No printable orders found. Please ensure orders are not marked as done and have valid courier data.'
@@ -640,9 +641,20 @@ export const useOrders = () => {
       return;
     }
 
-    printableOrders.forEach(order => {
-      printProductDetails(order, () => markAsDone(order, btn), invoiceLogo);
-    })
+    let index = 0
+    const printNextOrder = () => {
+      if (index < printableOrders.length) {
+        const order = printableOrders[index];
+        printProductDetails(order, async () => {
+          await markAsDone(order, btn)
+          index++;
+          printNextOrder();
+        }, invoiceLogo);
+      }
+    };
+
+    printNextOrder();
+
   }
 
   watch(() => selectedOrders, (newVal) => { selectAll.value = selectedOrders.value.size === orders.value.length; }, { deep: true });

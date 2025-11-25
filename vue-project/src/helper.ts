@@ -338,67 +338,69 @@ export const printProductDetails = (order, cb, invoice_logo) => {
     const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
 
     const printWindow = window.open("", "");
-    printWindow.document.write(`
-        <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Document</title>
-                <style>
-                    *, ::before, ::after {
-                        box-sizing: border-box;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    @page {
-                        size: 3in 2in landscape;
-                        padding: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div style="
-                    width: 2.78in; 
-                    height: 1.8in; 
-                    padding: 4px 4px; 
-                    border-radius: 4px;
-                    border: 1px solid;
-                    font-family: poppins, sans-serif;
-                    font-size: 14px;
-                    display: flex; 
-                    align-items: center;
-                    justify-content: space-between;
-                ">
-                    <div style="display: grid; gap: 4px;">
-                        <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 38px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
-                        <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
-                        <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
-                        <p style="margin:0;"><strong>Name:</strong> ${order.customer_name}</p>
-                        <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
+    if (printWindow) {
+        printWindow.document.write(`
+            <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Document</title>
+                    <style>
+                        *, ::before, ::after {
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        @page {
+                            size: 3in 2in landscape;
+                            padding: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div style="
+                        width: 2.78in; 
+                        height: 1.8in; 
+                        padding: 4px 4px; 
+                        border-radius: 4px;
+                        border: 1px solid;
+                        font-family: poppins, sans-serif;
+                        font-size: 14px;
+                        display: flex; 
+                        align-items: center;
+                        justify-content: space-between;
+                    ">
+                        <div style="display: grid; gap: 4px;">
+                            <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 38px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                            <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
+                            <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
+                            <p style="margin:0;"><strong>Name:</strong> ${order.customer_name}</p>
+                            <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
+                        </div>
+                        <div>
+                            <img src="${qrUrl}" alt="QR Code" style="width: 100px; height: 100px;margin-right: -8px;margin-top: -8px;margin-bottom: -8px;" />
+                        </div>
                     </div>
-                    <div>
-                        <img src="${qrUrl}" alt="QR Code" style="width: 100px; height: 100px;margin-right: -8px;margin-top: -8px;margin-bottom: -8px;" />
-                    </div>
-                </div>
-            </body>
-        </html>
-    `);
+                </body>
+            </html>
+        `);
 
-    printWindow.document.close();
-    // Wait for the print job to complete before closing and calling the callback
-    printWindow.onafterprint = () => {
-        printWindow.close();
-        if (typeof cb === "function") {
-            cb();
-        }
-    };
+        printWindow.document.close();
+        // Wait for the print job to complete before closing and calling the callback
+        printWindow.onafterprint = () => {
+            printWindow.close();
+            if (typeof cb === "function") {
+                cb();
+            }
+        };
 
-    checkImageLoad(qrUrl, (isLoaded) => {
-        if (isLoaded) {
-            setTimeout(() => {
-                printWindow.print();
-            }, 100); // Delay to ensure the image is loaded
-        }
-    })
+        checkImageLoad(qrUrl, (isLoaded) => {
+            if (isLoaded) {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 100); // Delay to ensure the image is loaded
+            }
+        });
+    }
 }
