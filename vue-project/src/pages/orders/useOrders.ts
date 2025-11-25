@@ -405,9 +405,9 @@ export const useOrders = () => {
       }
       const { data: statuses } = await steadfastBulkStatusCheck(payload);
 
-      orders.value.forEach(async (order) => {
+      courierData.forEach(async (order) => {
         let orderId = order.id;
-        let courierUpdatedStatus = statuses[orderId]; // courier invoice id == order id
+        let courierUpdatedStatus = statuses[formatInvoice(orderId)] || 'unknown'; // courier invoice id == formatInvoice('order id')
 
         // manageCourier
         if (courierUpdatedStatus) {
