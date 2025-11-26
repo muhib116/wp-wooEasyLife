@@ -23,7 +23,7 @@ export const useBlackList = () => {
     }
 
     const removeFromBlacklist = async (id: string | number, btn) => {
-        if(!confirm("Are you sure to remove?")) return
+        if (!confirm("Are you sure to remove?")) return
         try {
             isLoading.value = true
             btn.isLoading = true
@@ -42,7 +42,7 @@ export const useBlackList = () => {
             item.isSelected = selectAll.value
         })
     }
-    
+
     const handleBulkDelete = async () => {
         const selectedIds = blackListData.value
             .filter(item => item.isSelected)

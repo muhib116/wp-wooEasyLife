@@ -1,7 +1,18 @@
 <template>
-    <p class="mb-4 font-medium text-blue-500 bg-blue-100/70 py-1 px-4">
-        If the cart remains inactive for 25 minutes, it will be considered an abandoned order.
-    </p>
+    <div class="mb-2 flex flex-col md:flex-row items-center justify-between">
+        <p class="mb-4 font-medium text-blue-500 bg-blue-100/70 py-1 px-4">
+            If the cart remains inactive for 25 minutes, it will be considered an abandoned order.
+        </p>
+
+        <Button.Native
+            v-if="hasSelectedItems()"
+            @onClick="handleBulkDelete"
+            class="px-1 text-red-500"
+        >
+            <Icon name="PhX" size="20" />
+            Remove Selected Items
+        </Button.Native>
+    </div>
 
     <div class="flex justify-end mb-2">
         <Pagination />
@@ -10,6 +21,17 @@
     <div class="hidden w-full md:block">
         <Table.Table>
             <Table.THead>
+                <Table.Th class="w-5">
+                    <label class="flex gap-2">
+                        <input
+                            type="checkbox"
+                            v-model="selectAll"
+                            @change="toggleSelectAll"
+                            title="Click here to select all items"
+                        />
+                    </label>
+                </Table.Th>
+                <Table.Th class="truncate w-5">#sl</Table.Th>
                 <Table.Th class="truncate">Customer Info</Table.Th>
                 <Table.Th class="truncate">Shipping</Table.Th>
                 <Table.Th class="truncate">Payment</Table.Th>
@@ -19,9 +41,10 @@
             <Table.TBody>
                 <template v-if="abandonOrders?.length">
                     <TableRow
-                        v-for="item in abandonOrders || []"
+                        v-for="(item, index) in abandonOrders || []"
                         :key="item.id"
                         :item="item"
+                        :index="index"
                     />
                 </template>
                 <Table.Tr v-else-if="!isLoading">
@@ -57,14 +80,18 @@
 </template>
 
 <script setup lang="ts">
-    import { Table } from '@components'
+    import { Table, Button, Icon } from '@components'
     import { inject } from 'vue'
     import TableRow from './TableRow.vue'
     import TableRowForMobile from './TableRowForMobile.vue'
     import Pagination from './Pagination.vue'
 
     const {
+        selectAll,
         isLoading,
-        abandonOrders
+        abandonOrders,
+        hasSelectedItems,
+        handleBulkDelete,
+        toggleSelectAll
     } = inject('useMissingOrder')
 </script>

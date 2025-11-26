@@ -35,6 +35,7 @@ interface CartContents {
 
 interface AbandonedOrder {
     id: number;
+    selected?: boolean;
     customer_name: string;
     customer_phone: string;
     customer_email?: string;
@@ -74,6 +75,7 @@ interface Option {
 export const useMissingOrder = () => {
     const isLoading = ref<boolean>(false)
     const abandonOrders = ref<AbandonedOrder[]>([])
+    const selectAll = ref(false)
     const options = ref<Option[]>([
         {
             title: 'Abandoned',
@@ -461,6 +463,53 @@ export const useMissingOrder = () => {
             isLoading.value = false
         }
     }
+    const toggleSelectAll = () => {
+        abandonOrders.value.forEach(item => {
+            item.isSelected = selectAll.value
+        })
+    }
+
+    const handleBulkDelete = async () => {
+        const selectedIds = abandonOrders.value
+            .filter(item => item.isSelected)
+            .map(item => item.id)
+
+        if (selectedIds.length === 0) {
+            showNotification({
+                message: 'No items selected for deletion.',
+                type: 'danger'
+            })
+            return
+        }
+
+        if (!confirm(`Are you sure you want to remove ${selectedIds.length} selected items?`)) {
+            return
+        }
+
+        try {
+            isLoading.value = true
+            await Promise.all(selectedIds.map(async id => {
+                await updateAbandonedOrderStatus(id, { status: 'canceled' })
+            }))
+            showNotification({
+                message: `${selectedIds.length} items removed successfully.`,
+                type: 'success'
+            })
+            await loadAbandonedOrder()
+        } catch (error: any) {
+            console.error('Bulk delete error:', error);
+            showNotification({
+                type: 'danger',
+                message: 'Bulk delete failed!'
+            })
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    const hasSelectedItems = () => {
+        return abandonOrders.value.some(item => item.isSelected)
+    }
 
     onMounted(() => {
         loadAbandonedOrder()
@@ -468,6 +517,7 @@ export const useMissingOrder = () => {
 
     return {
         options,
+        selectAll,
         isLoading,
         totalPages,
         orderFilter,
@@ -478,9 +528,12 @@ export const useMissingOrder = () => {
         selectedOption,
         updateStatus,
         handleFilter,
+        toggleSelectAll,
+        hasSelectedItems,
+        handleBulkDelete,
         loadDashboardData,
         loadAbandonedOrder,
-        createOrderFromAbandonedData,
         checkProductsExistence,
+        createOrderFromAbandonedData,
     }
 }

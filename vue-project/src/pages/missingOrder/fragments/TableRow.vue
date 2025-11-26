@@ -1,5 +1,18 @@
 <template>
   <Table.Tr>
+    <Table.Td
+        @click="item.isSelected = !item.isSelected"  
+        class="cursor-pointer hover:bg-green-50"
+    >
+        <input
+          type="checkbox"
+          :value="item.id"
+          :checked="item.isSelected"
+        />
+    </Table.Td>
+    <Table.Td>
+      {{ index + 1 }}
+    </Table.Td>
     <Table.Td class="space-y-1">
       <div class="flex gap-2">
         <span
@@ -180,14 +193,47 @@ import FraudData from '@/pages/fraudChecker/FraudData.vue'
 import { useFraudChecker } from '@/pages/fraudChecker/useFraudChecker'
 import OrderHistory from './OrderHistory.vue';
 
+interface CartContents {
+  total_discount?: number;
+  coupon_codes?: string[];
+  payment_method?: string;
+  shipping_method_title?: string;
+  shipping_cost?: number | string;
+}
+
+interface Item {
+  id: number | string;
+  isSelected?: boolean;
+  last_wc_order_at?: string;
+  last_wc_order_current_status?: string;
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string;
+  created_at?: string;
+  billing_address?: string;
+  total_value?: number;
+  cart_contents?: CartContents;
+  status?: string;
+  abandoned_at?: string;
+  recovered_at?: string;
+}
+
 const props = defineProps<{
-  item: object;
+  item: Item;
+  index: number;
 }>();
 
 const toggleModal = ref(false);
 const toggleFraudCheckModal = ref(false);
 const selectedStatus = ref(props.item.status)
-const { updateStatus, options, selectedOption } = inject("useMissingOrder");
+// Define the expected type for the injected object
+interface UseMissingOrder {
+  updateStatus: (item: Item, status: string, btn: any) => void;
+  options: Array<{ label: string; value: string; color?: string }>;
+  selectedOption: { label: string; value: string; color?: string };
+}
+
+const { updateStatus, options, selectedOption } = inject<UseMissingOrder>("useMissingOrder")!;
 const { handleFraudCheck, data } = useFraudChecker()
 
 const handleFraudCHeck = async (phone, btn) => {
