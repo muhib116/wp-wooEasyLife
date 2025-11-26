@@ -16,6 +16,7 @@ import {
   getShippingMethods,
   getPaymentMethods
 } from "@/api";
+import { updateCourierDataBulk, changeStatusBulk } from "@/api/courier"
 
 import { manageCourier } from "./useHandleCourierEntry";
 import { filterOrderById, formatInvoice, normalizePhoneNumber, printProductDetails, showNotification } from "@/helper";
@@ -424,7 +425,7 @@ export const useOrders = () => {
       }
 
       // Prepare payload: consignment_ids if available, otherwise invoice_ids
-      const payload = { 
+      const payload = {
         consignment_ids: courierData
           .filter(item => item.courier_data?.consignment_id && item.courier_data.consignment_id !== 'not-available')
           .map(item => item.courier_data.consignment_id),
@@ -444,7 +445,11 @@ export const useOrders = () => {
       // Fetch updated statuses from courier API
       const { data: statuses } = await steadfastBulkStatusCheck(payload);
 
-      // Update each order based on returned statuses
+      // Prepare bulk update arrays
+      const courierDataUpdates = [];
+      const statusUpdates = [];
+      let metaNeedsUpdate = false;
+
       for (const order of courierData) {
         let orderId = order.id;
         // Determine the key to use for status lookup
@@ -467,29 +472,42 @@ export const useOrders = () => {
               partner: courierPartner,
               status: courierUpdatedStatus
             }]);
-
-            await loadOrderStatusList();
-            await getOrders();
-            showNotification({ type: "success", message: "Order data synced with courier platform." });
+            metaNeedsUpdate = true;
             continue;
           }
 
-          // Update courier status in order meta
+          // Collect for bulk update
           order.courier_data.status = courierUpdatedStatus;
-          await updateCourierData({ order_id: order.id, courier_data: order.courier_data });
+          courierDataUpdates.push({ order_id: order.id, courier_data: order.courier_data });
 
-          // Update WooCommerce order status if needed
           let statusName = get_status(courierUpdatedStatus);
-          try {
-            await changeStatus([{ order_id: order.id, new_status: statusName }]);
-            order.status = statusName.replace('wc-', '');
-          } catch (err) {
-            console.error(err);
-          }
+          statusUpdates.push({ order_id: order.id, new_status: statusName });
+          order.status = statusName.replace('wc-', '');
         }
       }
 
+      // Bulk update API calls
+      if (courierDataUpdates.length) {
+        await updateCourierDataBulk(courierDataUpdates);
+      }
+      if (statusUpdates.length) {
+        try {
+          await changeStatusBulk(statusUpdates);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // If any meta was updated for orders without consignment_id, refresh UI
+      if (metaNeedsUpdate) {
+        await loadOrderStatusList();
+        await getOrders();
+        showNotification({ type: "success", message: "Order data synced with courier platform." });
+      }
+
       showNotification({ type: "success", message: "Courier data refresh done." });
+      await loadOrderStatusList();
+      await getOrders();
     } finally {
       btn.isLoading = false;
     }

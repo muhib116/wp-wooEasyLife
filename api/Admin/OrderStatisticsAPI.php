@@ -814,12 +814,12 @@ class OrderStatisticsAPI extends WP_REST_Controller
         $start_date = $request->get_param('start_date');
         $end_date = $request->get_param('end_date');
         $status = $request->get_param('status');
-    
+
         // Validate and sanitize dates
         if ($start_date && $end_date) {
             $start_date = sanitize_text_field($start_date);
             $end_date = sanitize_text_field($end_date);
-    
+
             if (!strtotime($start_date) || !strtotime($end_date)) {
                 return new WP_REST_Response([
                     'status'  => 'error',
@@ -831,32 +831,44 @@ class OrderStatisticsAPI extends WP_REST_Controller
             $start_date = date('Y-m-d', strtotime('-30 days'));
             $end_date = date('Y-m-d');
         }
-    
+
+        // Use status from request or default to both completed and processing
+        $status_array = [];
+        if ($status) {
+            // Accept comma-separated or array
+            $status_array = is_array($status) ? $status : explode(',', $status);
+            $status_array = array_map('trim', $status_array);
+            // Ensure all statuses are prefixed with 'wc-'
+            $status_array = array_map(function($s) {
+                return strpos($s, 'wc-') === 0 ? $s : 'wc-' . $s;
+            }, $status_array);
+        } else {
+            $status_array = ['wc-completed', 'wc-processing'];
+        }
+
         // Initialize result arrays
         $repeat_series = [];
         $new_series = [];
         $categories = [];
-    
+
         $billing_info = [
             'phone' => [],
             'email' => []
         ];
 
-    
         // Loop through dates and fetch order data
         $current_date = strtotime($start_date);
         $end_date_timestamp = strtotime($end_date);
 
-
+        // Fetch all orders in range with selected statuses for overall stats
         $args = array_merge([
-            'status'        => ['wc-completed'],
+            'status'        => $status_array,
             'date_created'  => $start_date . '...' . $end_date,
             'type'         => 'shop_order',
             'limit' => -1,
-            
         ], getMetaDataOfOrderForArgs());
         $orders = wc_get_orders($args);
-        
+
         $customer_data = [];
         foreach($orders as $order) {
             $phone = $order->get_billing_phone();
@@ -872,7 +884,6 @@ class OrderStatisticsAPI extends WP_REST_Controller
             }
         }
 
-    
         /**
          * make chart data for
          * new order repeat comparison
@@ -880,41 +891,39 @@ class OrderStatisticsAPI extends WP_REST_Controller
         while ($current_date <= $end_date_timestamp) {
             $date = date('Y-m-d', $current_date);
             $categories[] = $date;
-    
-            // Fetch orders for this date
+
+            // Fetch orders for this date with selected statuses
             $args = array_merge([
-                'status'        => ['wc-processing'],
+                'status'        => $status_array,
                 'date_created'  => $date . ' 00:00:00...' . $date . ' 23:59:59',
                 'type'         => 'shop_order',
                 'limit' => -1,
-               
             ], getMetaDataOfOrderForArgs());
             $orders = wc_get_orders($args);
 
             $total_orders = count($orders ?? []);
             $total_repeat_orders = 0;
 
-    
             foreach($orders as $order) {
                 $phone = $order->get_billing_phone();
                 $email = $order->get_billing_email();
 
-                $complete_orders_for_billing_phone = [];
+                $customer_orders = [];
                 // collect customer contact info
                 if(!empty($phone)) {
-                    $complete_orders_for_billing_phone = get_orders_by_billing_phone_or_email_and_status($phone, null, ['wc-completed']);
+                    $customer_orders = get_orders_by_billing_phone_or_email_and_status($phone, null, $status_array);
                 } else if(!empty($email)) {
-                    $complete_orders_for_billing_phone = get_orders_by_billing_phone_or_email_and_status(null, trim($email), ['wc-completed']);
+                    $customer_orders = get_orders_by_billing_phone_or_email_and_status(null, trim($email), $status_array);
                 }
 
-                if(count($complete_orders_for_billing_phone)) {
+                if(count($customer_orders) > 1) { // >1 means repeat
                     $total_repeat_orders ++;
                 }
             }
 
             $repeat_series[] = $total_repeat_orders;
             $new_series[] = $total_orders - $total_repeat_orders;
-    
+
             $current_date = strtotime('+1 day', $current_date);
         }
 

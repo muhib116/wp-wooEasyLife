@@ -35,6 +35,14 @@ class CourierHandleAPI extends WP_REST_Controller
                 'permission_callback' => api_permission_check(),
             ],
         ]);
+        // Route for updating bulk courier data
+        register_rest_route(__API_NAMESPACE, '/courier-data/update-bulk', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'update_bulk_courier_data'],
+                'permission_callback' => api_permission_check(),
+            ],
+        ]);
 
         register_rest_route(__API_NAMESPACE, '/courier-data/(?P<order_id>\d+)', [
             [
@@ -210,7 +218,56 @@ class CourierHandleAPI extends WP_REST_Controller
         ], 200);
     }
 
-    
+    /**
+     * Update bulk courier data
+     */
+    public function update_bulk_courier_data(WP_REST_Request $request)
+    {
+        $payload = $request->get_json_params();
+
+        if (!is_array($payload) || empty($payload)) {
+            return new WP_Error('invalid_payload', 'The payload is invalid or empty.', ['status' => 400]);
+        }
+
+        $responses = [];
+        foreach ($payload as $item) {
+            $order_id = isset($item['order_id']) ? intval($item['order_id']) : null;
+            $courier_data = $item['courier_data'] ?? null;
+
+            if (!$order_id || !$courier_data) {
+                $responses[] = [
+                    'order_id' => $order_id,
+                    'status'   => 'error',
+                    'message'  => 'Missing order_id or courier_data.',
+                ];
+                continue;
+            }
+
+            $order = wc_get_order($order_id);
+            if (!$order) {
+                $responses[] = [
+                    'order_id' => $order_id,
+                    'status'   => 'error',
+                    'message'  => 'Invalid order ID.',
+                ];
+                continue;
+            }
+
+            // Update the _courier_data meta
+            update_post_meta($order_id, '_courier_data', $courier_data);
+
+            $responses[] = [
+                'order_id' => $order_id,
+                'status'   => 'success',
+                'message'  => 'Courier data updated.',
+            ];
+        }
+
+        return new WP_REST_Response([
+            'status'    => 'success',
+            'responses' => $responses,
+        ], 200);
+    }
 
     /**
      * Retrieve courier data for an order

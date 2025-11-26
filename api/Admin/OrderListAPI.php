@@ -182,6 +182,16 @@ class OrderListAPI
                 ]
             ]
         );
+
+        register_rest_route(
+            __API_NAMESPACE, 
+            '/orders/change-status-bulk',
+            [
+                'methods'  => 'POST',
+                'callback' => [$this, 'change_order_status_bulk'],
+                'permission_callback' => api_permission_check(),
+            ]
+        );
     }
 
     /**
@@ -872,6 +882,75 @@ class OrderListAPI
     
     
     public function change_order_status(\WP_REST_Request $request) {
+        // Get the payload from the request
+        $payload = $request->get_json_params();
+    
+        // Validate the payload
+        if (empty($payload) || !is_array($payload)) {
+            return new \WP_REST_Response([
+                'status'  => 'error',
+                'message' => 'Invalid or empty payload.',
+            ], 400);
+        }
+    
+        $responses = []; // To store the responses for each order
+
+        foreach ($payload as $entry) {
+            // Validate each entry in the payload
+            if (empty($entry['order_id']) || empty($entry['new_status'])) {
+                $responses[] = [
+                    'status'  => 'error',
+                    'message' => 'Missing order_id or new_status in entry.',
+                    'entry'   => $entry,
+                ];
+                continue;
+            }
+    
+            $order_id = intval($entry['order_id']);
+            $new_status = sanitize_text_field($entry['new_status']);
+    
+            // Get the order by ID
+            $order = wc_get_order($order_id);
+    
+            if (!$order) {
+                $responses[] = [
+                    'status'  => 'error',
+                    'message' => 'Order not found.',
+                    'order_id' => $order_id,
+                ];
+                continue;
+            }
+    
+            // Update the order status
+            try {
+                $order->update_status($new_status, 'Status updated via API', true);
+                if($new_status == 'wc-completed'){
+                    $customerHandler = new \WooEasyLife\Frontend\CustomerHandler();
+                    $customerHandler->handle_customer_data($order_id, $order);
+                }
+
+                $responses[] = [
+                    'status'  => 'success',
+                    'message' => 'Order status updated successfully.',
+                    'order_id' => $order_id,
+                    'new_status' => $new_status,
+                ];
+            } catch (\Exception $e) {
+                $responses[] = [
+                    'status'  => 'error',
+                    'message' => $e->getMessage(),
+                    'order_id' => $order_id,
+                ];
+            }
+        }
+    
+        return new \WP_REST_Response([
+            'status' => 'success',
+            'data'   => $responses,
+        ], 200);
+    }
+
+    public function change_order_status_bulk(\WP_REST_Request $request) {
         // Get the payload from the request
         $payload = $request->get_json_params();
     

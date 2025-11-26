@@ -3,6 +3,22 @@ import {
     localApiBaseURL
 } from './init'
 
+export const updateCourierDataBulk = async (payload: {
+    order_id: string | number,
+    courier_data: any
+}[]) => {
+    const { data } = await axios.post(`${localApiBaseURL}/courier-data/update-bulk`, payload)
+    return data
+}
+
+export const changeStatusBulk = async (payload: {
+    order_id: string | number,
+    new_status: string
+}[]) => {
+    const { data } = await axios.post(`${localApiBaseURL}/orders/change-status-bulk`, payload)
+    return data
+}
+
 export const storeBulkRecordsInToOrdersMeta =  async (payload: {
     order_id: string | number
     invoice: string | number
