@@ -3,6 +3,7 @@
     <Table.Td
         @click="item.isSelected = !item.isSelected"  
         class="cursor-pointer hover:bg-green-50"
+        v-if="selectedOption.id != 'canceled'"
     >
         <input
           type="checkbox"
@@ -141,8 +142,8 @@
     <Table.Td 
       class="truncate"
     >
+      <!-- v-if="item.status == 'abandoned' || item.status == 'call-not-received'" -->
       <div
-        v-if="item.status == 'abandoned' || item.status == 'call-not-received'"
         class="grid gap-3 min-w-[135px]"
       >
         <Select.Primary
@@ -152,14 +153,17 @@
 
         <Button.Primary
           class="!bg-green-500 justify-center"
+          :class="{
+            '!bg-red-500': item.status == 'canceled'
+          }"
           @onClick="(btn) => updateStatus(item, selectedStatus, btn)"
         >
           Apply now
         </Button.Primary>
       </div>
-      <div v-else>
+      <!-- <div v-else>
           n/a
-      </div>
+      </div> -->
     </Table.Td>
   </Table.Tr>
 

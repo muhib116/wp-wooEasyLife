@@ -20,8 +20,11 @@
 
     <div class="hidden w-full md:block">
         <Table.Table>
-            <Table.THead>
-                <Table.Th class="w-5">
+            <Table.THead :class="{ 'bg-red-500': selectedOption.id == 'canceled' }">
+                <Table.Th 
+                    class="w-5"
+                    v-if="selectedOption.id != 'canceled'"
+                >
                     <label class="flex gap-2">
                         <input
                             type="checkbox"
@@ -92,6 +95,7 @@
         abandonOrders,
         hasSelectedItems,
         handleBulkDelete,
-        toggleSelectAll
+        toggleSelectAll,
+        selectedOption
     } = inject('useMissingOrder')
 </script>
