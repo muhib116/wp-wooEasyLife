@@ -267,65 +267,54 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 Changelog
 
-### Version 2.0.0 (Latest)
-- ✨ New Vue.js 3 frontend interface
-- 🔒 Enhanced fraud detection algorithms
-- 🚚 Improved courier integrations
-- 📊 Advanced analytics dashboard
-- 🎨 Modern UI/UX improvements
+### Version 1.1.6
+- 🚀 NEW: Bulk courier data update API endpoint (`/courier-data/update-bulk`) for efficient mass updates.
+- 🚀 NEW: Bulk order status change API endpoint (`/orders/change-status-bulk`) for faster status management.
+- ⚡ IMPROVED: Order status and courier data updates are now handled in bulk, reducing API calls and improving performance.
+- ⚡ IMPROVED: Dashboard and analytics APIs now use consistent status filtering and support custom statuses.
+- 🐛 FIX: Fixed logic for handling orders without consignment IDs during courier sync.
+- 🐛 FIX: Minor bug fixes and code optimizations throughout the plugin.
 
-### Version 1.5.0
-- 📱 SMS notification system
-- 🔍 Advanced order filtering
-- 🛡️ Security enhancements
-- 🐛 Bug fixes and optimizations
+### Version 1.1.5
+- 🚀 NEW: Manual COD (Cash on Delivery) amount override when creating or updating orders, with automatic order note and audit trail.
+- 🚀 NEW: Order note and metadata tracking for all manual COD modifications, including original and modified totals, user, and timestamp.
+- 🚀 NEW: Improved sequential label printing—ensures each order label prints only after the previous one completes.
+- 🚀 NEW: API endpoint for updating order total/COD now adds system note and metadata for all changes.
+- 🚀 NEW: Helper function to retrieve COD modification notes for any order.
+- ⚡ IMPROVED: Internet connection detection now prevents duplicate notifications and cleans up event listeners on component unmount.
+- ⚡ IMPROVED: TypeScript and code structure for order creation, printing, and courier integration.
+- ⚡ IMPROVED: Error handling and user notifications for all order and printing operations.
+- 🐛 FIX: Prevented duplicate event listeners and notifications on SPA hot reloads.
+- 🐛 FIX: Ensured order total update API validates input and handles errors gracefully.
+- 🐛 FIX: Label printing now waits for print dialog to close before proceeding to the next order.
+- 🐛 FIX: Various minor bug fixes and performance improvements throughout the plugin.
 
-## 🆘 Support
-
-### Documentation
-- [Full Documentation](https://docs.wooeasylife.com)
-- [API Reference](https://api.wooeasylife.com)
-- [Video Tutorials](https://tutorials.wooeasylife.com)
-
-### Getting Help
-- 📧 Email: support@wooeasylife.com
-- 💬 Support Forum: [forum.wooeasylife.com](https://forum.wooeasylife.com)
-- 🐛 Bug Reports: [GitHub Issues](https://github.com/your-repo/issues)
-
-### Premium Support
-- Priority email support
-- Custom feature development
-- Professional services available
-- Training and consultation
+### Version 1.1.4
+- 🚀 NEW: Abandoned cart tracking and recovery dashboard.
+- 🚀 NEW: Product existence validation before creating orders from abandoned carts.
+- 🚀 NEW: Admin bar menu with real-time order status counts.
+- 🚀 NEW: Dropdown menu showing Call Not Received, Courier Entry, and New Orders counts.
+- 🚀 NEW: Performance-optimized caching for order counts (2-minute cache).
+- 🚀 NEW: Automatic cache clearing when orders are created or status changes.
+- ⚡ IMPROVED: Order creation workflow with comprehensive product validation.
+- ⚡ IMPROVED: Enhanced error messages for product availability issues.
+- ⚡ IMPROVED: Partial order creation support (creates orders with available products only).
+- ⚡ IMPROVED: Better TypeScript type definitions across all composables.
+- ⚡ IMPROVED: User experience with detailed notifications for order operations.
+- 🐛 FIX: 'Product not found' errors during abandoned cart order creation.
+- 🐛 FIX: Invalid order status errors in abandoned order filtering.
+- 🐛 FIX: Loading state conflicts in order status updates.
+- 🐛 FIX: API response handling for different order creation response structures.
+- ✨ ENHANCEMENT: Better phone number validation for Bangladesh numbers.
+- ✨ ENHANCEMENT: Improved error logging and debugging for order operations.
 
 ## 📄 License
 
-This plugin is licensed under the GPL v2 or later.
+This plugin is licensed under the [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
 
-```
-WooEasyLife - Advanced WooCommerce Management Plugin
-Copyright (C) 2025 WooEasyLife Team
+## 📢 Support & Feedback
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-```
+For support, feature requests, or bug reports, please [open an issue](https://github.com/your-repo/woo-easy-life/issues) or contact us via the plugin dashboard.
 
-## 🙏 Credits
-
-### Built With
-- [WordPress](https://wordpress.org) - Content Management System
-- [WooCommerce](https://woocommerce.com) - E-commerce Platform
-- [Vue.js](https://vuejs.org) - Progressive JavaScript Framework
-- [TypeScript](https://typescriptlang.org) - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS Framework
-
-### Contributors
-- Development Team: WooEasyLife
-- UI/UX Design: Professional Design Team
-- Testing: Quality Assurance Team
-
----
-
-**Made with ❤️ for the WooCommerce community**
+Thank you for using **WooEasyLife**!  
+Empowering WooCommerce store owners with advanced automation, analytics, and operational
