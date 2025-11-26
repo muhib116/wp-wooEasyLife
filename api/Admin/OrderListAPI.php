@@ -1188,21 +1188,25 @@ function getProductInfo($order)
         foreach ($order->get_items() as $item_id => $item) {
             // Get product details
             $product = $item->get_product(); // Get the product object
-            $product_image_url = wp_get_attachment_url($product->get_image_id()); // Get the featured image URL
 
-            if ($product) {
-                $product_total = $item->get_total(); // Total for the line item (quantity * price)
-                $productInfo["total_price"] = (int)$productInfo["total_price"] += (int)($product->get_price() * $item->get_quantity());
-                $productInfo["total_price_after_cut_discount"] = (int)$productInfo["total_price_after_cut_discount"] += (int)$product_total;
-                $productInfo["product_info"][] = [
-                    'id' => $product->get_id(),
-                    'product_name' => $product->get_name(),
-                    'product_price' => $product->get_price(),
-                    'product_total' => ($product->get_price() * $item->get_quantity()),
-                    'product_quantity' => $item->get_quantity(),
-                    'product_image' => $product_image_url
-                ];
+            // Safely handle missing or invalid products
+            if (!$product || !is_object($product) || !$product->get_id()) {
+                // Optionally, you can log or collect info about missing products here
+                continue;
             }
+
+            $product_image_url = wp_get_attachment_url($product->get_image_id()); // Get the featured image URL
+            $product_total = $item->get_total(); // Total for the line item (quantity * price)
+            $productInfo["total_price"] += (int)($product->get_price() * $item->get_quantity());
+            $productInfo["total_price_after_cut_discount"] += (int)$product_total;
+            $productInfo["product_info"][] = [
+                'id' => $product->get_id(),
+                'product_name' => $product->get_name(),
+                'product_price' => $product->get_price(),
+                'product_total' => ($product->get_price() * $item->get_quantity()),
+                'product_quantity' => $item->get_quantity(),
+                'product_image' => $product_image_url
+            ];
         }
     }
     return $productInfo;

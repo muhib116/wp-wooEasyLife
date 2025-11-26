@@ -358,6 +358,10 @@ class CustomOrderHandleAPI extends WP_REST_Controller
     
         // Format product data
         foreach ($products as $product) {
+            if (!$product || !is_object($product) || !$product->get_id()) {
+                // Skip this product if not found or invalid
+                continue;
+            }
             $image_id = $product->get_image_id(); // Get the main image ID
             $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'full') : wc_placeholder_img_src(); // Get the URL or a placeholder
             $product_currency_symbol = get_woocommerce_currency_symbol();

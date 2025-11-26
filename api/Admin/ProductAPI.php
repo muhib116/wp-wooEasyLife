@@ -168,22 +168,25 @@ class ProductAPI extends WP_REST_Controller {
                     $query->the_post();
                     $product = wc_get_product(get_the_ID());
                     
-                    if ($product && is_object($product)) {
-                        $image_id = $product->get_image_id();
-                        $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : '';
-                        
-                        $products[] = [
-                            'id'            => $product->get_id(),
-                            'name'          => $product->get_name(),
-                            'price'         => $product->get_price(),
-                            'regular_price' => $product->get_regular_price(),
-                            'stock_status'  => $product->get_stock_status(),
-                            'in_stock'      => $product->is_in_stock(),
-                            'image_url'     => $image_url,
-                            'sku'           => $product->get_sku(),
-                            'type'          => $product->get_type(),
-                        ];
+                    if (!$product || !is_object($product)) {
+                        // Skip this product if not found or invalid
+                        continue;
                     }
+                    
+                    $image_id = $product->get_image_id();
+                    $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : '';
+                    
+                    $products[] = [
+                        'id'            => $product->get_id(),
+                        'name'          => $product->get_name(),
+                        'price'         => $product->get_price(),
+                        'regular_price' => $product->get_regular_price(),
+                        'stock_status'  => $product->get_stock_status(),
+                        'in_stock'      => $product->is_in_stock(),
+                        'image_url'     => $image_url,
+                        'sku'           => $product->get_sku(),
+                        'type'          => $product->get_type(),
+                    ];
                 }
                 wp_reset_postdata();
             }

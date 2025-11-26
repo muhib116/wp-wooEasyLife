@@ -247,6 +247,10 @@ class TrackAbandonCart {
         $total_value = 0;
         foreach (WC()->cart->get_cart() as $cart_item) {
             $product = $cart_item['data'];
+            if (!$product || !is_object($product) || !$product->get_id()) {
+                // Skip this cart item if product is not found or invalid
+                continue;
+            }
             $cart_contents['products'][] = [
                 'product_id'  => $product->get_id(),
                 'name'        => $product->get_name(),

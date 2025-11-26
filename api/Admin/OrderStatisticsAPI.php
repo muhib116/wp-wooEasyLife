@@ -281,7 +281,12 @@ class OrderStatisticsAPI extends WP_REST_Controller
     
         $data = array_map(function ($result) {
             $product = wc_get_product($result->ID);
-    
+
+            if (!$product || !is_object($product)) {
+                // Skip this product if not found or invalid
+                return null;
+            }
+
             return [
                 'product_id'   => $result->ID,
                 'product_name' => $product->get_name(),
@@ -294,6 +299,9 @@ class OrderStatisticsAPI extends WP_REST_Controller
                 'low_stock_threshold' => $product->get_low_stock_amount() ?: false, // Get low stock threshold
             ];
         }, $results);
+    
+        // Remove nulls from the array (products not found)
+        $data = array_values(array_filter($data));
     
         return new WP_REST_Response([
             'status' => 'success',

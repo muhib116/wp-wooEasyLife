@@ -427,10 +427,10 @@ export const useOrders = () => {
       // Prepare payload: consignment_ids if available, otherwise invoice_ids
       const payload = {
         consignment_ids: courierData
-          .filter(item => item.courier_data?.consignment_id && item.courier_data.consignment_id !== 'not-available')
+          .filter(item => item && item.courier_data && item.courier_data.consignment_id && item.courier_data.consignment_id !== 'not-available')
           .map(item => item.courier_data.consignment_id),
         invoice_ids: courierData
-          .filter(item => !item.courier_data?.consignment_id || item.courier_data.consignment_id === 'not-available')
+          .filter(item => item && (!item.courier_data?.consignment_id || item.courier_data.consignment_id === 'not-available'))
           .map(item => formatInvoice(item.id || ''))
       };
 
