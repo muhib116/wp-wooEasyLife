@@ -5,7 +5,7 @@
             
             <label class="font-light border px-2 py-1 rounded-sm">
                 <select 
-                    class="outline-none bg-transparent !border-none focus:outline-none"
+                    class="outline-none bg-transparent !border-none focus:outline-none w-[130px]"
                     v-model="selectedDspFilter"
                     title="Filter by Delivery Success Probability"
                 >
@@ -26,7 +26,7 @@
                     @change="debouncedGetOrders"
                     title="Filter by Done/Undone Status"
                 >
-                    <option value="">All Orders</option>
+                    <option value="undefined">All Orders</option>
                     <option value="1">Marked as Done</option>
                     <option value="0">Marked as Undone</option>
                 </select>
@@ -39,7 +39,7 @@
                     @change="debouncedGetOrders"
                     title="Filter by Follow Up Status"
                 >
-                    <option value="">All Orders</option>
+                    <option value="undefined">All Orders</option>
                     <option value="1">Marked as Follow</option>
                     <option value="0">Marked as Not follow</option>
                 </select>

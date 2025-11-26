@@ -26,7 +26,38 @@ import { useRoute } from "vue-router";
 
 export const useOrders = () => {
   const route = useRoute();
-  const orders = ref([]);
+  interface Order {
+    id: string | number;
+    courier_data?: {
+      consignment_id?: string;
+      status?: string;
+    };
+    billing_address?: {
+      phone?: string;
+      email?: string;
+    };
+    customer_report?: {
+      success_rate?: string;
+    };
+    customer_custom_data?: {
+      fraud_score?: string;
+      first_name?: string;
+      last_name?: string;
+      phone?: string;
+      address?: string;
+    };
+    product_info?: {
+      total?: number;
+    };
+    status?: string;
+    is_done?: boolean | number | string;
+    need_follow?: boolean | number | string;
+    customer_device_token?: string;
+    customer_ip?: string;
+    [key: string]: any;
+  }
+
+  const orders = ref<Order[]>([]);
   const shippingMethods = ref(null);
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
@@ -387,54 +418,67 @@ export const useOrders = () => {
       btn.isLoading = true;
       let courierData = selectedOrders.value?.size ? [...selectedOrders.value] : orders.value;
 
+      // If no selected orders, filter out orders without courier data
       if (![...selectedOrders.value]?.length) {
         courierData = courierData.filter((item) => !isEmpty(item.courier_data));
       }
 
-      const ids = courierData.map((item) => {
-        return formatInvoice(item.id || '') // order id == steadfast invoice id
-        // return item.courier_data.consignment_id
-      });
+      // Prepare payload: consignment_ids if available, otherwise invoice_ids
+      const payload = { 
+        consignment_ids: courierData
+          .filter(item => item.courier_data?.consignment_id && item.courier_data.consignment_id !== 'not-available')
+          .map(item => item.courier_data.consignment_id),
+        invoice_ids: courierData
+          .filter(item => !item.courier_data?.consignment_id || item.courier_data.consignment_id === 'not-available')
+          .map(item => formatInvoice(item.id || ''))
+      };
 
-      // const payload = { consignment_ids: ids };
-      const payload = { invoice_ids: ids };
-
-      if (!ids?.length) {
+      // If nothing to refresh, show warning and exit
+      if (
+        (!payload.consignment_ids.length && !payload.invoice_ids.length)
+      ) {
         showNotification({ type: "warning", message: "There is no data available to refresh." });
-        return
+        return;
       }
+
+      // Fetch updated statuses from courier API
       const { data: statuses } = await steadfastBulkStatusCheck(payload);
 
-      courierData.forEach(async (order) => {
+      // Update each order based on returned statuses
+      for (const order of courierData) {
         let orderId = order.id;
-        let courierUpdatedStatus = statuses[formatInvoice(orderId)] || 'unknown'; // courier invoice id == formatInvoice('order id')
+        // Determine the key to use for status lookup
+        const statusKey = order.courier_data?.consignment_id
+          ? order.courier_data.consignment_id
+          : formatInvoice(orderId);
 
-        // manageCourier
+        let courierUpdatedStatus = statuses[statusKey] || 'unknown';
+
         if (courierUpdatedStatus) {
-          /**
-           * if by chance any courier entry data missed to save in db then it resolved it
-           */
+          // If courier entry data is missing, store it
           if (!order.courier_data?.consignment_id) {
             storeBulkRecordsInToOrdersMeta([{
               order_id: order.id,
               invoice: formatInvoice(order.id || ''),
-              recipient_name: order.customer_custom_data.first_name + order.customer_custom_data.last_name,
+              recipient_name: (order.customer_custom_data.first_name || '') + (order.customer_custom_data.last_name || ''),
               recipient_phone: order.customer_custom_data.phone,
               recipient_address: order.customer_custom_data.address,
               cod_amount: order.product_info.total,
               partner: courierPartner,
               status: courierUpdatedStatus
-            }])
+            }]);
 
             await loadOrderStatusList();
             await getOrders();
             showNotification({ type: "success", message: "Order data synced with courier platform." });
-
-            return;
+            continue;
           }
 
+          // Update courier status in order meta
           order.courier_data.status = courierUpdatedStatus;
           await updateCourierData({ order_id: order.id, courier_data: order.courier_data });
+
+          // Update WooCommerce order status if needed
           let statusName = get_status(courierUpdatedStatus);
           try {
             await changeStatus([{ order_id: order.id, new_status: statusName }]);
@@ -443,7 +487,8 @@ export const useOrders = () => {
             console.error(err);
           }
         }
-      });
+      }
+
       showNotification({ type: "success", message: "Courier data refresh done." });
     } finally {
       btn.isLoading = false;

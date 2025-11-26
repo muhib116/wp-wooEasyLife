@@ -16,7 +16,7 @@
         :class="{ 'mb-4 flex w-full justify-center': !hideTargetAchieve }"
       >
         <Chart.Native
-          :width="hideTargetAchieve ? '100%' : '250'"
+          :width="hideTargetAchieve ? '100%' : '400'"
           :height="hideTargetAchieve ? '100%' : '250'"
           :chartData="chartData"
         />
