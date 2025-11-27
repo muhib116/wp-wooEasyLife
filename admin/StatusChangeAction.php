@@ -10,24 +10,34 @@ class StatusChangeAction {
     }
 
     public function handle_order_status_change($order_id, $old_status, $new_status) {
-        if($old_status == $new_status) return; // If status is unchanged, do nothing
+        if($old_status == $new_status) return;
 
         if (!is_wel_license_valid()) {
-            return; // Exit the *current* function if the license is not valid.
+            return;
         }
 
-        // Get the order object
         $order = wc_get_order($order_id);
-
         if (!$order) {
-            return; // Exit if the order is invalid
+            return;
+        }
+
+        // Prevent duplicate SMS for same status
+        $meta_key = '_wel_sms_sent_' . $new_status;
+        if (get_post_meta($order_id, $meta_key, true)) {
+            return;
         }
 
         $sms_config_table = new \WooEasyLife\CRUD\SMSConfigTable();
         $sms_records = $sms_config_table->get_all('wc-'.$new_status, 1);
 
         $this->send_sms($order, $sms_records);
-        $this->send_purchase_event_to_pixel($order, $old_status, $new_status);
+
+        // Send pixel event for confirmed or cancelled
+        if (in_array($new_status, ['confirmed', 'cancelled'])) {
+            $this->send_order_event_to_pixel($order, $old_status, $new_status);
+        }
+
+        update_post_meta($order_id, $meta_key, 1);
     }
 
     public function send_sms($order, $sms_records) 
@@ -63,8 +73,9 @@ class StatusChangeAction {
         }
     }
 
-    public function send_purchase_event_to_pixel($order, $old_status, $new_status) {
-        if ($old_status === $new_status || $new_status !== 'confirmed') {
+    public function send_order_event_to_pixel($order, $old_status, $new_status) {
+        // Only fire if status actually changed and is now 'confirmed' or 'cancelled'
+        if ($old_status === $new_status || !in_array($new_status, ['confirmed', 'cancelled'])) {
             return;
         }
 
@@ -74,6 +85,7 @@ class StatusChangeAction {
         $access_token = isset($config_data["pixel_access_token"]) ? trim($config_data["pixel_access_token"]) : '';
 
         if (empty($pixel_id) || empty($access_token)) {
+            $this->log_facebook_pixel_response('Missing Pixel ID or Access Token.');
             return;
         }
 
@@ -82,7 +94,6 @@ class StatusChangeAction {
             return;
         }
 
-        // ✅ Helper function for hashing
         $hash_data = function($value) {
             return hash('sha256', strtolower(trim($value)));
         };
@@ -90,20 +101,16 @@ class StatusChangeAction {
         // Customer info
         $email      = $order->get_billing_email();
         $phone_raw  = preg_replace('/\D/', '', $order->get_billing_phone());
-
-        // Ensure phone in E.164 format (Bangladesh example)
-        if (strpos($phone_raw, '880') !== 0) {
+        if ($phone_raw && strpos($phone_raw, '880') !== 0) {
             $phone_raw = '880' . ltrim($phone_raw, '0');
         }
-
-        // Additional user data
         $first_name = $order->get_billing_first_name();
         $last_name  = $order->get_billing_last_name();
         $city       = $order->get_billing_city();
         $state      = $order->get_billing_state();
         $zip        = $order->get_billing_postcode();
-        $country    = $order->get_billing_country() || 'BD';
-        $address_1 = $order->get_billing_address_1();
+        $country    = $order->get_billing_country() ?: 'BD';
+        $address_1  = $order->get_billing_address_1();
 
         // Get client IP (proxy aware)
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -113,36 +120,52 @@ class StatusChangeAction {
         }
 
         $user_data = [];
-        if (!empty($email))    $user_data['em']      = $hash_data($email);
-        if (!empty($phone_raw))$user_data['ph']      = $hash_data($phone_raw);
-        if (!empty($first_name))$user_data['fn']     = $hash_data($first_name);
-        if (!empty($last_name)) $user_data['ln']     = $hash_data($last_name);
-        if (!empty($city))      $user_data['ct']     = $hash_data($city);
-        if (!empty($state))     $user_data['st']     = $hash_data($state);
-        if (!empty($zip))       $user_data['zp']     = $hash_data($zip);
-        if (!empty($country))   $user_data['country']= $hash_data($country);
-        if (!empty($address_1)) $user_data['addr'] = hash('sha256', strtolower(trim($address_1)));
+        if (!empty($email))      $user_data['em']      = $hash_data($email);
+        if (!empty($phone_raw))  $user_data['ph']      = $hash_data($phone_raw);
+        if (!empty($first_name)) $user_data['fn']      = $hash_data($first_name);
+        if (!empty($last_name))  $user_data['ln']      = $hash_data($last_name);
+        if (!empty($city))       $user_data['ct']      = $hash_data($city);
+        if (!empty($state))      $user_data['st']      = $hash_data($state);
+        if (!empty($zip))        $user_data['zp']      = $hash_data($zip);
+        if (!empty($country))    $user_data['country'] = $hash_data($country);
+        if (!empty($address_1))  $user_data['addr']    = $hash_data($address_1);
 
         // Required fields for CAPI
         $user_data['client_ip_address'] = $client_ip;
         $user_data['client_user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-        // Order info
         $value    = floatval($order->get_total());
         $currency = strtoupper($order->get_currency()) ?: 'BDT';
         $order_id = $order->get_id();
 
-        $event_id = 'purchase_' . sanitize_key($order_id);
+        // Set event name and event_id based on status
+        $event_name = $new_status === 'confirmed' ? 'Purchase' : 'OrderCancelled';
+        $event_id = strtolower($event_name) . '_' . sanitize_key($order_id);
+
+        $contents = [];
+        foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
+            if ($product && is_object($product)) {
+                $contents[] = [
+                    'id'       => $product->get_id(),
+                    'quantity' => $item->get_quantity(),
+                    'item_price' => $product->get_price(),
+                    'name'     => $product->get_name(),
+                ];
+            }
+        }
 
         $event = [
-            'event_name' => 'Purchase',
-            'event_time' => time(),
-            'event_id'   => $event_id,
+            'event_name'    => $event_name,
+            'event_time'    => time(),
+            'event_id'      => $event_id,
             'action_source' => 'website',
-            'user_data'  => $user_data,
-            'custom_data' => [
+            'user_data'     => $user_data,
+            'custom_data'   => [
                 'currency' => $currency,
-                'value' => $value
+                'value'    => $value,
+                'contents' => $contents,
+                'num_items' => count($contents),
             ]
         ];
 
@@ -151,7 +174,6 @@ class StatusChangeAction {
             'access_token' => $access_token
         ];
 
-        // Optional: Only in development environment
         if (!empty($config_data['pixel_test_event_code']) && defined('WP_DEBUG') && WP_DEBUG) {
             $payload['test_event_code'] = $config_data['pixel_test_event_code'];
         }
@@ -166,7 +188,17 @@ class StatusChangeAction {
             'timeout' => 20
         ]);
 
-        $this->log_facebook_pixel_response($response, $payload);
+        // Improved error handling and logging
+        if (is_wp_error($response)) {
+            error_log('[FB Pixel] Error: ' . $response->get_error_message());
+            error_log('[FB Pixel] Payload: ' . json_encode($payload));
+        } else {
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+            error_log("[FB Pixel] Status Code: {$code}");
+            error_log("[FB Pixel] Response Body: " . $body);
+            error_log("[FB Pixel] Payload Sent: " . json_encode($payload));
+        }
     }
 
 
