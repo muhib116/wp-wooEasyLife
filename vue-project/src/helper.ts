@@ -370,12 +370,13 @@ export const printProductDetails = (order, cb, invoice_logo) => {
                         display: flex; 
                         align-items: center;
                         justify-content: space-between;
+                        margin-left: 4px;
                     ">
                         <div style="display: grid; gap: 4px;">
-                            <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 38px; max-width: 100px; object-fit: contain; margin-bottom: 4px;" />
+                            <img src="${invoice_logo || 'https://api.wpsalehub.com/app-logo'}" alt="Logo" style="height: 40px; max-width: 130px; object-fit: contain; margin-bottom: 4px;" />
                             <p style="margin:0;"><strong>ID: ${order.courier_data.consignment_id}</strong></p>
                             <p style="margin:0;"><strong>COD:</strong> ${order.total}${order.currency_symbol}</p>
-                            <p style="margin:0;"><strong>Name:</strong> ${order.customer_name}</p>
+                            <p style="margin:0;"><strong>Address:</strong> ${order.billing_address.address_1}</p>
                             <p style="margin:0;"><strong>Phone:</strong> ${order.billing_address.phone}</p>
                         </div>
                         <div>

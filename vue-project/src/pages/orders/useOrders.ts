@@ -482,7 +482,7 @@ export const useOrders = () => {
 
           let statusName = get_status(courierUpdatedStatus);
           statusUpdates.push({ order_id: order.id, new_status: statusName });
-          order.status = statusName.replace('wc-', '');
+          order.status = typeof statusName === 'string' ? statusName.replace('wc-', '') : '';
         }
       }
 
