@@ -22,11 +22,7 @@
 
             <QuickOrderStatusChange
                 :order="order"
-            >
-                <BlockAllTogether
-                    :order="order"
-                />
-            </QuickOrderStatusChange>
+            />
 
             <a 
                 class="absolute top-0 left-full text-orange-500 hover:scale-150 duration-200 opacity-0 group-hover:opacity-100"

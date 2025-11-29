@@ -16,7 +16,10 @@
             class="absolute right-0 bg-white border shadow-md rounded z-10 w-fit block"
             :class="from == 'mobile' ? 'bottom-full mb-1' : 'top-full mt-1'"
         >
-            <slot></slot>
+            <BlockAllTogether
+                :order="order"
+                @closeDropdown="toggleDropdown = false "
+            />
             <Button.Native
                 v-if="hasStatus('cancelled')"
                 @onClick="onClickChangeToCancelled"
@@ -46,6 +49,7 @@
     import { ref, inject } from 'vue'
     import { changeStatus } from '@/api'
     import { Button, Icon } from '@/components'
+    import BlockAllTogether from './BlockAllTogether.vue'
 
     const { wooCommerceStatuses } = inject('useOrders') as any
     const toggleDropdown = ref(false)

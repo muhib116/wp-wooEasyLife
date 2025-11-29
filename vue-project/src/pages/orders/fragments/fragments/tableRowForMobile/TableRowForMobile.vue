@@ -216,11 +216,7 @@
                     class="ml-auto"
                     :order="order"
                     from="mobile"
-                >
-                    <BlockAllTogether
-                        :order="order"
-                    />
-                </QuickOrderStatusChange>
+                />
             </div>
 
             <hr />

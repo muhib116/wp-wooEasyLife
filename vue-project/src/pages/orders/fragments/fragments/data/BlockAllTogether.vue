@@ -1,7 +1,10 @@
 <template>
     <Button.Native
         v-if="userBlockHasEnabled"
-        @onClick="handleBlocking"
+        @onClick="async (btn) => {
+            await handleBlocking(btn)
+            $emit('closeDropdown')
+        }"
         class="w-full font-medium hover:scale-1 gap-0 whitespace-nowrap text-left px-3 py-2 text-sm bg-red-400 text-white rounded disabled:opacity-50 hover:bg-red-600"
     >
         <Icon name="PhLockSimple" size="16" class="inline-block mr-2"/> Block this user
