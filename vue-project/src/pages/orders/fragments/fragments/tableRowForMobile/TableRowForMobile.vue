@@ -215,7 +215,12 @@
                 <QuickOrderStatusChange
                     class="ml-auto"
                     :order="order"
-                />
+                    from="mobile"
+                >
+                    <BlockAllTogether
+                        :order="order"
+                    />
+                </QuickOrderStatusChange>
             </div>
 
             <hr />
@@ -318,6 +323,7 @@
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
     import { Whatsapp, CourierEntry } from '@/components';
     import QuickOrderStatusChange from '@/pages/orders/fragments/fragments/data/QuickOrderStatusChange.vue'
+    import BlockAllTogether from '../data/BlockAllTogether.vue'
 
     // allow the full order object to be passed through without strict structural typing
     const props = defineProps<{

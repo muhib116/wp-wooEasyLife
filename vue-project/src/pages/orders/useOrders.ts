@@ -269,30 +269,41 @@ export const useOrders = () => {
     }
   }
 
-  const handlePhoneNumberBlock = async (btn) => {
+  const handlePhoneNumberBlock = async (btn, reloadOrders: boolean = true) => {
     if (![...selectedOrders.value].length) {
-      alert("Please select at least on item.");
-      return;
+      alert("Please select at least one item.");
+      return { success: false, errors: ['No order selected'] };
     }
     const payload = [...selectedOrders.value].map((item) => ({ type: "phone_number", ip_phone_email_or_device: item?.billing_address?.phone }));
+    const errors: string[] = [];
+    let blockCount = 0;
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
 
       (response || []).forEach(({ status, message }) => {
         showNotification({ type: status === 'success' ? "success" : "danger", message });
+        if (status === 'success') blockCount++;
+        else errors.push(message);
       });
 
-      await getOrders();
+      if (reloadOrders) {
+        await getOrders();
+      }
+      return { success: errors.length === 0, errors, blockCount };
+    } catch (err) {
+      errors.push('Phone number block failed.');
+      showNotification({ type: "danger", message: 'Phone number block failed.' });
+      return { success: false, errors, blockCount };
     } finally {
       btn.isLoading = false;
     }
   };
 
-  const handleEmailBlock = async (btn) => {
+  const handleEmailBlock = async (btn, reloadOrders: boolean = true) => {
     if (![...selectedOrders.value].length) {
-      alert("Please select at least on item.");
-      return;
+      alert("Please select at least one item.");
+      return { success: false, errors: ['No order selected'] };
     }
     const payload = [...selectedOrders.value].map((item) => {
       if (!item?.billing_address?.email) {
@@ -301,64 +312,94 @@ export const useOrders = () => {
       } else {
         return { type: "email", ip_phone_email_or_device: item?.billing_address?.email };
       }
-    });
+    }).filter(Boolean);
+    const errors: string[] = [];
+    let blockCount = 0;
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
 
-      (response || []).forEach(({ status, message }) => {
-        showNotification({ type: status === 'success' ? "success" : "danger", message });
-      });
-
-      await getOrders();
+      if (reloadOrders) {
+        (response || []).forEach(({ status, message }) => {
+          showNotification({ type: status === 'success' ? "success" : "danger", message });
+          if (status === 'success') blockCount++;
+          else errors.push(message);
+        });
+        await getOrders();
+      }
+      return { success: errors.length === 0, errors, blockCount };
+    } catch (err) {
+      errors.push('Email block failed.');
+      showNotification({ type: "danger", message: 'Email block failed.' });
+      return { success: false, errors, blockCount };
     } finally {
       btn.isLoading = false;
     }
   };
 
-  const handleDeviceBlock = async (btn) => {
+  const handleDeviceBlock = async (btn, reloadOrders: boolean = true) => {
     if (!selectedOrders.value.size) {
       showNotification({ type: 'warning', message: 'Please select at least one order to block the device.' });
-      return;
+      return { success: false, errors: ['No order selected'] };
     }
 
     const payload = [...selectedOrders.value].map((item) => {
-      console.log(item)
       if (!item?.customer_device_token) {
         showNotification({ type: 'warning', message: 'Device token is missing. May be custom order.' });
         return;
       } else {
         return { type: "device_token", ip_phone_email_or_device: item?.customer_device_token }
       }
-    });
-    console.log({ payload })
+    }).filter(Boolean);
+
+    const errors: string[] = [];
+    let blockCount = 0;
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
-      (response || []).forEach(({ status, message }) => {
-        showNotification({ type: status === 'success' ? "success" : "danger", message });
-      });
-      await getOrders();
+      if (reloadOrders) {
+        (response || []).forEach(({ status, message }) => {
+          showNotification({ type: status === 'success' ? "success" : "danger", message });
+          if (status === 'success') blockCount++;
+          else errors.push(message);
+        });
+        await getOrders();
+      }
+      return { success: errors.length === 0, errors, blockCount };
+    } catch (err) {
+      errors.push('Device block failed.');
+      showNotification({ type: "danger", message: 'Device block failed.' });
+      return { success: false, errors, blockCount };
     } finally {
       btn.isLoading = false;
     }
   };
 
-  const handleIPBlock = async (btn) => {
+  const handleIPBlock = async (btn, reloadOrders: boolean = true) => {
     if (![...selectedOrders.value].length) {
-      alert("Please select at least on item.");
-      return;
+      alert("Please select at least one item.");
+      return { success: false, errors: ['No order selected'] };
     }
     const payload = [...selectedOrders.value].map((item) => ({ type: "ip", ip_phone_email_or_device: item?.customer_ip }));
+    const errors: string[] = [];
+    let blockCount = 0;
     try {
       btn.isLoading = true;
       const response = await ip_phone_email_or_device_block_bulk_entry(payload);
 
-      (response || []).forEach(({ status, message }) => {
-        showNotification({ type: status === 'success' ? "success" : "danger", message });
-      });
-
-      await getOrders();
+      if (reloadOrders) {
+        (response || []).forEach(({ status, message }) => {
+          showNotification({ type: status === 'success' ? "success" : "danger", message });
+          if (status === 'success') blockCount++;
+          else errors.push(message);
+        });
+        await getOrders();
+      }
+      return { success: errors.length === 0, errors, blockCount };
+    } catch (err) {
+      errors.push('IP block failed.');
+      showNotification({ type: "danger", message: 'IP block failed.' });
+      return { success: false, errors, blockCount };
     } finally {
       btn.isLoading = false;
     }

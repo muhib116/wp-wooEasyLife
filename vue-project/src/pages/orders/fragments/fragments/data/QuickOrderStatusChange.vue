@@ -13,8 +13,10 @@
         
         <div 
             v-if="toggleDropdown" 
-            class="absolute top-full right-0 bg-white border shadow-md rounded mt-1 z-10 w-fit block"
+            class="absolute right-0 bg-white border shadow-md rounded z-10 w-fit block"
+            :class="from == 'mobile' ? 'bottom-full mb-1' : 'top-full mt-1'"
         >
+            <slot></slot>
             <Button.Native
                 v-if="hasStatus('cancelled')"
                 @onClick="onClickChangeToCancelled"
@@ -49,6 +51,7 @@
     const toggleDropdown = ref(false)
     const props = defineProps<{
         order: any
+        from?: string
     }>()
 
     // Check if a status exists in the available statuses
