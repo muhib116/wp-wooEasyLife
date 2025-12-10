@@ -157,13 +157,17 @@
 
             <div
                 class="text-sm flex gap-1 items-center w-fit"
-                @click="toggleAddressModel = true"
             >
-                <p>
+                <p
+                    @click="toggleAddressModel = true"
+                >
                     🏠 
                     {{ order.billing_address.address_1 }},
                     {{ order.billing_address.address_2 }}
                 </p>
+                <CustomFieldData
+                    :order="order"
+                />
             </div>
 
             <BlackListData
@@ -319,7 +323,7 @@
     import OrderDetailsForMobile from './OrderDetailsForMobile.vue'
     import { Whatsapp, CourierEntry } from '@/components';
     import QuickOrderStatusChange from '@/pages/orders/fragments/fragments/data/QuickOrderStatusChange.vue'
-    import BlockAllTogether from '../data/BlockAllTogether.vue'
+    import CustomFieldData from '../data/CustomFieldData.vue'
 
     // allow the full order object to be passed through without strict structural typing
     const props = defineProps<{

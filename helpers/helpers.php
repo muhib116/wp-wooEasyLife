@@ -767,3 +767,92 @@ function get_site_logo_url() {
     }
     return get_site_url() . '/wp-content/uploads/default-logo.png'; // Optional fallback
 }
+
+
+
+/**
+ * Programmatically retrieves ONLY the CUSTOM fields defined by CartFlows 
+ * for a given WooCommerce order by parsing the associated Funnel Step configuration.
+ * 
+ * Returns false if no custom field data is found.
+ *
+ * @param int $order_id WooCommerce order ID.
+ * @return array|false Array of custom field data [Custom Field Label => Custom Field Value], 
+ *                     or false if no data is found.
+ */
+function get_only_cartflows_custom_fields_data( $order_id ) {
+    global $wpdb;
+    $custom_fields_data = [];
+    
+    // 1. Get the WooCommerce Order object.
+    $order = wc_get_order( $order_id );
+    if ( ! $order ) {
+        return false;
+    }
+
+    // 2. Retrieve the Flow ID from the Order Meta (Key: _wcf_flow_id)
+    $flow_id = $order->get_meta( '_wcf_flow_id', true );
+    if ( empty( $flow_id ) ) {
+        return false;
+    }
+
+    // 3. Find the Checkout Step ID associated with the Flow ID.
+    $checkout_step_id = $wpdb->get_var( 
+        $wpdb->prepare( 
+            "SELECT post_id 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = 'wcf-flow-id' 
+            AND meta_value = %d 
+            AND post_id IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'wcf-step-type' AND meta_value = 'checkout')",
+            $flow_id
+        ) 
+    );
+    
+    // Return false if the checkout step cannot be identified
+    if ( empty( $checkout_step_id ) ) {
+        return false;
+    }
+
+    // 4. Retrieve all field configuration arrays from the Checkout Step post.
+    $billing_fields_config  = get_post_meta( $checkout_step_id, 'wcf_field_order_billing', true );
+    $shipping_fields_config = get_post_meta( $checkout_step_id, 'wcf_field_order_shipping', true );
+    
+    $all_fields_config = array_merge( 
+        is_array( $billing_fields_config ) ? $billing_fields_config : [],
+        is_array( $shipping_fields_config ) ? $shipping_fields_config : []
+    );
+    
+    // Return false if there is no field configuration at all
+    if ( empty( $all_fields_config ) ) {
+        return false;
+    }
+
+    // 5. Loop through the configuration and FILTER for ONLY CUSTOM fields.
+    foreach ( $all_fields_config as $key => $field_data ) {
+        
+        // Check if the field is a custom field AND is enabled in the settings AND has a label
+        $is_custom_field = isset( $field_data['custom'] ) && (bool) $field_data['custom'];
+        $is_enabled      = isset( $field_data['enabled'] ) && (bool) $field_data['enabled'];
+        $has_label       = ! empty( $field_data['label'] );
+
+        if ( $is_custom_field && $is_enabled && $has_label ) {
+            
+            $field_label = $field_data['label'];
+            
+            // Try to get the value from the Order meta (check both underscore and non-underscore key)
+            $value = $order->get_meta( $key, true );
+            if ( empty( $value ) ) {
+                 $value = $order->get_meta( '_' . $key, true ); 
+            }
+
+            // If a value was actually submitted/saved, add it.
+            // Exclude empty values that sometimes get saved (e.g., 'yes', 'no', '0' are valid saved states, but we check if they are the actual value of a radio/select field)
+            if ( ! empty( $value ) && $value !== 'yes' && $value !== 'no' && $value !== '0' ) {
+                $custom_fields_data[ $field_label ] = $value;
+            }
+        }
+    }
+    
+    // 6. Return the data array OR false if the array is empty after processing.
+    return ! empty( $custom_fields_data ) ? $custom_fields_data : false;
+}

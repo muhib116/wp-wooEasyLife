@@ -70,7 +70,7 @@
             />
         </div>
         <div
-            class="flex gap-1 items-center"
+            class="flex gap-2 items-center"
             :title="`${order?.billing_address?.address_1}, ${order?.billing_address?.address_2}`"
         >
             <div class="max-w-[240px] break-all">
@@ -78,6 +78,10 @@
                 {{ order?.billing_address?.address_1 }},
                 {{ order?.billing_address?.address_2 }}
             </div>
+
+            <CustomFieldData
+                :order="order"
+            />
         </div>
 
         <div class="flex flex-wrap gap-x-2">
@@ -130,7 +134,7 @@
     import { Icon, Whatsapp, Button } from '@/components'
     import { baseUrl, changeStatus } from '@/api'
     import QuickOrderStatusChange from '@/pages/orders/fragments/fragments/data/QuickOrderStatusChange.vue'
-    import BlockAllTogether from '@/pages/orders/fragments/fragments/data/BlockAllTogether.vue'
+    import CustomFieldData from './CustomFieldData.vue'
     
     const props = defineProps({
         order: Object
