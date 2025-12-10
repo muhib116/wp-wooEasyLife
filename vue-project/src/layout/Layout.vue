@@ -54,6 +54,10 @@
     onMounted(async () => {
         if(isValidLicenseKey.value) {
             await loadCourierConfigData()
+            _useNotification.checkNewOrderStatus()
+            setInterval(() => {
+                _useNotification.checkNewOrderStatus()
+            }, 30000); // Check every 30 seconds
         }
     })
 

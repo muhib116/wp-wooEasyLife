@@ -15,6 +15,8 @@ WooEasyLife is a comprehensive WordPress plugin that supercharges your WooCommer
 - **Custom Order Statuses**: Create and manage custom order statuses
 - **Order Notes & History**: Track order changes and add custom notes
 - **Quick Status Changes**: One-click status updates with customizable buttons
+- **Custom Checkout Fields Support**: Automatically captures and displays custom billing/shipping fields from checkout
+- **Flexible Note Management**: Save custom field values to courier, invoice, or customer notes with dropdown selection
 
 ### 🔒 Fraud Detection & Security
 - **Real-time Fraud Analysis**: AI-powered fraud detection system
@@ -52,6 +54,10 @@ WooEasyLife is a comprehensive WordPress plugin that supercharges your WooCommer
 - **Cache Prevention**: Bypass all major caching plugins for real-time data
 - **CORS Support**: Full cross-origin resource sharing for frontend integrations
 - **Multi-Submenu Navigation**: Organized dashboard, orders, missing orders, and blacklist sections
+- **Custom Field Management**: Full support for custom billing and shipping fields added by plugins or themes
+- **Smart Field Detection**: Automatically identifies and separates custom fields from default WooCommerce fields
+- **Interactive Field Display**: Hover-over tooltips showing custom field data in order lists
+- **Multi-Destination Save**: Save custom field values to courier notes, invoice notes, or customer notes
 
 ## 🔧 Installation
 
@@ -146,6 +152,17 @@ The plugin includes a built-in licensing system:
 3. **Track Status**: Monitor delivery status automatically
 4. **Handle Returns**: Process returned orders efficiently
 
+### Custom Checkout Fields
+1. **Automatic Detection**: Custom fields are automatically detected and captured from checkout
+2. **View in Admin**: Custom fields display in WordPress admin order details page with styled sections
+3. **Order List Display**: Hover over info icon in order list to see custom field values
+4. **Save to Notes**: Click the pencil icon and select where to save the field value:
+   - **Courier Note**: For shipping/delivery instructions
+   - **Invoice Note**: For billing or invoice-related information
+   - **Customer Note**: For customer-specific details
+5. **API Access**: Custom fields available via REST API in `billing_address.custom_fields` and `shipping_address.custom_fields`
+6. **Compatible With**: CartFlows, WooCommerce Checkout Manager, Checkout Field Editor, and other custom field plugins
+
 ## 🔌 API Endpoints
 
 ### Order Management
@@ -153,6 +170,34 @@ The plugin includes a built-in licensing system:
 GET    /wp-json/wooeasylife/v1/orders
 POST   /wp-json/wooeasylife/v1/orders/change-status
 GET    /wp-json/wooeasylife/v1/status-with-counts
+POST   /wp-json/wooeasylife/v1/save-order-notes
+```
+
+**Order Response Structure** (including custom fields):
+```json
+{
+  "billing_address": {
+    "first_name": "John",
+    "phone": "0123456789",
+    "custom_fields": [
+      {
+        "key": "billing_special_instruction",
+        "label": "Special Instruction",
+        "value": "Please call before delivery"
+      }
+    ]
+  },
+  "shipping_address": {
+    "first_name": "John",
+    "custom_fields": [
+      {
+        "key": "shipping_preferred_time",
+        "label": "Preferred Time",
+        "value": "Morning delivery"
+      }
+    ]
+  }
+}
 ```
 
 ### Fraud Detection
@@ -270,7 +315,23 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 Changelog
 
-### Version 1.1.7 (Latest)
+### Version 1.1.8 (Latest)
+- 🚀 NEW: Custom checkout fields support - automatically captures billing and shipping custom fields
+- 🚀 NEW: Smart custom field detection - separates custom fields from default WooCommerce fields
+- 🚀 NEW: Custom fields display in WordPress admin order details page
+- 🚀 NEW: Interactive custom field tooltips in order management interface
+- 🚀 NEW: Dropdown menu to save custom field values to courier, invoice, or customer notes
+- 🚀 NEW: Helper functions `get_billing_custom_fields()` and `get_shipping_custom_fields()`
+- ⚡ IMPROVED: Order API response now includes `custom_fields` array in billing and shipping addresses
+- ⚡ IMPROVED: Custom field values can be appended to existing notes or create new ones
+- ⚡ IMPROVED: Better handling of custom fields from CartFlows, WooCommerce Checkout Manager, and other plugins
+- ✨ ENHANCEMENT: Real-time custom field data display with hover-over information icon
+- ✨ ENHANCEMENT: User-friendly field labels (auto-formatted from field keys)
+- ✨ ENHANCEMENT: TypeScript support for custom field data structures
+- 🐛 FIX: Custom field data properly structured with key, label, and value
+- 🐛 FIX: Toast notifications for successful custom field saves
+
+### Version 1.1.7
 - 🚀 NEW: Dashboard submenu structure (Dashboard, Orders, Missing Orders, Black List) for better navigation
 - 🚀 NEW: Comprehensive cache prevention system - prevents caching by all major WordPress cache plugins
 - 🚀 NEW: Full CORS support for cross-origin API requests - enables seamless frontend integration

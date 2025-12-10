@@ -77,17 +77,19 @@ Dashboard:
 ✅ abandoned list a date gulu ashtesena jeom: abandoned_at, recovered_at   
 ✅ missing order issue
 ✅ license add kora thaklew notun device a somossa kore
-✅ shipping method editable korte hobe
+shipping method editable korte hobe
+✅ kuno karone courier data DB te save na hole seita solve korar bebosta korte hobe
+✅ ordered product editable issue
+✅ customer order create and abandoned to order create er somoy shipping method niye kaj korte hobe.
+✅ shipping method change korar pore COD thik thak moto jay kina dekhte hobe
+✅ *** Curier cod edit er option dite hobe
+✅ plugin thik thak update kora jay kina check korte hobe
 
 
 
 --------heigh priority task------------
 👉🏻 multiple courier config
-👉🏻 kuno karone courier data DB te save na hole seita solve korar bebosta korte hobe
-👉🏻 ordered product editable issue
 👉🏻 ashraful mal er ei khane order details a giye product edit hoy kina check dite hobe.
-👉🏻 customer order create and abandoned to order create er somoy shipping method niye kaj korte hobe.
-👉🏻 shipping method change korar pore COD thik thak moto jay kina dekhte hobe
 👉🏻 task assign for employ
 
 
@@ -95,7 +97,6 @@ Dashboard:
 
 👉🏻 multiple order akjoner thakle akta delete korar bebosta thakte hobe
 
-👉🏻 *** Curier cod edit er option dite hobe
 👉🏻 Courier a entry korar pore status updte hole courier company jei delivery charge dhoreche ta niye shipping charge er shate meta data hisebe rakhte hobe.
 
 👉🏻 status bangla language a create korte gele status create hoyna
@@ -103,7 +104,6 @@ Dashboard:
 👉🏻 Send message for abandoned order customer
 👉🏻 Order list filter by courier partner
 👉🏻 landing page view calculation
-👉🏻 plugin thik thak update kora jay kina check korte hobe
 👉🏻 missing order theke create order er button dite hobe
 👉🏻 abandont order a sound dite hobe
 👉🏻 sound on and off localstorage theke control korte hobe
