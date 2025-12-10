@@ -49,6 +49,9 @@ WooEasyLife is a comprehensive WordPress plugin that supercharges your WooCommer
 - **Device Tracking**: Track customer devices for security
 - **Custom Product Management**: Advanced product handling capabilities
 - **Balance Management**: Built-in credit system for premium features
+- **Cache Prevention**: Bypass all major caching plugins for real-time data
+- **CORS Support**: Full cross-origin resource sharing for frontend integrations
+- **Multi-Submenu Navigation**: Organized dashboard, orders, missing orders, and blacklist sections
 
 ## 🔧 Installation
 
@@ -266,6 +269,23 @@ We welcome contributions! Please follow these guidelines:
 - Document all public functions
 
 ## 📝 Changelog
+
+### Version 1.1.7 (Latest)
+- 🚀 NEW: Dashboard submenu structure (Dashboard, Orders, Missing Orders, Black List) for better navigation
+- 🚀 NEW: Comprehensive cache prevention system - prevents caching by all major WordPress cache plugins
+- 🚀 NEW: Full CORS support for cross-origin API requests - enables seamless frontend integration
+- 🚀 NEW: Protected against 12+ caching plugins including WP Rocket, LiteSpeed, Cloudflare, W3 Total Cache, and more
+- ⚡ IMPROVED: API responses now include comprehensive no-cache headers for real-time data
+- ⚡ IMPROVED: Enhanced permission management - Shop Managers can now access WooEasyLife features
+- ⚡ IMPROVED: Admin menu structure with organized submenus for better UX
+- ⚡ IMPROVED: API endpoints now bypass all CDN/proxy caching layers
+- 🛡️ SECURITY: Added CORS headers with proper origin validation
+- 🛡️ SECURITY: Implemented cache-busting headers to prevent sensitive data caching
+- 🐛 FIX: Resolved API response caching issues across all major cache plugins
+- 🐛 FIX: Fixed CORS policy errors for localhost and development environments
+- ✨ ENHANCEMENT: Unique timestamp headers (X-WEL-Timestamp) for each API response
+- ✨ ENHANCEMENT: Better compatibility with caching plugins and CDN services
+- ✨ ENHANCEMENT: Improved Vue.js SPA integration with proper CORS handling
 
 ### Version 1.1.6
 - 🚀 NEW: Bulk courier data update API endpoint (`/courier-data/update-bulk`) for efficient mass updates.
