@@ -157,8 +157,9 @@ if (!class_exists('WooEasyLife')) :
             new WooEasyLife\API\API_Register();
             new WooEasyLife\Admin\Admin_Class_Register();
             new WooEasyLife\Frontend\Frontend_Class_Register();
+            new WooEasyLife\Extension\Extension_Class_Register();
+            
             $lifeCycleObj = new WooEasyLife\PluginLifecycleHandle();
-
             $current_version = $lifeCycleObj->get_current_plugin_version();
 
             new WooEasyLife\Init\UpdatePlugin($current_version, $license_key);

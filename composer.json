@@ -11,7 +11,8 @@
             "WooEasyLife\\API\\": "api/",
             "WooEasyLife\\Init\\": "init/",
             "WooEasyLife\\ElementorWidgets\\": "elementorWidgets/",
-            "WooEasyLife\\CRUD\\": "CRUD/"
+            "WooEasyLife\\CRUD\\": "CRUD/",
+            "WooEasyLife\\Extension\\": "extension/"
         },
         "files": [
             "helpers/helpers.php"

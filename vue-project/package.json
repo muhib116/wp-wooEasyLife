@@ -20,22 +20,22 @@
     "jspdf": "^3.0.1",
     "lodash": "^4.17.21",
     "tailwind-merge": "^2.5.5",
-    "vue": "^3.5.12",
-    "vue-router": "^4.4.5",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.3",
     "vue3-apexcharts": "^1.8.0",
     "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.9.0",
-    "@vitejs/plugin-vue": "^5.1.4",
+    "@vitejs/plugin-vue": "^6.0.2",
     "@vue/tsconfig": "^0.5.1",
     "autoprefixer": "^10.4.20",
     "npm-run-all2": "^7.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "~5.6.3",
-    "vite": "^5.4.10",
+    "vite": "^7.2.7",
     "vite-plugin-vue-devtools": "^7.5.4",
     "vue-tsc": "^2.1.10"
   }

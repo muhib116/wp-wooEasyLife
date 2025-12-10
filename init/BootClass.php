@@ -42,6 +42,46 @@ class BootClass {
             '',
             6
         );
+
+        // Add Dashboard submenu
+        add_submenu_page(
+            'woo-easy-life',           // Parent slug
+            'Dashboard',                // Page title
+            'Dashboard',                // Menu title
+            'manage_woocommerce',       // Capability
+            'woo-easy-life',            // Menu slug (same as parent to make it the first submenu)
+            [$this, 'wel_render_admin_page'] // Callback function
+        );
+
+        // Add Orders submenu
+        add_submenu_page(
+            'woo-easy-life',
+            'Orders',
+            'Orders',
+            'manage_woocommerce',
+            'woo-easy-life#/orders',
+            [$this, 'wel_render_admin_page']
+        );
+
+        // Add Missing Orders submenu
+        add_submenu_page(
+            'woo-easy-life',
+            'Missing Orders',
+            'Missing Orders',
+            'manage_woocommerce',
+            'woo-easy-life#/missing-orders',
+            [$this, 'wel_render_admin_page']
+        );
+
+        // Add Black List submenu
+        add_submenu_page(
+            'woo-easy-life',
+            'Black List',
+            'Black List',
+            'manage_woocommerce',
+            'woo-easy-life#/config/custom-black-list',
+            [$this, 'wel_render_admin_page']
+        );
     }
 
     public function wel_custom_menu_icon() {
@@ -195,7 +235,15 @@ class BootClass {
 
     // load admin script
     public function wel_enqueue_scripts($hook_suffix) {
-        if($hook_suffix != 'toplevel_page_woo-easy-life') return;
+        // Allow scripts on all WooEasyLife pages
+        $allowed_pages = [
+            'toplevel_page_woo-easy-life',
+            'wooeasylife_page_woo-easy-life-orders',
+            'wooeasylife_page_woo-easy-life-missing-orders',
+            'wooeasylife_page_woo-easy-life-black-list'
+        ];
+        
+        if(!in_array($hook_suffix, $allowed_pages)) return;
     
         if (file_exists($this->manifest_path)) {
             if ($this->js_file_name) {
