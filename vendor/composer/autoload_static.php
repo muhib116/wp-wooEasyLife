@@ -11,11 +11,12 @@ class ComposerStaticInit4bd325c6d539e219feefd4ea170fecd7
     );
 
     public static $prefixLengthsPsr4 = array (
-        'W' => 
+        'W' =>
         array (
             'WooEasyLife\\Init\\' => 17,
             'WooEasyLife\\Includes\\' => 21,
             'WooEasyLife\\Frontend\\' => 21,
+            'WooEasyLife\\Extension\\' => 22,
             'WooEasyLife\\ElementorWidgets\\' => 29,
             'WooEasyLife\\CRUD\\' => 17,
             'WooEasyLife\\Admin\\' => 18,
@@ -25,35 +26,39 @@ class ComposerStaticInit4bd325c6d539e219feefd4ea170fecd7
     );
 
     public static $prefixDirsPsr4 = array (
-        'WooEasyLife\\Init\\' => 
+        'WooEasyLife\\Init\\' =>
         array (
             0 => __DIR__ . '/../..' . '/init',
         ),
-        'WooEasyLife\\Includes\\' => 
+        'WooEasyLife\\Includes\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),
-        'WooEasyLife\\Frontend\\' => 
+        'WooEasyLife\\Frontend\\' =>
         array (
             0 => __DIR__ . '/../..' . '/frontend',
         ),
-        'WooEasyLife\\ElementorWidgets\\' => 
+        'WooEasyLife\\Extension\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/extension',
+        ),
+        'WooEasyLife\\ElementorWidgets\\' =>
         array (
             0 => __DIR__ . '/../..' . '/elementorWidgets',
         ),
-        'WooEasyLife\\CRUD\\' => 
+        'WooEasyLife\\CRUD\\' =>
         array (
             0 => __DIR__ . '/../..' . '/CRUD',
         ),
-        'WooEasyLife\\Admin\\' => 
+        'WooEasyLife\\Admin\\' =>
         array (
             0 => __DIR__ . '/../..' . '/admin',
         ),
-        'WooEasyLife\\API\\' => 
+        'WooEasyLife\\API\\' =>
         array (
             0 => __DIR__ . '/../..' . '/api',
         ),
-        'WooEasyLife\\' => 
+        'WooEasyLife\\' =>
         array (
             0 => __DIR__ . '/../..' . '/',
         ),

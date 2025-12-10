@@ -70,7 +70,7 @@
             />
         </div>
         <div
-            class="flex gap-2 items-center"
+            class="flex gap-2 items-center justify-between"
             :title="`${order?.billing_address?.address_1}, ${order?.billing_address?.address_2}`"
         >
             <div class="max-w-[240px] break-all">

@@ -9,6 +9,7 @@ return array(
     'WooEasyLife\\Init\\' => array($baseDir . '/init'),
     'WooEasyLife\\Includes\\' => array($baseDir . '/includes'),
     'WooEasyLife\\Frontend\\' => array($baseDir . '/frontend'),
+    'WooEasyLife\\Extension\\' => array($baseDir . '/extension'),
     'WooEasyLife\\ElementorWidgets\\' => array($baseDir . '/elementorWidgets'),
     'WooEasyLife\\CRUD\\' => array($baseDir . '/CRUD'),
     'WooEasyLife\\Admin\\' => array($baseDir . '/admin'),

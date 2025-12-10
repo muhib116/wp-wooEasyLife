@@ -156,7 +156,7 @@
             </div>
 
             <div
-                class="text-sm flex gap-1 items-center w-fit"
+                class="text-sm flex gap-1 items-center justify-between"
             >
                 <p
                     @click="toggleAddressModel = true"
