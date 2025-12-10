@@ -315,38 +315,36 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 Changelog
 
-### Version 1.1.8 (Latest)
+### Version 1.1.7 (Latest)
+- 🚀 NEW: Dashboard submenu structure (Dashboard, Orders, Missing Orders, Black List) for better navigation
+- 🚀 NEW: Comprehensive cache prevention system - prevents caching by all major WordPress cache plugins
+- 🚀 NEW: Full CORS support for cross-origin API requests - enables seamless frontend integration
+- 🚀 NEW: Protected against 12+ caching plugins including WP Rocket, LiteSpeed, Cloudflare, W3 Total Cache, and more
 - 🚀 NEW: Custom checkout fields support - automatically captures billing and shipping custom fields
 - 🚀 NEW: Smart custom field detection - separates custom fields from default WooCommerce fields
 - 🚀 NEW: Custom fields display in WordPress admin order details page
 - 🚀 NEW: Interactive custom field tooltips in order management interface
 - 🚀 NEW: Dropdown menu to save custom field values to courier, invoice, or customer notes
 - 🚀 NEW: Helper functions `get_billing_custom_fields()` and `get_shipping_custom_fields()`
-- ⚡ IMPROVED: Order API response now includes `custom_fields` array in billing and shipping addresses
-- ⚡ IMPROVED: Custom field values can be appended to existing notes or create new ones
-- ⚡ IMPROVED: Better handling of custom fields from CartFlows, WooCommerce Checkout Manager, and other plugins
-- ✨ ENHANCEMENT: Real-time custom field data display with hover-over information icon
-- ✨ ENHANCEMENT: User-friendly field labels (auto-formatted from field keys)
-- ✨ ENHANCEMENT: TypeScript support for custom field data structures
-- 🐛 FIX: Custom field data properly structured with key, label, and value
-- 🐛 FIX: Toast notifications for successful custom field saves
-
-### Version 1.1.7
-- 🚀 NEW: Dashboard submenu structure (Dashboard, Orders, Missing Orders, Black List) for better navigation
-- 🚀 NEW: Comprehensive cache prevention system - prevents caching by all major WordPress cache plugins
-- 🚀 NEW: Full CORS support for cross-origin API requests - enables seamless frontend integration
-- 🚀 NEW: Protected against 12+ caching plugins including WP Rocket, LiteSpeed, Cloudflare, W3 Total Cache, and more
 - ⚡ IMPROVED: API responses now include comprehensive no-cache headers for real-time data
 - ⚡ IMPROVED: Enhanced permission management - Shop Managers can now access WooEasyLife features
 - ⚡ IMPROVED: Admin menu structure with organized submenus for better UX
 - ⚡ IMPROVED: API endpoints now bypass all CDN/proxy caching layers
+- ⚡ IMPROVED: Order API response now includes `custom_fields` array in billing and shipping addresses
+- ⚡ IMPROVED: Custom field values can be appended to existing notes or create new ones
+- ⚡ IMPROVED: Better handling of custom fields from CartFlows, WooCommerce Checkout Manager, and other plugins
 - 🛡️ SECURITY: Added CORS headers with proper origin validation
 - 🛡️ SECURITY: Implemented cache-busting headers to prevent sensitive data caching
 - 🐛 FIX: Resolved API response caching issues across all major cache plugins
 - 🐛 FIX: Fixed CORS policy errors for localhost and development environments
+- 🐛 FIX: Custom field data properly structured with key, label, and value
+- 🐛 FIX: Toast notifications for successful custom field saves
 - ✨ ENHANCEMENT: Unique timestamp headers (X-WEL-Timestamp) for each API response
 - ✨ ENHANCEMENT: Better compatibility with caching plugins and CDN services
 - ✨ ENHANCEMENT: Improved Vue.js SPA integration with proper CORS handling
+- ✨ ENHANCEMENT: Real-time custom field data display with hover-over information icon
+- ✨ ENHANCEMENT: User-friendly field labels (auto-formatted from field keys)
+- ✨ ENHANCEMENT: TypeScript support for custom field data structures
 
 ### Version 1.1.6
 - 🚀 NEW: Bulk courier data update API endpoint (`/courier-data/update-bulk`) for efficient mass updates.
