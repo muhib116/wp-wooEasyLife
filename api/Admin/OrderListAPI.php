@@ -363,6 +363,8 @@ class OrderListAPI
             $referrer_url = get_post_meta($order_id, '_referrer_url', true);
             //get order note of cod modification
             $cod_modification_note = get_order_cod_modification_note($order);
+            // $billing_custom_fields = get_billing_custom_fields($order);
+            // $shipping_custom_fields = get_shipping_custom_fields($order);
             
             $data[] = [
                 'id'            => $order->get_id(),
