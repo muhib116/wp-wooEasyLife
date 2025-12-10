@@ -144,7 +144,8 @@ class TrackAbandonCart {
     
         // **Step 1: Get customer details from WooCommerce session**
         $customer_phone = normalize_phone_number(WC()->session->get('billing_phone'));
-        $customer_email = strtolower(WC()->session->get('billing_email')); // Normalize email case
+        $billing_email = WC()->session->get('billing_email');
+        $customer_email = !empty($billing_email) ? strtolower($billing_email) : ''; // Normalize email case
     
         // Validate phone or fallback to email
         if (!empty($customer_phone) && validate_BD_phoneNumber($customer_phone)) {

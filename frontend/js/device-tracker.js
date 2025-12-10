@@ -65,7 +65,7 @@
 
     // --- WooCommerce Checkout Integration ---
 const attachDeviceTokenToForm = async () => {
-        const $checkoutForm = $('form.checkout');
+        const $checkoutForm = $('form.checkout, form.wc-block-checkout__form');
 
         // 1. Load the token once the page is ready (proactive loading)
         const initialToken = await getDeviceToken();
