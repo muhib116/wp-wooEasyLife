@@ -9,7 +9,7 @@
             @click="toggleCartFlowFieldsData = !toggleCartFlowFieldsData"
             title="Toggle custom fields info"
         >
-            <Icon name="PhInfo" size="25" />
+            <Icon name="PhTextbox" size="25" />
         </button>
         <div 
             v-if="toggleCartFlowFieldsData" 
