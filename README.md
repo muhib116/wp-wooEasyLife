@@ -31,6 +31,7 @@ WooEasyLife is a comprehensive WordPress plugin that supercharges your WooCommer
 - **Real-time Status Sync**: Automatic status updates from courier APIs
 - **Shipping Cost Calculation**: Dynamic shipping cost management
 - **Delivery Tracking**: Track shipments directly from the dashboard
+- **Inline Consignment Editing**: Double-click to edit consignment IDs with keyboard shortcuts support
 
 ### 📊 Analytics & Reporting
 - **Sales Dashboard**: Comprehensive sales analytics and charts
@@ -151,6 +152,10 @@ The plugin includes a built-in licensing system:
 2. **Bulk Submit**: Send orders to couriers in batches
 3. **Track Status**: Monitor delivery status automatically
 4. **Handle Returns**: Process returned orders efficiently
+5. **Edit Consignment ID**: Double-click the consignment ID to edit inline
+   - Press **Enter** or click outside to save
+   - Press **Escape** to cancel editing
+   - Hover over the field to see the edit indicator
 
 ### Custom Checkout Fields
 1. **Automatic Detection**: Custom fields are automatically detected and captured from checkout
@@ -315,7 +320,18 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 Changelog
 
-### Version 1.1.7 (Latest)
+### Version 1.1.8 (Latest)
+- 🚀 NEW: Double-click editable consignment ID field in order delivery partner section for quick inline editing
+- 🚀 NEW: Keyboard shortcuts for consignment ID editing - Enter to save, Escape to cancel, click outside to save
+- 🚀 NEW: Visual hover effects on editable consignment ID field with subtle border and background changes
+- ⚡ IMPROVED: Enhanced UX for courier data management with instant inline updates without page refresh
+- ⚡ IMPROVED: Consignment ID field now displays 'Not set' when empty for better user clarity
+- ⚡ IMPROVED: Auto-focus on input field when entering edit mode for faster data entry
+- ✨ ENHANCEMENT: Seamless editing experience with automatic save on blur (click outside)
+- ✨ ENHANCEMENT: Better visual indication of editable fields with cursor pointer and tooltip
+- ✨ ENHANCEMENT: Smoother transition between view and edit modes for consignment IDs
+
+### Version 1.1.7
 - 🚀 NEW: Dashboard submenu structure (Dashboard, Orders, Missing Orders, Black List) for better navigation
 - 🚀 NEW: Comprehensive cache prevention system - prevents caching by all major WordPress cache plugins
 - 🚀 NEW: Full CORS support for cross-origin API requests - enables seamless frontend integration
