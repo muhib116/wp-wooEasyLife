@@ -320,7 +320,10 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📝 Changelog
 
-### Version 1.1.8 (Latest)
+### Version 1.1.9 (Latest)
+- � FIX: Fixed issue where new orders were getting refreshed when clicking on courier refresh to bulk refresh
+
+### Version 1.1.8
 - 🚀 NEW: Double-click editable consignment ID field in order delivery partner section for quick inline editing
 - 🚀 NEW: Keyboard shortcuts for consignment ID editing - Enter to save, Escape to cancel, click outside to save
 - 🚀 NEW: Visual hover effects on editable consignment ID field with subtle border and background changes

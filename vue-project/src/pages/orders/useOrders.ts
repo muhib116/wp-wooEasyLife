@@ -32,6 +32,7 @@ export const useOrders = () => {
     courier_data?: {
       consignment_id?: string;
       status?: string;
+      invoice?: string;
     };
     billing_address?: {
       phone?: string;
@@ -481,7 +482,7 @@ export const useOrders = () => {
 
       // If no selected orders, filter out orders without courier data
       if (![...selectedOrders.value]?.length) {
-        courierData = courierData.filter((item) => !isEmpty(item.courier_data));
+        courierData = courierData.filter((item) => item?.courier_data?.invoice);
       }
 
       // Prepare payload: consignment_ids if available, otherwise invoice_ids
