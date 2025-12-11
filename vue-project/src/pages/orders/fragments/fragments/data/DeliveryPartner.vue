@@ -41,9 +41,26 @@
             >
                 📍 Track Parcel
             </a>
-            <span title="Consignment Id">
-                🆔 {{ order?.courier_data?.consignment_id }}
-            </span>
+            <div title="Consignment Id" class="flex items-center gap-1">
+                🆔 
+                <span
+                    v-if="!isEditingConsignmentId"
+                    @dblclick="isEditingConsignmentId = true"
+                    class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded border border-transparent hover:border-gray-300 transition-colors"
+                    title="Double-click to edit"
+                >
+                    {{ order?.courier_data?.consignment_id || 'Not set' }}
+                </span>
+                <Input.Classic 
+                    v-else
+                    v-model="order!.courier_data.consignment_id"
+                    @update:modelValue="updateConsignmentIdInOrder(order!)"
+                    @blur="isEditingConsignmentId = false"
+                    @keyup.enter="isEditingConsignmentId = false"
+                    @keyup.escape="isEditingConsignmentId = false"
+                    autofocus
+                />
+            </div>
 
             
             <a 
@@ -55,8 +72,6 @@
                 <Icon name="PhArrowSquareOut" size="20" />
                 Edit Parcel Data
             </a>
-
-
             
             <span 
                 class="font-medium text-sky-500 flex items-center gap-2" 
@@ -80,8 +95,8 @@
 </template>
 
 <script setup lang="ts">
-    import { Icon } from '@components'
-    import { computed, inject } from 'vue'
+    import { Icon, Input } from '@/components'
+    import { computed, inject, ref } from 'vue'
     import { isEmpty } from 'lodash'
     import { CourierEntry } from '@/components'
 
@@ -89,11 +104,14 @@
         order: Object
     })
 
+    const isEditingConsignmentId = ref(false)
 
     const {
         courierStatusInfo,
-        getDeliveryProbability
+        getDeliveryProbability,
+        updateConsignmentIdInOrder
     } = inject('useOrders')
+
     const { courierConfigs } = inject('useCourierConfig')
 
 

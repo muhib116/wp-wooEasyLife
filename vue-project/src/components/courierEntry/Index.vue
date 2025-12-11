@@ -81,7 +81,6 @@
         handleCourierEntry,
         clearSelectedOrders,
         setSelectedOrder,
-        selectedOrders,
         refreshBulkCourierData
     } = inject('useOrders')
     

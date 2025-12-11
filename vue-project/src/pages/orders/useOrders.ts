@@ -57,7 +57,7 @@ export const useOrders = () => {
     customer_ip?: string;
     [key: string]: any;
   }
-
+  let timeoutId: any = null;
   const orders = ref<Order[]>([]);
   const shippingMethods = ref(null);
   const totalRecords = ref(0);
@@ -455,6 +455,25 @@ export const useOrders = () => {
     }
   };
 
+  const updateConsignmentIdInOrder = async (order: { id: any; courier_data: any; }) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(async () => {
+      try {
+        isLoading.value = true;
+        const payload = {
+          order_id: order.id,
+        courier_data: order.courier_data
+      };
+        await updateCourierData(payload);
+        showNotification({ type: 'success', message: 'Consignment ID updated successfully.' });
+      } catch (err) {
+        showNotification({ type: 'danger', message: 'Failed to update Consignment ID.' });
+      } finally {
+        isLoading.value = false;
+      }
+    }, 600);
+  }
+
   const refreshBulkCourierData = async (btn, courierPartner = 'steadfast') => {
     try {
       btn.isLoading = true;
@@ -614,7 +633,6 @@ export const useOrders = () => {
     }
   }
 
-  let timeoutId: any;
   const totalPages = computed(() => orderFilter.value.per_page ? Math.ceil(totalRecords.value / orderFilter.value.per_page) : 1);
   const debouncedGetOrders = (btn) => {
     orderFilter.value.page = orderFilter.value.page > totalPages.value ? totalPages.value : orderFilter.value.page
@@ -818,6 +836,7 @@ export const useOrders = () => {
     include_past_new_orders_thats_not_handled_by_wel_plugin,
     loadPaymentMethods,
     handleLabelPrint,
+    updateConsignmentIdInOrder,
     paymentMethods,
     selectedDspFilter,
     dspFilterOptions,
