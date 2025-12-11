@@ -11,14 +11,14 @@
       <li>
         <button
           v-if="isValidLicenseKey"
-          class="pointer-events-none bg-[#f0fdf4] border border-green-200 px-2 py-1 text-green-600 hover:text-green-600 rounded cursor-pointer font-normal mr-4"
+          class="pointer-events-none bg-[#f0fdf4] border border-green-200 px-1 md:px-2 py-1 text-green-600 hover:text-green-600 rounded cursor-pointer font-normal mr-4"
           title="Valid License"
         >
           <span class="hidden xl:block">Valid License</span>
           <Icon
             class="block xl:hidden"
             name="PhSealCheck"
-            size="22"
+            size="20"
             weight="bold"
           />
         </button>
