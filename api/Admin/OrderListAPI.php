@@ -886,6 +886,7 @@ class OrderListAPI
     public function change_order_status(\WP_REST_Request $request) {
         // Get the payload from the request
         $payload = $request->get_json_params();
+
     
         // Validate the payload
         if (empty($payload) || !is_array($payload)) {
@@ -909,8 +910,8 @@ class OrderListAPI
             }
     
             $order_id = intval($entry['order_id']);
-            $new_status = sanitize_text_field($entry['new_status']);
-    
+            $new_status = $entry['new_status'];
+            
             // Get the order by ID
             $order = wc_get_order($order_id);
     

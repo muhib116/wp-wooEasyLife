@@ -856,3 +856,25 @@ function get_only_cartflows_custom_fields_data( $order_id ) {
     // 6. Return the data array OR false if the array is empty after processing.
     return ! empty( $custom_fields_data ) ? $custom_fields_data : false;
 }
+
+function generateSlug($title) {
+    // Convert to lowercase
+    $slug = strtolower($title);
+
+    // Trim whitespace
+    $slug = trim($slug);
+
+    // Replace '&' with 'and'
+    $slug = str_replace('&', 'and', $slug);
+
+    // Replace spaces (or any whitespace) with hyphens
+    $slug = preg_replace('/\s+/', '-', $slug);
+
+    // Collapse multiple hyphens to one
+    $slug = preg_replace('/-+/', '-', $slug);
+
+    // Remove leading/trailing hyphens
+    $slug = trim($slug, '-');
+
+    return $slug;
+}

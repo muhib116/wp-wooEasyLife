@@ -16,8 +16,8 @@ if (!defined('ABSPATH')) {
 }
 
 // Load WordPress environment
-// require_once( ABSPATH . 'wp-load.php' );
-// require_once( ABSPATH . 'wp-includes/pluggable.php' );
+require_once( ABSPATH . 'wp-load.php' );
+require_once( ABSPATH . 'wp-includes/pluggable.php' );
 
 // ✅ Protect with token
 if (isset($_GET['token']) && $_GET['token'] == str_replace('.', '__', $_SERVER['HTTP_HOST'])) {

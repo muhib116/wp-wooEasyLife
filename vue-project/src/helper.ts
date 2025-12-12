@@ -84,7 +84,6 @@ export const generateSlug = (title: string) => {
         .toLowerCase() // Convert to lowercase
         .trim() // Remove leading and trailing whitespace
         .replace(/&/g, 'and') // Replace '&' with 'and'
-        .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
         .replace(/\s+/g, '-') // Replace spaces with hyphens
         .replace(/-+/g, '-') // Collapse multiple hyphens into one
         .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens

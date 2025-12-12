@@ -139,7 +139,7 @@ export const createCustomStatus = async (payload) => {
 };
 export const updateCustomStatus = async (payload, id) => {
   const { data } = await axios.put(
-    `${localApiBaseURL}/statuses/${id}`,
+    `${localApiBaseURL}/statuses`,
     payload
   );
   return data;

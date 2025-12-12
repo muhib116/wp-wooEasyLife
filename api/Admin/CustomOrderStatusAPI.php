@@ -193,20 +193,20 @@ class CustomOrderStatusAPI extends WP_REST_Controller
                 'callback'            => [$this, 'create_status'],
                 'permission_callback' => api_permission_check(),
                 'args'                => $this->get_status_schema(false), // No 'id' required for creation
-            ]
-        ]);
-
-        register_rest_route(__API_NAMESPACE, '/statuses/(?P<id>[a-zA-Z0-9\-_]+)', [
-            [
-                'methods'             => 'GET',
-                'callback'            => [$this, 'get_status'],
-                'permission_callback' => api_permission_check(),
             ],
             [
                 'methods'             => 'PUT',
                 'callback'            => [$this, 'update_status'],
                 'permission_callback' => api_permission_check(),
-                'args'                => $this->get_status_schema(true), // 'id' required for update
+                'args'                => $this->get_status_schema(false), // ID required in request body
+            ]
+        ]);
+
+        register_rest_route(__API_NAMESPACE, '/statuses/(?P<id>[^/]+)', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [$this, 'get_status'],
+                'permission_callback' => api_permission_check(),
             ],
             [
                 'methods'             => 'DELETE',
@@ -261,7 +261,7 @@ class CustomOrderStatusAPI extends WP_REST_Controller
             return new WP_Error('missing_title', 'The title field is required.', ['status' => 400]);
         }
 
-        $slug = sanitize_title($title);
+        $slug = generateSlug($title);
 
         // Check for duplicate title or slug
         foreach ($statuses as $status) {
@@ -303,14 +303,14 @@ class CustomOrderStatusAPI extends WP_REST_Controller
     public function update_status(WP_REST_Request $request)
     {
         $statuses = get_option(__PREFIX . 'custom_order_statuses', []);
-        $slug = sanitize_title($request->get_param('id')); // ID acts as slug
+        $slug = $request->get_param('slug'); // gere ID actually is slug
 
         if (!isset($statuses[$slug])) {
             return new WP_Error('not_found', 'Status not found', ['status' => 404]);
         }
 
         $new_title = sanitize_text_field($request->get_param('title'));
-        $new_slug = sanitize_title($new_title);
+        $new_slug = generateSlug($new_title);
 
         // Validate uniqueness of the title (excluding the current item)
         foreach ($statuses as $key => $status) {
@@ -342,10 +342,11 @@ class CustomOrderStatusAPI extends WP_REST_Controller
     public function delete_status(WP_REST_Request $request)
     {
         $statuses = get_option(__PREFIX . 'custom_order_statuses', []);
-        $slug = sanitize_title($request->get_param('id'));
+        $slug = urldecode($request->get_param('id')); // Decode URL-encoded Unicode characters
 
         if (!isset($statuses[$slug])) {
-            return new WP_Error('not_found', 'Status not found', ['status' => 404]);
+            // Debug: Return available slugs if not found
+            return new WP_Error('not_found', 'Status not found. Requested: ' . $slug . '. Available: ' . implode(', ', array_keys($statuses)), ['status' => 404]);
         }
 
         unset($statuses[$slug]);
