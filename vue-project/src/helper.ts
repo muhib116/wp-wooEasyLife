@@ -20,9 +20,9 @@ export const showNotification = (
     });
 }
 
-export const filterOrderById = (id: number, orders) => {
+export const filterOrderById = (id: number, orders: any[]) => {
     if (!id) return {}
-    return orders.find(order => order.id == id)
+    return orders.find((order: any) => order.id == id)
 
 }
 
@@ -62,7 +62,7 @@ export const getContrastColor = (hexColor: string) => {
     // Return white (#ffffff) for dark backgrounds, black (#000000) for light backgrounds
     return luminance > 0.5 ? '#000000' : '#ffffff'
 }
-export const hslToHex = (h, s, l) => {
+export const hslToHex = (h: number, s: number, l: number): string => {
     // Adjust lightness for darker shades to make them slightly lighter
     if (l < 25) {
         l = l + (25 - l) * 0.5; // Increase darkness by 50% towards mid-lightness
@@ -70,7 +70,7 @@ export const hslToHex = (h, s, l) => {
 
     l /= 100;
     const a = s * Math.min(l, 1 - l) / 100;
-    const f = n => {
+    const f = (n: number): string => {
         const k = (n + h / 30) % 12;
         const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
         return Math.round(255 * color).toString(16).padStart(2, '0');
@@ -118,74 +118,216 @@ export const printDate = (dateString: string) => {
 }
 
 
-export const calculateSMSDetails = (props: string) => {
-    const GSM_7BIT = "GSM_7BIT";
-    const GSM_7BIT_EX = "GSM_7BIT_EX";
-    const UTF16 = "UTF16";
 
-    const gsm7bitExChar = "\\^{}\\\\\\[~\\]|â‚¬\n";
-    const gsm7bitChars = "@Â£$Â¥Ã¨Ã©Ã¹Ã¬Ã²Ã‡\\nÃ˜Ã¸\\rÃ…Ã¥Î_Î¦ÎÎ›Î©Î Î¨Î£Î˜ÎžÃ†Ã¦ÃŸÃ‰ !\\\"#Â¤%&'()*+,-./0123456789:;<=>?Â¡ABCDEFGHIJKLMNOPQRSTUVWXYZÃ„ÃÃ‘ÃœÂ§Â¿abcdefghijklmnopqrstuvwxyzÃ¤Ã¶Ã±Ã¼Ã ";
 
-    const messageLength = { GSM_7BIT: 160, GSM_7BIT_EX: 160, UTF16: 70 };
-    const multiMessageLength = { GSM_7BIT: 153, GSM_7BIT_EX: 153, UTF16: 67 };
-    const gsm7bitRegExp = RegExp("\n^[" + gsm7bitChars + "]*$");
-    const gsm7bitExRegExp = RegExp("^[" + gsm7bitChars + gsm7bitExChar + "]*$");
-    const gsm7bitExOnlyRegExp = RegExp("^[\\" + gsm7bitExChar + "]*$");
+/**
+ * SMS Counter start here
+ */
+// --- SMS Encoding Constants and Types (Private to the module) ---
 
-    function detectEncoding(text: string) {
-        switch (false) {
-            case text.match(gsm7bitRegExp) == null:
-                return GSM_7BIT;
-            case text.match(gsm7bitExRegExp) == null:
-                return GSM_7BIT_EX;
-            default:
-                return UTF16
+const SMS_ENCODING = {
+    GSM_7BIT: 'GSM_7BIT',
+    GSM_7BIT_EXT: 'GSM_7BIT_EXT',
+    UTF16: 'UTF16'
+} as const;
+
+type SMSEncoding = typeof SMS_ENCODING[keyof typeof SMS_ENCODING];
+
+// Character limits per SMS part (single message)
+const MESSAGE_LENGTH: Record<SMSEncoding, number> = {
+    GSM_7BIT: 160,
+    GSM_7BIT_EXT: 160,
+    UTF16: 70
+};
+
+// Character limits per SMS part (multi-part message)
+const MULTI_MESSAGE_LENGTH: Record<SMSEncoding, number> = {
+    GSM_7BIT: 153,
+    GSM_7BIT_EXT: 153,
+    UTF16: 67
+};
+
+// GSM 7-bit character sets
+const GSM_7BIT_CHARS = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1BÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
+const GSM_7BIT_EXT_CHARS = "^{}\\[~]|€";
+
+// --- Single Exported Function ---
+
+/**
+ * Calculates comprehensive SMS details for a given text, including:
+ * - The required encoding (GSM_7BIT, GSM_7BIT_EXT, or UTF16)
+ * - The total character count based on SMS technical standards (counting code units for UTF-16)
+ * - The number of SMS parts (totalSMS)
+ * - The remaining characters in the current part
+ * 
+ * Supports: English, Bangla, and Emojis according to 3GPP standards.
+ * 
+ * @param {string} text The input text message.
+ * @returns {{encoding: SMSEncoding, totalCharacter: number, remainingCharacter: number, totalSMS: number}} SMS details.
+ */
+export const calculateSMSDetails = (text: string) => {
+    
+    // --- Helper Function 1: Detect Encoding ---
+    function detectEncoding(input: string): SMSEncoding {
+        let hasExtendedGSM = false;
+
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            
+            // Check if character is in extended GSM set
+            if (GSM_7BIT_EXT_CHARS.includes(char)) {
+                hasExtendedGSM = true;
+                continue;
+            }
+            
+            // Check if character is in basic GSM set
+            if (GSM_7BIT_CHARS.includes(char)) {
+                continue;
+            }
+            
+            // Character not in any GSM sets (e.g., Bangla, most Emojis) - must use UTF-16
+            return SMS_ENCODING.UTF16;
+        }
+
+        return hasExtendedGSM ? SMS_ENCODING.GSM_7BIT_EXT : SMS_ENCODING.GSM_7BIT;
+    }
+
+
+    // --- Helper Function 2: Calculate Length ---
+    function calculateLength(input: string, encoding: SMSEncoding): number {
+        if (encoding === SMS_ENCODING.UTF16) {
+            // For UTF-16 (Bangla, most Emojis): SMS technical standard counts UTF-16 code units.
+            // This means:
+            // - Basic char (ক) = 1
+            // - Compound char (কি) = 2 (consonant + combining mark)
+            // - Simple Emoji (👋) = 2 (surrogate pair)
+            return input.length;
+
+        } else if (encoding === SMS_ENCODING.GSM_7BIT_EXT) {
+            // For GSM 7-bit Extended: Extended chars count as 2 (1 char + 1 escape char)
+            let extendedCount = 0;
+            for (let i = 0; i < input.length; i++) {
+                if (GSM_7BIT_EXT_CHARS.includes(input[i])) {
+                    extendedCount++;
+                }
+            }
+            return input.length + extendedCount;
+
+        } else {
+            // For basic GSM 7-bit: Simple length (all characters count as 1)
+            return input.length;
         }
     }
 
-    function countGsm7bitEx(text: string) {
-        var char2, chars; chars = function () {
-            var _i, _len, _results; _results = [];
+    // --- Main Logic Execution ---
 
-            for (_i = 0, _len = text.length; _i < _len; _i++) {
-                char2 = text[_i];
-                if (char2.match(gsm7bitExOnlyRegExp) != null) {
-                    _results.push(char2)
-                }
-            }
-            return _results
-        }.call(this);
-        return chars.length
+    // Handle invalid input
+    if (typeof text !== 'string') {
+        return {
+            encoding: SMS_ENCODING.UTF16,
+            totalCharacter: 0,
+            remainingCharacter: MESSAGE_LENGTH.UTF16,
+            totalSMS: 0
+        };
     }
 
-    props = props.replace(/(\r\n|\n|\r)/gm, " ");
-    var encoding = detectEncoding(props);
-    let length = props.length, per_message, messages, remaining;
-    if (encoding === GSM_7BIT_EX) {
-        length += countGsm7bitEx(props);
-    }
-    per_message = messageLength[encoding];
-    if (length > per_message) {
-        per_message = multiMessageLength[encoding];
-    }
-    messages = Math.ceil(length / per_message);
-    remaining = per_message * messages - length;
+    // Normalize line breaks to the single GSM 7-bit Line Feed character (\n)
+    const normalizedText = text.replace(/(\r\n|\n|\r)/gm, "\n");
 
-    if (remaining == 0 && messages == 0) {
-        remaining = per_message;
-    }
+    // 1. Detect encoding type
+    const encoding = detectEncoding(normalizedText);
+    
+    // 2. Calculate character length based on encoding rules
+    const length = calculateLength(normalizedText, encoding);
 
-    var setSmsCharacterCount = length;
-    var setSmsRemainingCount = remaining;
-    var setSmsPartCount = messages;
+    // 3. Determine message length limit
+    // Use multi-part limit if the length exceeds the single-part limit.
+    const perMessage = length <= MESSAGE_LENGTH[encoding] && length > 0
+        ? MESSAGE_LENGTH[encoding] 
+        : MULTI_MESSAGE_LENGTH[encoding];
+
+    // 4. Calculate SMS parts
+    const messages = length === 0 ? 0 : Math.ceil(length / perMessage);
+    
+    // 5. Calculate remaining characters
+    const effectiveLimit = messages > 1 ? MULTI_MESSAGE_LENGTH[encoding] : MESSAGE_LENGTH[encoding];
+    const remaining = messages === 0 
+        ? effectiveLimit // Full limit if no message
+        : (effectiveLimit * messages) - length;
 
     return {
         encoding,
-        totalCharacter: setSmsCharacterCount,
-        remainingCharacter: setSmsRemainingCount,
-        totalSMS: setSmsPartCount
+        totalCharacter: length,
+        remainingCharacter: remaining,
+        totalSMS: messages
+    };
+};
+/**
+ * SMS counter end here
+ */
+
+
+/**
+ * Counts the actual human-perceived characters (graphemes) in a string
+ * and checks if the total count exceeds a specified VARCHAR limit.
+ * 
+ * This is suitable for most modern database systems' VARCHAR counting, 
+ * which is typically based on characters, not bytes or code units.
+ * 
+ * @param {string} text The string to analyze.
+ * @param {number} limit The maximum allowed character length (the VARCHAR limit, e.g., 255).
+ * @returns {{totalCharacter: number, isOverLimit: boolean, remainingCharacter: number}} The count and limit status.
+ */
+export const countVarcharCharacters = (text: string, limit: number) => {
+    // 1. Handle invalid/non-string input
+    if (typeof text !== 'string') {
+        return {
+            totalCharacter: 0,
+            isOverLimit: false,
+            remainingCharacter: limit
+        };
     }
-}
+
+    // 2. Calculate the character count (Grapheme Count)
+    // Array.from(text) correctly splits the string into human-perceived characters 
+    // (graphemes), handling multi-unit characters like complex emojis and 
+    // compound characters (e.g., "কি" or "👨‍👩‍👧‍👦") as a single unit.
+    const totalCharacter = Array.from(text).length;
+
+    // 3. Determine the status
+    const isOverLimit = totalCharacter > limit;
+    
+    // 4. Calculate remaining characters
+    const remainingCharacter = Math.max(0, limit - totalCharacter);
+
+    return {
+        totalCharacter,
+        isOverLimit,
+        remainingCharacter
+    };
+};
+
+// --- Examples ---
+// const VARCHAR_LIMIT = 255;
+// const TEXT_LIMIT = 10;
+// 
+// // English (Simple)
+// console.log(countVarcharCharacters("Hello", TEXT_LIMIT)); 
+// // Output: { totalCharacter: 5, isOverLimit: false, remainingCharacter: 5 }
+// 
+// // Bangla (Grapheme Count)
+// // 'কি' is 1 perceived character (2 code units, but counted as 1 grapheme)
+// console.log(countVarcharCharacters("কি", TEXT_LIMIT)); 
+// // Output: { totalCharacter: 1, isOverLimit: false, remainingCharacter: 9 }
+// 
+// // Emoji (Complex, ZWJ Sequence)
+// // '👨‍👩‍👧‍👦' is 1 perceived character (multiple code units, but counted as 1 grapheme)
+// console.log(countVarcharCharacters("👨‍👩‍👧‍👦", TEXT_LIMIT)); 
+// // Output: { totalCharacter: 1, isOverLimit: false, remainingCharacter: 9 }
+// 
+// // Over Limit
+// console.log(countVarcharCharacters("1234567890X", 10)); 
+// // Output: { totalCharacter: 11, isOverLimit: true, remainingCharacter: 0 }
 
 export const normalizePhoneNumber = (phone: string): string => {
     // Remove all non-digit characters
@@ -243,26 +385,27 @@ export const detectInternetState = (callback: (msg: { type: string; message: str
     window.removeEventListener("online", updateStatus);
     window.removeEventListener("offline", updateStatus);
 
-    if ('connection' in navigator && navigator.connection?.removeEventListener) {
-        navigator.connection.removeEventListener("change", updateStatus);
+    if ('connection' in navigator && (navigator as any).connection?.removeEventListener) {
+        (navigator as any).connection.removeEventListener("change", updateStatus);
     }
 
     // Add listeners
     window.addEventListener("online", updateStatus);
     window.addEventListener("offline", updateStatus);
-    if ('connection' in navigator && navigator.connection?.addEventListener) {
-        navigator.connection.addEventListener("change", updateStatus);
+    if ('connection' in navigator && (navigator as any).connection?.addEventListener) {
+        (navigator as any).connection.addEventListener("change", updateStatus);
     }
 
     // Return a cleanup function for use in Vue's onUnmounted, if needed
     return () => {
         window.removeEventListener("online", updateStatus);
         window.removeEventListener("offline", updateStatus);
-        if ('connection' in navigator && navigator.connection?.removeEventListener) {
-            navigator.connection.removeEventListener("change", updateStatus);
+        if ('connection' in navigator && (navigator as any).connection?.removeEventListener) {
+            (navigator as any).connection.removeEventListener("change", updateStatus);
         }
     };
 };
+
 
 export const checkImageLoad = (imgUrl: string, callback: (isLoaded: boolean) => void) => {
     let img = new Image();
@@ -332,7 +475,7 @@ export const handlePrint = () => {
     window.print();
 }
 
-export const printProductDetails = (order, cb, invoice_logo) => {
+export const printProductDetails = (order: any, cb: () => void, invoice_logo: string) => {
     const qrData = order.courier_data.consignment_id
     const qrUrl = `https://quickchart.io/qr?text=${qrData}&size=100`; // Third-party QR generator
 

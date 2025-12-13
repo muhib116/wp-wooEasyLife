@@ -46,7 +46,7 @@
                 placeholder="Write message"
                 v-model="form.message"
             />
-            <p class="font-semibold -mt-3 text-[10px] text-orange-500">
+            <p v-if="form?.message?.length" class="font-semibold -mt-3 text-[10px] text-orange-500">
                 {{ messageCountData.remainingCharacter }} character remaining, 
                 {{  messageCountData.totalSMS }} SMS
             </p>
