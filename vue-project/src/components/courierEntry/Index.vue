@@ -72,7 +72,7 @@
     const props = defineProps<{
         showRefreshBtn?: boolean
         hideText?: boolean
-        order: {
+        order?: {
             courier_data: object
         }
     }>()

@@ -478,12 +478,12 @@ export const useOrders = () => {
   const refreshBulkCourierData = async (btn, courierPartner = 'steadfast') => {
     try {
       btn.isLoading = true;
-      let courierData = selectedOrders.value?.size ? [...selectedOrders.value] : orders.value;
+      let courierData = selectedOrders.value && selectedOrders.value.size ? Array.from(selectedOrders.value) : (orders.value || []);
 
-      // If no selected orders, filter out orders without courier data
-      if (![...selectedOrders.value]?.length) {
-        courierData = courierData.filter((item) => item?.courier_data?.invoice);
-      }
+      courierData = courierData.filter(item => {
+        const inv = item?.courier_data?.invoice;
+        return typeof inv === 'string' ? inv.trim().length > 0 : Boolean(inv);
+      });
 
       // Prepare payload: consignment_ids if available, otherwise invoice_ids
       const payload = {

@@ -87,6 +87,13 @@ shipping method editable korte hobe
 
 
 
+courier data refrash if order has courier data
+order duplication
+bulk fraud check
+missing order bulk delete not work if checked item >40
+missing order permanent delete after sartain time
+
+
 --------heigh priority task------------
 👉🏻 multiple courier config
 👉🏻 ashraful mal er ei khane order details a giye product edit hoy kina check dite hobe.
