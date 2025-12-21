@@ -32,9 +32,12 @@
         <Table.Td 
             class="whitespace-nowrap"
         >
-            <DeliveryPartner
-                :order="order"
-            />
+            <div class="flex items-start gap-2">
+                <DeliveryPartner
+                    class="flex-1"
+                    :order="order"
+                />
+            </div>
         </Table.Td>
         <Table.Td>
             <Shipping
@@ -67,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-    import { Table } from '@components'
+    import { Table, Icon, Button } from '@/components'
     import { inject } from 'vue'
     import CustomerInfo from '@/pages/orders/fragments/fragments/data/CustomerInfo.vue'
     import CustomerBehavior from '@/pages/orders/fragments/fragments/data/CustomerBehavior.vue'
@@ -107,8 +110,9 @@
         };
     }>();
 
+
     const {
         setSelectedOrder,
         selectedOrders,
-    } = inject('useOrders')
+    } = inject('useOrders') as any
 </script>

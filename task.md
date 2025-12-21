@@ -87,7 +87,7 @@ shipping method editable korte hobe
 
 
 
-courier data refrash if order has courier data
+✅ courier data refrash if order has courier data
 order duplication
 bulk fraud check
 missing order bulk delete not work if checked item >40

@@ -64,7 +64,7 @@ export const useOrders = () => {
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
   const activeOrder = ref();
-  const selectedOrders = ref(new Set([]));
+  const selectedOrders = ref<Set<Order>>(new Set<Order>());
   const isShippingEditing = ref(false);
   const selectAll = ref(false);
   const isLoading = ref(false);
@@ -180,14 +180,17 @@ export const useOrders = () => {
     shippingMethods.value = _shippingMethods
   }
 
-  const handleFraudCheck = async (button) => {
-    if (![...selectedOrders.value].length) {
+  const handleFraudCheck = async (button: any, order?: any) => {
+    if (!order && ![...selectedOrders.value].length) {
       alert("Please select at least one item.");
       return;
     }
-    const _selectedOrders = [...selectedOrders.value];
+    let _selectedOrders = [...selectedOrders.value];
+    if (order) {
+      _selectedOrders = [order];
+    }
     const chunkSize = 10;
-    const orderChunks = [];
+    const orderChunks: any[] = [];
     for (let i = 0; i < _selectedOrders.length; i += chunkSize) {
       orderChunks.push(_selectedOrders.slice(i, i + chunkSize));
     }
