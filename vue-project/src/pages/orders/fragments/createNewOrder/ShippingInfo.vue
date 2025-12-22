@@ -27,18 +27,17 @@
 </template>
 
 <script setup lang="ts">
-    import { Select } from '@components'
+    import { Select } from '@/components'
     import { ref, onMounted, inject } from 'vue'
-    import { getPaymentMethods } from '@/api'
     
     const {
         form
-    } = inject('useCustomOrder')
+    } = inject('useCustomOrder') as any
     
     const {
         shippingMethods,
         paymentMethods // <-- useOrders এ লোড করা পেমেন্ট মেথড
-    } = inject('useOrders')
+    } = inject('useOrders') as any
 
     onMounted(() => {
         // Check if only one payment method is available

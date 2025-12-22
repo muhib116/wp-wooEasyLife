@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-    import { provide } from 'vue'
+    import { onMounted, provide } from 'vue'
     import { Loader, Input, Button } from '@components'
     import CustomerInfo from './CustomerInfo.vue'
     import ShippingInfo from './ShippingInfo.vue'
@@ -46,7 +46,8 @@
     const {
         form,
         handleCreateOrder,
-        isLoading
+        isLoading,
+        resetCustomOrderForm
     } = _useCustomOrder
 
     provide('useCustomOrder', _useCustomOrder)

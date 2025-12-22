@@ -121,7 +121,11 @@
 
         <ProductListWithSearch
             v-if="toggleProductList"
-            :addProductToForm="addProductToForm"
+            :addProductToForm="async (item, btn) => {
+                addProductToForm(item, btn)
+                toggleProductList = false
+            }"
+            @close="toggleProductList = false"
         />
     </div>
 </template>

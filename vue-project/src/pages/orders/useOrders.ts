@@ -21,12 +21,16 @@ import { updateCourierDataBulk, changeStatusBulk } from "@/api/courier"
 import { manageCourier } from "./useHandleCourierEntry";
 import { filterOrderById, formatInvoice, normalizePhoneNumber, printProductDetails, showNotification } from "@/helper";
 import { steadfastBulkStatusCheck } from "@/remoteApi";
-import { isEmpty, isFunction } from "lodash";
 import { storeBulkRecordsInToOrdersMeta } from "@/api/courier";
 import { useRoute } from "vue-router";
+import {
+    shippingMethods, 
+    paymentMethods
+} from "@/storage"
 
 export const useOrders = () => {
   const route = useRoute();
+
   interface Order {
     id: string | number;
     courier_data?: {
@@ -60,7 +64,6 @@ export const useOrders = () => {
   }
   let timeoutId: any = null;
   const orders = ref<Order[]>([]);
-  const shippingMethods = ref(null);
   const totalRecords = ref(0);
   const orderStatusWithCounts = ref([]);
   const activeOrder = ref();
@@ -73,7 +76,6 @@ export const useOrders = () => {
   const toggleNewOrder = ref(false);
   const wooCommerceStatuses = ref([]);
   const selectedStatus = ref(null);
-  const paymentMethods = ref([])
   const { userData, loadUserData } = inject('useServiceProvider');
 
   const courierStatusInfo = {

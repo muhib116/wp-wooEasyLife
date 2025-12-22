@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
     import { Input, Select, Textarea } from '@/components'
-    import { ref, inject, onUnmounted } from 'vue'
+    import { ref, inject, onUnmounted, onMounted } from 'vue'
     import { normalizePhoneNumber, validateBDPhoneNumber, showNotification } from '@/helper'
     import { useFraudChecker } from '@/pages/fraudChecker/useFraudChecker'
 
@@ -86,6 +86,10 @@
         {
             id: 'phone-call',
             title: 'Phone call'
+        },
+        {
+            id: 'clone-order',
+            title: 'Clone Order'
         },
         {
             id: 'other',
@@ -154,5 +158,9 @@
     onUnmounted(() => {
         if (timeoutId) clearTimeout(timeoutId)
         if (debounceTimeoutId) clearTimeout(debounceTimeoutId)
+    })
+
+    onMounted(() => {
+        selectedSource.value = orderSource.find(item => item.id === form.created_via) ? form.created_via : 'other'
     })
 </script>

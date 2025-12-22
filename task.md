@@ -88,7 +88,8 @@ shipping method editable korte hobe
 
 
 ✅ courier data refrash if order has courier data
-order duplication
+✅ order duplication
+already clone kore toiri hoise amon order theke abar clone korle problem kore
 bulk fraud check
 missing order bulk delete not work if checked item >40
 missing order permanent delete after sartain time

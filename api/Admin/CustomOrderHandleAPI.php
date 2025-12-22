@@ -303,34 +303,72 @@ class CustomOrderHandleAPI extends WP_REST_Controller
 
     /**
      * Add shipping method to order
+     * 
+     * Handles both direct method_id and instance_id formats
+     * WooCommerce uses instance_id when a specific zone/instance is configured
      */
     private function add_shipping_method_to_order($order, $shipping_method_id, $shipping_cost = 0)
     {
-        // Get all available shipping methods
-        $shipping_methods = WC()->shipping->get_shipping_methods();
+        // Get all shipping zones to find the correct method
+        $chosen_method = null;
+        $shipping_methods = [];
 
-        // Check if the shipping method exists
-        $method = $shipping_methods[$shipping_method_id] ?? null;
-        if (!$method) {
-            throw new \Exception('Invalid shipping method ID provided: ' . $shipping_method_id);
+        // Collect methods from all zones
+        $zones = \WC_Shipping_Zones::get_zones();
+        foreach ($zones as $zone) {
+            $zone_obj = new \WC_Shipping_Zone($zone['id']);
+            $zone_methods = $zone_obj->get_shipping_methods(false);
+            $shipping_methods = array_merge($shipping_methods, $zone_methods);
         }
 
-        // Get the shipping cost, either from the method settings or as provided
+        // Also get default zone methods
+        $default_zone = new \WC_Shipping_Zone(0);
+        $default_methods = $default_zone->get_shipping_methods(false);
+        $shipping_methods = array_merge($shipping_methods, $default_methods);
+
+        // Try to find the method by instance_id first (preferred)
+        foreach ($shipping_methods as $method) {
+            // Match by instance_id (e.g., "1", "2", etc.)
+            if ((string)$method->get_instance_id() === (string)$shipping_method_id) {
+                $chosen_method = $method;
+                break;
+            }
+        }
+
+        // Fallback: try to match by method_id (e.g., "free_shipping", "flat_rate")
+        if (!$chosen_method) {
+            foreach ($shipping_methods as $method) {
+                if ($method->id === $shipping_method_id) {
+                    $chosen_method = $method;
+                    break;
+                }
+            }
+        }
+
+        // If still not found, throw error
+        if (!$chosen_method) {
+            throw new \Exception('Shipping method not found: ' . $shipping_method_id);
+        }
+
+        // Get the shipping cost
         $calculated_cost = $shipping_cost;
         if ($calculated_cost == 0) {
-            $calculated_cost = $method->get_instance_option('cost', '0'); // Default to '0' if not set
+            $calculated_cost = $chosen_method->get_instance_option('cost', '0');
         }
 
-        // Create a new shipping item for the order
+        // Create a shipping item for the order
         $item = new \WC_Order_Item_Shipping();
-        $item->set_method_id($shipping_method_id); // Set the shipping method ID
-        $item->set_method_title($method->get_title()); // Set the shipping method title
-        $item->set_total($calculated_cost); // Set the total shipping cost
+        $item->set_method_id($chosen_method->id);                    // Set the method ID (e.g., "free_shipping")
+        $item->set_method_title($chosen_method->get_title());       // Set the method title from the actual method
+        $item->set_total($calculated_cost);                          // Set the cost
+        
+        // Add instance ID to the item meta for reference
+        $item->add_meta_data('instance_id', $chosen_method->get_instance_id(), true);
 
         // Add the shipping item to the order
         $order->add_item($item);
 
-        // Save the shipping item to persist it in the order
+        // Save the shipping item
         $item->save();
     }
 

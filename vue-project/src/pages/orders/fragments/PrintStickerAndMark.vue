@@ -1,6 +1,16 @@
 <template>
     <div class="flex gap-4 items-center justify-end">
         <Button.Native
+            class="opacity-50 flex items-center hover:opacity-100"
+            @onClick="btn => cloneOrder(order, btn)"
+            title="Clone Order"
+        >
+            <Icon
+                name="PhCopy"
+                size="25"
+            />
+        </Button.Native>
+        <Button.Native
             v-if="order?.courier_data?.consignment_id"
             class="opacity-50 flex items-center hover:opacity-100"
             @onClick="btn => printProductDetails(order, () => markAsDone(order, btn), configData.invoice_logo)"
@@ -43,6 +53,7 @@
     import { Button, Icon } from '@components'
     import { inject } from 'vue'
     import { printProductDetails } from '@/helper'
+    import { useCustomOrder } from '@/pages/orders/fragments/createNewOrder/useCustomOrder'
 
     defineProps<{
         order: {
@@ -75,7 +86,11 @@
     const {
         markAsDone,
         markAsFollowing
-    } = inject('useOrders')
+    } = inject('useOrders') as any
 
-    const { configData } = inject('configData')
+    const { configData } = inject('configData') as any
+
+    const {
+        cloneOrder
+    } = useCustomOrder()
 </script>

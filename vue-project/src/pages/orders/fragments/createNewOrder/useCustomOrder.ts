@@ -1,6 +1,35 @@
-import { createOrder, validateCoupon } from "@/api"
+import { createOrder, validateCoupon, getShippingMethods, getPaymentMethods } from "@/api"
 import { normalizePhoneNumber, showNotification, validateBDPhoneNumber } from "@/helper";
 import { computed, ref, inject } from "vue"
+import {
+    shippingMethods, 
+    paymentMethods
+} from "@/storage"
+
+const placeHolderData = {
+    order_status: 'wc-processing',
+    first_name: '',
+    last_name: '',
+    address_1: '',
+    address_2: '',
+    phone: '',
+    customer_note: '',
+    created_via: '',
+    products: [],
+    shippingMethod: {
+        zone_name: '',
+        method_id: '',
+        instance_id: '',
+        method_title: '',
+        settings: [],
+        shipping_cost: 0,
+        title: ''
+    },
+    paymentMethod: {},
+    cod_amount: null,
+    coupons: []
+}
+const form = ref({...placeHolderData})
 
 export const useCustomOrder = () => 
 {
@@ -9,22 +38,6 @@ export const useCustomOrder = () =>
     const couponValidationErrorMessage = ref('')
     const appliedCoupon = ref('')
     const couponDiscount = ref(0);
-    const placeHolderData = {
-        order_status: 'wc-processing',
-        first_name: '',
-        last_name: '',
-        address_1: '',
-        address_2: '',
-        phone: '',
-        customer_note: '',
-        created_via: '',
-        products: [],
-        shippingMethod: {},
-        paymentMethod: {},
-        coupons: []
-    }
-
-    const form = ref({...placeHolderData})
     const filteredProducts = computed(() => {
         if(productSearchKey.value){
             return products.value.filter(item => {
@@ -37,6 +50,14 @@ export const useCustomOrder = () =>
     })
 
     const isLoading = ref(false)
+
+
+    const resetCustomOrderForm = () => {
+        form.value = {...placeHolderData}
+        appliedCoupon.value = ''
+        couponDiscount.value = 0
+        couponValidationErrorMessage.value = ''
+    }
 
     const addProductToForm = (item) => {
         // Check existence of product
@@ -150,6 +171,7 @@ export const useCustomOrder = () =>
             discountedTotal: (getItemsTotal.value - totalDiscount).toFixed(2),
         };
     }
+    
     const _discountsCalculationSequentially = (coupons: {
         "discount_type": string,
         "amount": number | string,
@@ -299,6 +321,225 @@ export const useCustomOrder = () =>
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+    // Define a proper type
+    type ShippingMethod = {
+        zone_name: string;
+        method_id: string;
+        instance_id: string;
+        method_title: string;
+        settings: any[];
+        shipping_cost: number;
+        title: string;
+    };
+
+    const EMPTY_SHIPPING_METHOD: ShippingMethod = {
+        zone_name: '',
+        method_id: '',
+        instance_id: '',
+        method_title: '',
+        settings: [],
+        shipping_cost: 0,
+        title: ''
+    };
+
+    /**
+     * Find shipping method by name from available shipping methods
+     * Returns complete shipping method object with all fields
+     * @param methodName - Name of the shipping method (e.g., "Free shipping")
+     * @returns Complete shipping method object or empty object if not found
+     */
+    const _findShippingMethodIdByName = (methodName: string): ShippingMethod => {
+        if (!methodName?.trim() || !shippingMethods.value?.length) {
+            return { ...EMPTY_SHIPPING_METHOD };
+        }
+
+        const normalizedName = methodName.trim().toLowerCase();
+
+        // First try exact match on method_title (more specific)
+        let method = shippingMethods.value.find((m: any) =>
+            m.method_title?.toLowerCase() === normalizedName
+        );
+
+        // If not found, try substring match (less specific, wider range)
+        if (!method) {
+            method = shippingMethods.value.find((m: any) =>
+                m.title?.toLowerCase().includes(normalizedName)
+            );
+        }
+
+        if (!method) {
+            console.warn(
+                `Shipping method "${methodName}" not found. Available: ${
+                    shippingMethods.value.map((m: any) => m.method_title).join(', ')
+                }`
+            );
+            return { ...EMPTY_SHIPPING_METHOD };
+        }
+
+        return {
+            zone_name: method.zone_name || '',
+            method_id: method.method_id || '',
+            method_title: method.method_title || '',
+            instance_id: method.instance_id || '',
+            method_title: method.method_title || '',
+            settings: method.settings || [],
+            shipping_cost: method.shipping_cost || 0,
+            title: method.title || ''
+        };
+    };
+
+    /**
+     * Clone an existing order to create a new order form
+     * Supports new custom API order format
+     */
+    const cloneOrder = async (order: any, btn: { isLoading: boolean }) => {
+        resetCustomOrderForm();
+        
+        if (!order) {
+            showNotification({
+                type: 'danger',
+                message: 'Invalid order data. Cannot clone.'
+            });
+            btn.isLoading = false;
+            return;
+        }
+
+        try {
+            btn.isLoading = true;
+
+            // Validate order has required fields
+            if (!order.product_info?.product_info?.length) {
+                throw new Error('Order must contain at least one product.');
+            }
+
+            const { 
+                billing_address, 
+                shipping_address, 
+                product_info, 
+                order_notes, 
+                payment_method, 
+                shipping_methods, 
+                shipping_cost, 
+                applied_coupons, 
+                customer_custom_data 
+            } = order;
+
+            // Extract address with fallbacks (billing → shipping → customer_custom_data)
+            const firstName = billing_address?.first_name || shipping_address?.first_name || customer_custom_data?.first_name || '';
+            const lastName = billing_address?.last_name || shipping_address?.last_name || customer_custom_data?.last_name || '';
+            const address1 = billing_address?.address_1 || shipping_address?.address_1 || '';
+            const address2 = billing_address?.address_2 || shipping_address?.address_2 || '';
+            const phone = billing_address?.phone || '';
+
+            // Map products from new format
+            const products = product_info.product_info.map((item: any) => ({
+                product: {
+                    id: item.id,
+                    name: item.product_name,
+                    price: item.product_price,
+                    currency_symbol: item.currency_symbol || '',
+                    regular_price: item.regular_price || item.product_price,
+                    sale_price: item.sale_price || '',
+                    sku: item.sku || '',
+                    stock_status: item.stock_status || 'instock',
+                    stock_quantity: item.stock_quantity,
+                    in_stock: item.in_stock || true,
+                    type: item.type || 'simple',
+                    permalink: item.permalink || '',
+                    image: item.product_image || item.image || '',
+                    from: 'cloned-order'
+                },
+                quantity: item.product_quantity
+            }));
+
+            // Map shipping method with auto-lookup by name
+            let shippingMethod = { ...EMPTY_SHIPPING_METHOD };
+            shippingMethod.shipping_cost = shipping_cost || 0;
+
+            if (shipping_methods?.length > 0) {
+                const foundMethod = _findShippingMethodIdByName(shipping_methods[0]);
+                if (foundMethod.method_id) {
+                    shippingMethod = {
+                        ...foundMethod,
+                        shipping_cost: shipping_cost || 0,
+                        title: `${foundMethod.zone_name}-${foundMethod.method_title}-(${foundMethod.shipping_cost})`
+                    };
+                } else {
+                    showNotification({
+                        type: 'warning',
+                        message: `Shipping method "${shipping_methods[0]}" not found. Please select one manually.`
+                    });
+                }
+            }
+
+            // Map payment method (use injected paymentMethods if available, else fallback to API)
+            let paymentMethodData = {};
+            try {
+                const methodsList = paymentMethods?.value || (await getPaymentMethods()).data || [];
+                const foundPaymentMethod = methodsList.find((m: any) => m.id === payment_method);
+                if (foundPaymentMethod) {
+                    paymentMethodData = foundPaymentMethod;
+                } else if (payment_method) {
+                    throw new Error(`Payment method "${payment_method}" not found.`);
+                }
+            } catch (err) {
+                console.warn('Payment method lookup failed:', err);
+                showNotification({
+                    type: 'warning',
+                    message: 'Could not find payment method. Please select one manually.'
+                });
+            }
+
+            // Build form data
+            const formData = {
+                ...placeHolderData,
+                order_status: 'wc-processing',
+                first_name: firstName,
+                last_name: lastName,
+                address_1: address1,
+                address_2: address2,
+                phone: phone,
+                customer_note: order_notes?.customer_note || '',
+                created_via: 'clone-order',
+                products: products,
+                shippingMethod: shippingMethod,
+                paymentMethod: paymentMethodData,
+                coupons: applied_coupons || [],
+                cod_amount: order.total || 0
+            };
+
+            form.value = formData;
+
+            calculateCouponDiscountAmount(form.value.coupons);
+            toggleNewOrder.value = true;
+
+            showNotification({
+                type: 'success',
+                message: 'Order cloned successfully. Review details and submit.'
+            });
+        } catch (err) {
+            console.error('Error cloning order:', err);
+            showNotification({
+                type: 'danger',
+                message: (err as any)?.message || 'Failed to clone order. Please try again.'
+            });
+        } finally {
+            btn.isLoading = false;
+        }
+    };
+
     return {
         form,
         isLoading,
@@ -311,5 +552,7 @@ export const useCustomOrder = () =>
         handleCouponValidation,
         addProductToForm,
         calculateCouponDiscountAmount,
+        cloneOrder,
+        resetCustomOrderForm,
     }
 }

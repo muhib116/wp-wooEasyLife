@@ -100,6 +100,7 @@
 <script setup lang="ts">
     import { inject, computed, ref } from 'vue'
     import CreateNewOrder from './createNewOrder/Index.vue'
+    import { useCustomOrder } from './createNewOrder/useCustomOrder'
     import {
         Button,
         Icon,
@@ -112,6 +113,7 @@
     })
     
     const toggleCourierDropdown = ref(false)
+    const { resetCustomOrderForm } = useCustomOrder()
     const {configData} = inject('configData') as any
     const { userData } = inject('useServiceProvider') as any
 
@@ -127,7 +129,6 @@
         showInvoices,
         showLabels,
         toggleNewOrder,
-        refreshBulkCourierData,
         orders,
         handleLabelPrint,
         include_past_new_orders_thats_not_handled_by_wel_plugin,
@@ -142,6 +143,7 @@
             bg: '#155E95',
             color: '#fff',
             method: () => {
+                resetCustomOrderForm()
                 toggleNewOrder.value = true
             }
         },
